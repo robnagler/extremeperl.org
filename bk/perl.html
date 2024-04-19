@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 3: Perl</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 3: Perl</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="extreme-programming.html"><small>Previous: Chapter 2: Extreme Programming</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="release-planning.html"><small>Next: Chapter 4: Release Planning</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="perl"></a>
+
+
+
+
+<blockquote>
+
+<p>
+Perl is a language for getting your job done.
+</p>
+<div align="right">-- Larry Wall</div></blockquote>
+
+<p>Perl is a dynamic, object-oriented, interpreted,
+applications programming language with a full complement of security
+features, syntax-directed editors, debuggers, profilers and libraries.
+You can also write scripts in it.  Perl lets you program any way you
+want, and XP helps you choose which way is the most effective for your
+project.
+</p>
+
+<p>
+This chapter discusses how Perl shares similar values with XP, and how
+the Perl culture uses XP programming practices.  Finally, we note why
+XP is needed to organize Perl&#39;s exuberance.
+</p>
+
+
+
+<h3>Core Values</h3>
+
+<p>
+Perl and XP share a similar set of values.  It&#39;s rare for programming
+languages and methodologies to define values at all, so this basic
+fact puts Perl and XP in a unique category.  We discussed XP&#39;s values
+in
+<a href="extreme-programming.html">Extreme Programming</a>, so let&#39;s compare Perl&#39;s core
+values to XP&#39;s:
+</p>
+
+<ul>
+
+<li><p>
+<i>Laziness</i> means you work hard to look for the
+simplest solution and that you communicate efficiently.  You don&#39;t
+want to misunderstand what someone said which might cause you to do
+more work than you have to.
+</p></li>
+
+
+<li><p>
+<i>Impatience</i> encourages you to do the simplest
+thing that could possibly work.  You use the code to communicate your
+understanding of the problem to the customer, because you don&#39;t like
+sitting through long, boring meetings.
+</p></li>
+
+
+<li><p>
+<i>Hubris</i> is courage born from the fear your code
+will be too complex for others to understand.  Hubris makes you strive
+for positive feedback and to react quickly to negative feedback from your
+peers, the computer, and the customer.
+</p></li>
+
+</ul>
+
+<p>
+Larry Wall, Perl&#39;s inventor, calls these values the
+"three great virtues of a programmer".<a href="perl.html#1">[1]</a>
+They tell us why Perl is the way it is: a language that grows
+organically to meet the demands of its customers.
+</p>
+
+
+
+
+<h3>Customer-Orientation</h3>
+
+<p>
+Perl and XP were invented in the trenches.  Larry Wall had to produce
+reports for configuration management based on netnews.<a href="perl.html#2">[2]</a>
+Kent Beck was tasked with saving the Chrysler Comprehensive
+Compensation project.  Neither Perl nor XP were designed in the ivory
+towers of academia.  Both XP and Perl were developed to solve a
+specific problem, and quickly so that Kent and Larry would keep their
+jobs.
+</p>
+
+<p>
+It&#39;s too early to tell with XP, but Perl has remained true to its
+roots.  Perl continues to evolve based on feedback from its customers:
+the Perl community.  Features are added or changed if enough people
+clamor for them.
+</p>
+
+<p>
+This smorgasbord approach to programming languages is non-traditional,
+much like XP&#39;s focus on people over process is non-traditional in the
+development methodology community.  Perl gives you a wide variety of
+tools without constraining how you use them.  For example, Perl is
+object-oriented but objects aren&#39;t required to create modules or
+scripts.  Perl programmers aren&#39;t forced to encapsulate all their code
+in objects to solve every problem, especially when simpler
+alternatives exist.<a href="perl.html#3">[3]</a>
+XP asks you to ignore what you aren&#39;t going to need, and Perl lets you
+put this principle into action.
+</p>
+
+
+
+
+<h3>Testing</h3>
+
+<p>
+Another parallel between XP and Perl is testing.  The Perl culture is
+steeped in testing, and in XP, we test to get feedback from the
+computer and the customer.  Perl comes with a complete test suite for
+the language, and virtually every CPAN (Comprehensive Perl Archive
+Network) module comes with unit tests.
+Testing in Perl is about impatience.  It&#39;s faster to get accurate
+feedback from a unit test than by firing up the whole system to see
+that it works.
+</p>
+
+<p>
+It&#39;s easy to write tests in Perl.   The software quality assurance
+community has long known this, and Perl is a favorite tool among
+testers.<a href="perl.html#4">[4]</a>
+Perl programmers are lazy, so sometimes on CPAN the only useful documentation
+for a package is its tests.  Some programmers find it&#39;s easier to write
+tests than 
+documents, and conveniently that&#39;s the XP way of doing things anyway.
+Unit tests communicate exactly how to use an API, and acceptance
+tests demonstrate correctness and progress to the customer.
+</p>
+
+
+
+
+<h3>CPAN</h3>
+
+<p>
+In XP, we share code in a collective repository.  CPAN is probably the
+largest collection of Perl code on the Internet.  There are over 3500
+open source packages available for download.  It&#39;s also the
+official repository for the Perl core implementation.  Any
+perl programmer can get the latest version of Perl, and perl
+developers check in their changes directly to CPAN.  The Perl
+community shares openly, because they&#39;re lazy, and want to solve
+problems once and only once.
+</p>
+
+<p>
+Hubris plays a role on CPAN and in the Perl community in general.  For
+example, type in <tt>xml parser</tt> into
+<a href="http://search.cpan.org">http://search.cpan.org</a>, and you&#39;ll get at least six
+pages of results.   It took some time for us to find the right XML
+parsing package to use in <a href="its-a-smop.html">It's a SMOP</a>.  CPAN, like
+Perl, offers you many more ways to do it than any one project needs.
+</p>
+
+
+
+<h3>Organizing Your Workshop</h3>
+
+<p>
+Perl is often called a <i>Swiss Army Chainsaw</i>.
+When you add in CPAN, it&#39;s really more like the world&#39;s largest
+selection of hardware.<a href="perl.html#5">[5]</a>
+You can get lost in the dizzying array of choices.  Some
+programmers find Perl daunting.<a href="perl.html#6">[6]</a>
+</p>
+
+<p>
+This is where XP comes to the rescue.  XP is the organizer in the
+Extreme Perl marriage that complements Perl, the doer and fixer.
+XP&#39;s role is to keep Perl from fixing the car when the kids need to be
+put to bed.  XP gently guides Perl to do the right thing for the
+customer.
+</p>
+
+<p>
+The next few chapters show you how Extreme Perl is organized, and the
+second half of this book shows you know Extreme Perl gets things done.
+</p>
+
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+<i>Programming Perl</i>, 3rd Edition by Larry Wall et
+al, p xix.
+</p></li>
+<li><a name="2"></a><p>
+This wonderful story of doing the simplest thing that could possibly
+work is elaborated in <i>Programming Perl</i>, p. 646.
+</p></li>
+<li><a name="3"></a><p>
+See <a href="its-a-smop.html#its-a-smop-object-oriented">Object-Oriented Programming</a> in
+<a href="its-a-smop.html">It's a SMOP</a> for an example of when objects
+obfuscate.
+</p></li>
+<li><a name="4"></a><p>
+Visit <a href="http://www.stickyminds.com">http://www.stickyminds.com</a>,
+and search for Perl.
+</p></li>
+<li><a name="5"></a><p>
+McGuckin Hardware in Boulder, Colorado
+(<a href="http://www.mcguckin.com">http://www.mcguckin.com</a>)
+is the physical world equivalent of Perl.
+</p></li>
+<li><a name="6"></a><p>
+In a presentation at the 2002 PHP Conference, Michael J. Radwin lists
+Perl&#39;s Motto, "There Is More Than One Way To Do It", as
+one of the three reasons Yahoo! was moving away from Perl.
+Visit
+<a href="http://public.yahoo.com/~radwin/talks/yahoo-phpcon2002.htm">http://public.yahoo.com/~radwin/talks/yahoo-phpcon2002.htm</a>
+for the complete presentation.
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="extreme-programming.html"><small>Previous: Chapter 2: Extreme Programming</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="release-planning.html"><small>Next: Chapter 4: Release Planning</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="perl.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

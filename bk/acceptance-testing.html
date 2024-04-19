@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 6: Acceptance Testing</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 6: Acceptance Testing</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="iteration-planning.html"><small>Previous: Chapter 5: Iteration Planning</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="tracking.html"><small>Next: Chapter 7: Tracking</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="acceptance-testing"></a>
+
+
+
+
+<blockquote>
+
+<p>
+For defect removal, the most prominent attribute of a
+requirements specification is its testability.<a href="acceptance-testing.html#1">[1]</a>
+</p>
+<div align="right">-- Robert Dunn</div></blockquote>
+
+<p>
+Acceptance tests are the functional specifications of XP.  Each story
+card is elaborated in one or more scripts by the customer.  The test
+suite is run regularly on the entire application, and the programmers
+can use the scripts to diagnose implementation defects.
+</p>
+
+<p>
+The purpose of this chapter is to demonstrate how the customer can
+create automated acceptance tests.  Acceptance tests are explained in
+general and with example test scripts.  An alternative approach
+called, data-driven testing, is presented that allows the customer to
+generate tests using ordinary office software, such as, spreadsheets
+and word processors.
+</p>
+
+
+
+
+<h3>Acceptance Tests</h3>
+
+<p>
+Acceptance tests, also known as, <i>customer tests</i>
+and <i>functional tests</i>, validate the customer&#39;s
+view of the application.  They are distinct from unit tests, which validate the
+programmer&#39;s view of the software internals.  The
+programmers help write acceptance tests, but as with writing story
+cards, the customer needs to be involved directly.  Otherwise,
+customer expectations probably won&#39;t be met by the application.
+</p>
+
+<p>
+When writing tests, the customer fills in the details the story cards
+leave out.  Each test encodes one or more specific user scenarios.
+When the test runs, it performs the same actions a user would, and,
+ideally, validates what the user would see.  An acceptance test
+simulates the user automatically.
+</p>
+
+
+
+<h3>Automation</h3>
+<p>
+Acceptance tests need to be automated to be effective XP tools.
+You can write manual tests, that is, tests where a person acts as the
+simulated user.
+However, manual tests don&#39;t fit well with XP, because they don&#39;t
+provide the consistent, instantaneous feedback that XPers crave.
+Manual tests have their place, and the existing literature covers them
+well.<a href="acceptance-testing.html#2">[2]</a>
+This book is about empowering teams to use XP, and manual tests are
+not tools in a typical XP project.<a href="acceptance-testing.html#3">[3]</a>
+</p>
+
+<p>
+The trade-off between a manual and automated test is cost.  Automation
+has a higher up front cost, but in XP the cost is amortized quickly.
+Acceptance tests are run nightly or more frequently in an XP project.
+When dealing with physical devices, such as printers, automation is
+expensive.  For typical Perl applications, however, inertia is a greater
+barrier to automation than cost.
+</p>
+
+<p>
+I take a top-down approach to overcome automation inertia.  Let the
+customer write or specify the test, and then figure out how to
+implement it.  Tests can be implemented partially yet still be
+valuable.  As always in XP, take it one step at a time, and do the
+simplest thing that could possibly work.
+</p>
+
+
+
+<h3>I&#39;m Gonna Buy Me a Dog<a href="acceptance-testing.html#4">[4]</a></h3>
+
+<p>
+The examples that follow test PetShop, a demonstration, open
+source, online pet store.<a href="acceptance-testing.html#5">[5]</a>
+The specifics of the scripts could apply to most online stores so
+you don&#39;t need to try PetShop to read the examples.  Potential buyers
+add items to a shopping cart while they browse or search a
+hierarchical catalog. To complete the check out, they must login or
+register.
+</p>
+
+<p>
+This first script tests several ways to find a Corgi, a small herding
+dog.  The stories tested by the script are:
+</p>
+
+<ul>
+
+<li><p>
+Organize catalog hierarchically by category, breed, and animal for
+sale.
+</p></li>
+
+<li><p>
+Allow buyers to search for animals by keyword(s).
+</p></li>
+
+</ul>
+
+<p>
+The test script in Perl syntax is:
+</p>
+
+<blockquote><pre>
+test_setup(&#39;PetShop&#39;);
+
+home_page();
+follow_link(&#39;Dogs&#39;);
+follow_link(&#39;Corgi&#39;);
+add_to_cart(&#39;Female Puppy Corgi&#39;);
+
+search_for(&#39;corgi&#39;);
+add_to_cart(&#39;Female Puppy Corgi&#39;);
+search_for(&#39;CORGI&#39;);
+add_to_cart(&#39;Female Puppy Corgi&#39;);
+search_for(&#39;dogs wales&#39;);
+add_to_cart(&#39;Female Puppy Corgi&#39;);
+
+</pre></blockquote>
+
+<p>
+The first line in the script tells the test framework<a href="acceptance-testing.html#6">[6]</a>
+what we are testing.
+<tt>test_setup</tt> establishes the functions, or
+actions, used by the test.  Since this is an online store, the actions
+include: <tt>home_page</tt>,
+<tt>follow_link</tt>, 
+<tt>search_for</tt>,
+and <tt>add_to_cart</tt>.
+</p>
+
+<p>
+Acceptance test scripts are similar to the script to a movie or play.
+The roles are the user and the computer.  The script shows the user
+role, or what the user does and expects to see.  For example, the
+second section of the script follows the site&#39;s hierarchy to put a dog
+in the cart.  It goes to the home page, selects the
+<tt>Dogs</tt> animal category, drills down to the
+<tt>Corgi</tt> breed, and, finally, puts a <tt>Female
+Puppy Corgi</tt> into the cart.  These are the actions of an
+ordinary user.
+</p>
+
+<p>
+The test script is run through an <i>interpreter</i>,
+a program that translates the functions into interactions with the
+application.  The programmers implement the functions on demand for
+the customer.  The functions are responsible for checking the
+computer&#39;s role in the script.  For example, this test script states
+that the user clicks on the <tt>Dogs</tt> link on the home
+page.  If the <tt>Dogs</tt> link is missing from the home
+page or spelled incorrectly, the <tt>follow_link</tt>
+action stops and indicates that the test script has failed.  This
+approach is called <tt>fast fail</tt>, and makes it easy
+to write and maintain test scripts.  In keeping with the movie script
+analogy, it&#39;s like when the director sees computer screwing up its
+lines, and yells, "cut!".  Everybody stops.   The
+director corrects what&#39;s wrong, and the actors start over again.
+</p>
+
+<p>
+The next section tests the search facility.  We should be able to find
+our dog by searching for <tt>corgi</tt>,
+<tt>CORGI</tt>, and <tt>dogs wales</tt>.
+We aren&#39;t particularly interested in Corgis<a href="acceptance-testing.html#7">[7]</a>,
+rather our goal is to test that the search mechanism is
+case-insensitive and supports multiple words.  And, most importantly,
+the list of search results allows the buyer to place found animals in their
+cart easily.
+Shoppers should be given an opportunity to buy what they find.
+</p>
+
+
+
+<h3>Group Multiple Paths</h3>
+
+<p>
+The previous example demonstrated testing multiple paths, that is,
+different ways of doing the same thing.  In one case, we searched for
+a <tt>Female Puppy Corgi</tt> hierarchically, and then we
+used the search box to find the same dog using different keywords.
+Here is another example that demonstrates multiple paths:
+</p>
+
+<blockquote><pre>
+test_setup(&#39;PetShop&#39;);
+home_page();
+follow_link(&#39;Reptiles&#39;);
+follow_link(&#39;Rattlesnake&#39;);
+add_to_cart(&#39;Rattleless Rattlesnake&#39;);
+remove_from_cart(&#39;Rattleless Rattlesnake&#39;);
+
+search_for(&#39;Angelfish&#39;);
+add_to_cart(&#39;Large Angelfish&#39;);
+update_cart(&#39;Large Angelfish&#39;, 0);
+
+
+</pre></blockquote>
+
+<p>
+This example tests the two ways you can remove animals from the cart.
+<tt>remove_from_cart</tt> uses a button labeled
+<tt>Remove</tt> to delete the item from the cart.
+<tt>update_cart</tt> allows buyers to change the quantity
+desired.  Setting it to zero should have the same effect as
+<tt>remove_from_cart</tt>.
+</p>
+
+<p>
+Most applications allow you to do something in more than one way, like
+in this example.  Grouping similar functions in the same test is
+another organizational technique for your acceptance test suite.  It
+also provides an opportunity to talk about an application
+cross-functionally.  The creation of test scripts is a collaborative
+effort, much like pair programming.  This sort of detailed matters,
+and probably won&#39;t come up during the planning game.  The details
+emerge when the stories and their acceptance tests are being
+implemented.  The test suite opens a communication channel between the
+programmers and the customer to discuss application consistency and
+other technical details, such as what to do when the user enters an
+unexpected value.
+</p>
+
+
+
+
+<h3>Without Deviation, Testing Is Incomplete</h3>
+
+<p>
+The acceptance test suite also checks that the application handles
+unexpected input gracefully.  For example, if the user enters an
+incorrect login name, the application should tell the user
+<tt>not found</tt> or something similar.  The technical
+term for this is <i>deviance testing</i>.  It&#39;s like
+kicking the tires or slamming the car into reverse while driving on
+the highway.  The previous examples are <i>conformance
+tests</i>, because they only validate
+using the application for its intended purpose.  When you write a
+deviance test, you break the rules in order to ensure the application
+doesn&#39;t do the wrong thing, such as displaying a stack trace instead
+of an error message or allowing unauthorized access.
+</p>
+
+<p>
+For example, here&#39;s how we test login conformance and deviance of the
+PetShop:
+</p>
+
+<blockquote><pre>
+test_setup(&#39;PetShop&#39;);
+home_page();
+login_as(&#39;demo&#39;, &#39;password&#39;);
+login_as(&#39;DEMO&#39;, &#39;password&#39;);
+login_as(&#39;demo@bivio.biz&#39;, &#39;password&#39;);
+login_as(&#39;Demo@Bivio.Biz&#39;, &#39;password&#39;);
+
+test_deviance(&#39;does not match&#39;);
+login_as(&#39;demo&#39;, &#39;PASSWORD&#39;);
+
+test_deviance(&#39;must supply a value&#39;);
+login_as(&#39;demo&#39;, &#39;&#39;);
+login_as(&#39;&#39;, &#39;password&#39;);
+
+test_deviance(&#39;not found&#39;);
+login_as(&#39;notuser&#39;, &#39;password&#39;);
+login_as(&quot;demo&#39;||&#39;&quot;, &#39;password&#39;);
+login_as(&#39;%demo%&#39;, &#39;password&#39;);
+
+</pre></blockquote>
+
+<p>
+The first section tests conformance.  We login as
+<tt>demo</tt> and <tt>DEMO</tt> to test that user
+names can be case insensitive.  The PetShop allows you to login with
+an email address, case insensitively.
+</p>
+
+<p>
+Passwords are case sensitive, however.  The next section expects the
+application to return an error message that contains <tt>does not
+match</tt> when given a password in the wrong case.  This is a
+deviance test, and the <tt>test_deviance</tt> that begins
+the next section tells the test framework that the subsequent
+statements should fail and what the expected output should contain.
+This is an example where the test script specifies the
+computer&#39;s role as well as the user&#39;s.
+</p>
+
+<p>
+The application should ask the user to supply a value, if either the
+login name or password fields on the form are blank.  The next section
+tests this.  This case might be something a programmer would suggest
+to the customer.  The customer might decide that <tt>must supply
+a value</tt> is too computer-like, and ask the programmer to
+change the application to say something like, <tt>Please enter
+your login ID or email address.</tt>
+</p>
+
+<p>
+In the last section, we test a variety of <tt>not found</tt>
+cases.  The first case assumes that <tt>notuser</tt> is not
+a user in the system.  The test suite database is constructed so that
+this is the case.  The last two cases are highly technical, and are
+based on the programmer&#39;s knowledge of the application internals, that
+is, SQL, a database programming language, is used to find the user.
+Some applications do not correctly validate application input, which
+can allows the user unauthorized access to system internals.  This is
+how computer virii and worms work.  This test case validates that the
+user name is checked by the application before it is used in a
+low-level SQL statement.  If the user name syntax is not checked by
+the application, one of the last two cases might allow the user to
+login, and the deviance test would fail.
+</p>
+
+<p>
+Note that we didn&#39;t test <tt>notuser</tt> without a
+password.  It&#39;s not likely that an invalid user could login without a
+password when a valid user couldn&#39;t.  In testing parlance, the two
+tests are in the same <i>equivalence class</i>.  This
+means we only need to test one case or the other but not both.
+</p>
+
+<p>
+We use equivalence classes to reduce the size of the test
+suite.  A large application test suite will have thousands of
+cases and take hours to run.  It&#39;s important to keep the runtime as
+short as possible to allow for frequent testing.  And, as always, the
+less code to do what needs to get done, the better.
+</p>
+
+
+
+
+<h3>Subject Matter Oriented Programming</h3>
+
+<p>
+Another way to minimize test length is letting the problem, also known
+as subject matter, guide the development of the functions used by the
+scripts.  The customer is probably not a programmer.  Moreover, the
+customer&#39;s terminology has probably been refined to match her subject
+matter.  The programmers should let the customer choose the function
+names, and the order and type of the function parameters.  The
+language she uses is probably near optimal for the subject and
+workflow.
+</p>
+
+<p>
+The process of bringing the program to the problem is what I call,
+<i>subject matter oriented programming</i> (SMOP).  It
+is what XP strives for: creating an application that speaks the
+customer&#39;s language.  The acceptance test suite is probably the
+customer&#39;s most important design artifact, because it encodes the
+detailed knowledge of what the application is supposed to do.  If she
+or her co-workers can&#39;t read the tests, the suite&#39;s value is greatly
+diminished.
+</p>
+
+<p>
+The design and implementation of the acceptance test suite evolves as
+the customer encodes her knowledge.  The programmer may need to help
+the customer to identify the vocabulary of the subject matter.
+Subject matter experts sometimes have difficulty expressing what they
+do succinctly.  The programmer needs to be part linguist, just like
+Larry Wall, Perl&#39;s inventor.  Unlike other language designers, Larry
+lets the problems programmers face dictate the solution (the
+programming language) they use.  Perl is not prescriptive, in
+linguistics terms, but descriptive, evolving to meet the language used
+by programmers, not the other way around.
+</p>
+
+<p>
+Enough theory.  I&#39;m in danger of getting lost in the solution myself.
+If you are a programmer, you&#39;ll learn how to implement a subject
+matter oriented program in the <a href="its-a-smop.html">It's a SMOP</a> chapter.
+I&#39;ll get back to the customer, and another method by which she can
+create the acceptance test suite.
+</p>
+
+
+
+
+<h3>Data-Driven Testing</h3>
+
+<p>
+The test examples up to this point have been written in Perl syntax.
+While I fully believe just about anybody can follow these simple
+syntactic conventions, customers may balk at the idea.  Ward
+Cunningham, a well-known XPer, has taken subject matter oriented
+programming to a new level.  His framework for intergrated testing
+(FIT) lets customers write acceptance tests in their own language
+using their own tools, office applications, such as, word processors
+and spreadsheets.  Here&#39;s the login test translated as a FIT document:
+</p>
+
+
+<center><b>FIT Login</b></center>
+<div align="center"><img border="0" src="../i/fit-login.jpg"></div>
+
+
+<p>
+FIT ignores all text in the document except for tabular text.  The
+tables contain the text inputs and expected outputs.  This allows the
+customer to document the test, and to have one document which contains
+many tests.  The order of the columns and what they are for is worked
+out between the customer and the programmer.  Once that&#39;s done, the
+framework does the rest.<a href="acceptance-testing.html#8">[8]</a>
+</p>
+
+<p>
+Just like the Perl examples earlier, the customer must specify the
+test language interpreter, <tt>PetShop</tt>.  In this
+type of FIT test, the customer enters actions
+(<tt>login</tt>) on a row-by-row basis.  The programmer
+can create new actions.  The cells to the right of the action name are
+parameters.  The <tt>login</tt> action accepts a user
+name, a password, and an error message.  If the there&#39;s no error
+message, <tt>login</tt> tests that the login was
+successful.
+</p>
+
+<p>
+The subject matter may suggest a different organization for the
+tables.  For example, here&#39;s a denser test format for a simple math
+module:<a href="acceptance-testing.html#9">[9]</a>
+</p>
+
+
+<center><b>FIT Math</b></center>
+<div align="center"><img border="0" src="../i/fit-math.jpg"></div>
+
+
+<p>
+As with the login test, the first line contains the test language
+interpreter, <tt>SimpleMath</tt>.  The next row lists
+the actions in a columnar format.  The first action sets an
+<tt>x</tt> value, the next sets <tt>y</tt>,
+and the last two columns test adding (<tt>sum)</tt>)
+and subtracting (<tt>diff</tt>).  The subsequent rows
+contain a test in each cell of the table.  The first row sets
+<tt>x</tt> and <tt>y</tt> to
+<tt>1</tt>
+and <tt>2</tt> and tests that <tt>sum</tt>
+and <tt>diff</tt> return <tt>3</tt> and
+<tt>-1</tt>.  As you can see,
+this kind of FIT test gives the customer a clear overview
+of the acceptance test data using an ordinary word processor.  With
+this style of testing, customers can create spreadsheets using
+formulas.
+</p>
+
+<p>
+The general term for using documents as test inputs is called
+<i>data-driven testing</i>.  And, sometimes there&#39;s no
+practical alternative to using tabular data.  On one project we
+developed, we needed to test the correctness of a pre-marital
+evaluation tool.  Each partner in a couple had to answer 350
+questions. The scoring algorithm related the couple&#39;s answers for
+compatibility.  The customer had supplied us with the questions,
+answers, scores, and weights in tabular format.  When we asked for
+acceptance test data, he simply added the answers for test couples in
+another column, and we generated the test suite by parsing out the
+data.  As it turned out, the test data uncovered several areas that
+were misunderstood by the programmers.  Without customer generated
+test data, the software would have contained critical defects.
+</p>
+
+
+
+
+<h3>Empower The Customer to Test</h3>
+
+<p>
+Whether the customer uses a spreadsheet, a word processor, or Perl,
+she can write tests.  And, she needs to.  No one else on the
+team knows the subject matter better than she does.
+</p>
+
+<p>
+Getting started is the hardest part.  Take the simplest and most
+straightforward part of the application.  Write a test outline for it
+together on the whiteboard.  Implement that test, and run it
+together.
+</p>
+
+<p>
+After the first steps, you&#39;ll fill in more and more detail.  As the
+suite grows with the implementation, the application will benefit from
+the regular exercise.  The programmers will gain deeper insight into
+the subject matter.  The customer will see the quality improve
+firsthand.  And, everybody will benefit from the well-structured
+knowledge base encoded by your acceptance test suite.
+</p>
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+<i>Software Defect Removal</i>, Robert Dunn,
+McGraw-Hill, Inc., 1984, p. 28.
+</p></li>
+<li><a name="2"></a><p>
+<i>Testing Computer Software</i> by Cem Kaner et al is
+an excellent book about classical testing and quality assurance.
+</p></li>
+<li><a name="3"></a><p>
+In <i>Testing Extreme Programming</i>, Lisa Crispin
+and Tip House state that "All acceptance tests on an Extreme
+Programming project must be automated" and devote an entire
+chapter to explain why.
+</p></li>
+<li><a name="4"></a><p>
+I want to go on record that I do not promote buying animals in
+stores.  Buy animals from a reputable breeder, or better yet, adopt
+a pet from your local animal shelter.
+</p></li>
+<li><a name="5"></a><p>
+Visit <a href="http://petshop.bivio.biz">http://petshop.bivio.biz</a> to
+see it live and to browse the source.
+The idea was inspired by Sun Microsystems, Inc.&#39;s J2EE
+Blueprint Pet Store.
+</p></li>
+<li><a name="6"></a><p>
+Programmers: This chapter is devoted to explaining to the customer&#39;s
+view of acceptance testing, not the programmer&#39;s.  The test script
+interpreter consists of a few lines of Perl, and uses
+<tt>eval</tt> and <tt>AUTOLOAD</tt>.   You
+could write this yourself, or download my company&#39;s open source
+implementation from <a href="http://www.bivio.biz">http://www.bivio.biz</a>.
+</p></li>
+<li><a name="7"></a><p>
+Or other high-energy small dogs.
+</p></li>
+<li><a name="8"></a><p>
+Thanks to Brian Ingerson for implementing <tt>Test-FIT</tt>,
+and making it available on CPAN.
+</p></li>
+<li><a name="9"></a><p>
+<tt>SimpleMath</tt> and the test data were adapted
+from <tt>Test-FIT</tt>, version 0.11, on CPAN.
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="iteration-planning.html"><small>Previous: Chapter 5: Iteration Planning</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="tracking.html"><small>Next: Chapter 7: Tracking</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="acceptance-testing.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

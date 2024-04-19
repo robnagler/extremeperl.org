@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 10: Coding Style</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 10: Coding Style</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="logistics.html"><small>Previous: Chapter 9: Logistics</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="test-driven-design.html"><small>Next: Chapter 11: Test-Driven Design</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="coding-style"></a>
+
+
+
+<blockquote>
+
+<p>
+Language requires consensus.
+</p>
+<div align="right">-- Larry Wall<a href="coding-style.html#1">[1]</a></div></blockquote>
+
+<p>
+Code is the primary means of communication in an XP team.  A uniform
+coding style greatly facilitates code comprehension, refactoring, pair
+programming, collective ownership and testing.  An XP team agrees on a
+coding style before development starts.
+</p>
+
+<p>
+Coding style is the first problem and XP team has to work out as a
+group.  The solution to the problem needs to be clear and unambiguous.
+It&#39;s amazing how far this can be, and with some teams it&#39;s
+impossible.
+</p>
+
+<p>
+Coding style discussions are like a lightning rod.  If there&#39;s a storm
+brewing within the team, coding style will usually attract the first
+lightning strike.  If you can&#39;t reach agreement on a style, your team
+is going to have difficulty building an application together.
+</p>
+
+<p>
+Tension around style choices is natural in some ways.  We are all
+individuals.  Programmers
+take pride in their own work, further motivating their own success,
+just as individual athletes value their own accomplishments.
+However, not even the best
+pitcher, quarterback, or forward in the world can win a game alone.
+It takes a team and teamwork to win a game or write a large
+application.  Programming is a team sport.<a href="coding-style.html#2">[2]</a>
+</p>
+
+<p>
+If you are a programmer, you may find yourself gritting your teeth at
+my coding style.  It wouldn&#39;t surprise me.  Athletes and programmers
+on different teams sometimes bristle at each other&#39;s style.  However,
+if we were to join the same team, we&#39;d work out a compromise on coding
+style to ensure the success of the project.
+</p>
+
+<p>
+This chapter explains the need for a coding style in XP and discusses
+how to go about creating one.  I also explain and demonstrate the
+coding style used in this book through a comparative example.
+</p>
+
+
+
+
+<h3>There&#39;s More Than One Way To Do It</h3>
+
+<p>
+Perl is a rich and complex language.  If you ask a question about how
+to do something in Perl on the Internet, you&#39;ll probably get several
+different answers.  And, the answers will often include the caveat:
+TMTOWTDI.  This is the acronym for Perl&#39;s motto: There&#39;s more than one
+way to do it.  The solution you choose will depend on the way you
+program Perl.
+</p>
+
+<p>
+So how do you program Perl?  Larry Wall et al present a
+coding style in the <tt>perlstyle</tt> man page.<a href="coding-style.html#3">[3]</a>
+Yet there are myriad divergent styles on CPAN and in the Perl
+literature.  In the Perl community, diversity is seen as a strength,
+and no one is going to tell you how to program Perl.  Well, even if
+they did, you wouldn&#39;t listen to them.
+</p>
+
+
+
+
+<h3>Give Me Consistency or Give Me Death</h3>
+<p>
+Your team still needs to pick a style.  This isn&#39;t just XP dogma; it&#39;s human
+nature.  In the anthropology classic, <i>The Silent
+Language</i>, Edward Hall wrote, "The drive toward
+congruity would seem to be as strong a human need as the will to
+physical survival." I conclude from this that if you don&#39;t pick
+a Perl coding style, you&#39;ll die.  If that isn&#39;t a good enough reason,
+stop reading now.
+</p>
+
+<p>
+Seriously, consistency is not an end in itself, it is the means to
+facilitate testing, collective ownership, pair programming, and
+refactoring.  If you are developing a small application (a few
+thousand lines of Perl), it&#39;s easy to keep the code consistent, or to
+clean it up in an afternoon or two.
+For large applications (tens or hundreds of thousands of lines spread
+over hundreds or thousands of files), quick fixes are impossible.  You
+would never have the time to reformat the entire codebase.
+</p>
+
+<p>
+The code changes too quickly.  You don&#39;t get to ask everybody working
+on a large application to stop while you fix some style issue.
+However, for some necessary refactorings, such as, a change in a
+widely used API, you may have no choice but to dive into tens or
+possibly hundreds of files.  You&#39;ll want this to happen as quickly as
+possible so you&#39;ll automate the refactoring.  With a consistent style,
+you can probably do this fairly easily.  If you have to account for
+the many ways you can do things in Perl, you&#39;ll probably resort to
+hand editing each file.  Not only is this labor intensive, but it&#39;s
+error prone, too.
+</p>
+
+<p>
+Even when you aren&#39;t making global changes, you and your partner still
+have to read unfamiliar code.  A programming pair&#39;s ability to read
+and to communicate through the code is affected directly by its
+consistency.  Communication is hard enough without you and your
+partner having to wade through several code dialects.  And, allowing
+for style variations when writing code opens up too many unnecessary
+thoughts.  Do I adapt to my partner&#39;s style?  Should we adopt the
+style of the code we&#39;re editing now?  Or perhaps, I should insist on
+my style.  After all, it has worked well for me over the years.
+Starting out with an agreed upon style, frees our minds of such
+distractions and allows us to focus on the important bit: solving
+the customer&#39;s problem.
+</p>
+
+
+
+
+<h3>Team Colors</h3>
+
+<p>
+In <i>Extreme Programming Explained</i>, Kent Beck
+wrote, "The standard must be adopted voluntarily by
+the whole team." This may not be so simple.  Establishing consensus
+requires work on everybody&#39;s part.  If your team has coded together
+before, you&#39;ll probably have an easy time agreeing on a style.
+</p>
+
+<p>
+For newly formed teams, use the style guide as a team building
+exercise.  Everyone should be encouraged to contribute.  If a
+particular point is too contentious, drop it until after the first
+iteration or so.  The goal is to get full consensus on the entire
+guide.  If someone is particularly inflexible during the discussions,
+it&#39;s a warning sign that a team adjustment may be necessary.
+Better sooner than later.
+</p>
+
+<p>
+A style guide can be highly motivating, however.  It&#39;s like your team&#39;s colors.
+It&#39;s something relatively insignificant which provides significant
+cohesion.  If even one team member is coerced into agreement, the team
+isn&#39;t sticking together, and the rift may grow into a chasm.  When
+everybody voluntarily accepts the style choices, you are functioning
+as a team, and you are ready to code.
+</p>
+
+
+
+<h3>An Example</h3>
+
+<p>
+Rather than discuss style in the abstract, I&#39;d like to demonstrate my
+opinion of good style through a comparative example.  Here&#39;s an
+excerpt from the popular <tt>Test</tt> package on CPAN:
+<a href="coding-style.html#4">[4]</a>
+</p>
+
+<blockquote><pre>
+package Test;
+use strict;
+
+sub plan {
+    croak &quot;Test::plan(%args): odd number of arguments&quot; if @_ &amp; 1;
+    croak &quot;Test::plan(): should not be called more than once&quot; if $planned;
+
+    local($\, $,);   # guard against -l and other things that screw with
+                     # print
+
+    _reset_globals();
+
+    _read_program( (caller)[1] );
+
+    my $max=0;
+    for (my $x=0; $x &lt; @_; $x+=2) {
+        my ($k,$v) = @_[$x,$x+1];
+        if ($k =~ /^test(s)?$/) { $max = $v; }
+        elsif ($k eq &#39;todo&#39; or 
+               $k eq &#39;failok&#39;) { for (@$v) { $todo{$_}=1; }; }
+        elsif ($k eq &#39;onfail&#39;) { 
+            ref $v eq &#39;CODE&#39; or croak &quot;Test::plan(onfail =&gt; $v): must be CODE&quot;;
+            $ONFAIL = $v; 
+        }
+        else { carp &quot;Test::plan(): skipping unrecognized directive &#39;$k&#39;&quot; }
+    }
+    my @todo = sort { $a &lt;=&gt; $b } keys %todo;
+    if (@todo) {
+        print $TESTOUT &quot;1..$max todo &quot;.join(&#39; &#39;, @todo).&quot;;\n&quot;;
+    } else {
+        print $TESTOUT &quot;1..$max\n&quot;;
+    }
+    ++$planned;
+    print $TESTOUT &quot;# Running under perl version $] for $^O&quot;,
+      (chr(65) eq &#39;A&#39;) ? &quot;\n&quot; : &quot; in a non-ASCII world\n&quot;;
+
+    print $TESTOUT &quot;# Win32::BuildNumber &quot;, &amp;Win32::BuildNumber(), &quot;\n&quot;
+      if defined(&amp;Win32::BuildNumber) and defined &amp;Win32::BuildNumber();
+
+    print $TESTOUT &quot;# MacPerl verison $MacPerl::Version\n&quot;
+      if defined $MacPerl::Version;
+
+    printf $TESTOUT
+      &quot;# Current time local: %s\n# Current time GMT:   %s\n&quot;,
+      scalar(   gmtime($^T)), scalar(localtime($^T));
+      
+    print $TESTOUT &quot;# Using Test.pm version $VERSION\n&quot;;
+
+    # Retval never used:
+    return undef;
+}
+
+</pre></blockquote>
+
+<p>
+The routine <tt>plan</tt> is used to set up a unit
+test, for example:
+</p>
+
+<blockquote><pre>
+use Test;
+use strict;
+BEGIN {
+    plan(tests =&gt; 2);
+}
+ok(1 + 1 == 2);
+ok(2 * 2 == 4);
+
+</pre></blockquote>
+
+<p>
+This unit test calls <tt>plan</tt> to declare that there
+are two test cases.  The <tt>ok</tt> function checks the
+result after each case executes, and prints success or failure.
+</p>
+
+<p>
+Here&#39;s what I think is good about this implementation of
+<tt>plan</tt>.  The routine:
+</p>
+
+<ul>
+
+<li><p>
+is well-used and mature.
+We can be relatively sure it addresses the needs of its users and is
+relatively stable.
+</p></li>
+
+<li><p>
+has had several authors.  The more eyes on a problem, the better the
+solution.
+</p></li>
+
+<li><p>
+addresses type safety.  <tt>Test</tt> has a broad user
+base, so it makes sense to put extra effort into argument validation.
+</p></li>
+
+<li><p>
+<i>fails fast</i>, that is, if
+<tt>plan</tt> encounters an unexpected argument or state,
+it terminates execution (calls <tt>croak</tt>) in all but
+one case.  The sooner a programming error is detected, the less damage
+the errant program can do.
+</p></li>
+
+<li><p>
+is backwards compatible.  The parameters <tt>test</tt> and
+<tt>failok</tt> are deprecated, that is, they shouldn&#39;t
+be used in new tests, but existing tests that use them still work.
+</p></li>
+
+<li><p>
+comes with a thorough unit test suite that describes expected
+behavior and enables refactoring.
+</p></li>
+
+<li><p>
+uses fine-granularity, feature-driven portability.  It uses narrow feature
+checks
+(for example, <tt>defined $MacPerl::Version</tt>
+and <tt>chr(65) eq &#39;A&#39;)</tt>) instead of broad general checks, such
+as, checking the operating system (for example,
+<tt>$^0 eq &#39;MacOS&#39;</tt>).  Powerful and easy to 
+use introspection is one of the reasons Perl and CPAN packages are
+usable on so many platforms.
+</p></li>
+
+</ul>
+
+
+
+
+<h3>You Say, "<tt>if else</tt>", And I Say, "<tt>? :</tt>"</h3>
+
+<p>
+While indentation, lining up braces, or other formatting is important
+to ease automated refactoring, you won&#39;t find much discussion about
+them in this book.  However, the more strictly you follow your coding
+style, the more easily you can automate refactorings.  For example, if
+function arguments are always surrounded by parentheses,
+you can rename functions or reorder parameters using a simple editor
+macro.<a href="coding-style.html#5">[5]</a>
+</p>
+
+<p>
+And speaking of editors, most programmers&#39; editors have style
+formatters.  If yours doesn&#39;t, you can always use
+<tt>perltidy</tt>, a very flexible Perl code
+reformatter.<a href="coding-style.html#6">[6]</a>
+Automatic formatters improve your team&#39;s efficiency and adherence to
+your style guidelines.  That&#39;s all I&#39;m going to say about formatters
+and editors.  The only thing worse than coding style discussions are
+editor wars.
+</p>
+
+<p>
+Like editors, style choice is defined by your experience and personal
+taste, and the details matter. I follow the
+<tt>perlstyle</tt> man page for the most part, but I
+disagree with some of their parentheses and alignment choices.  You
+may not like my style, so go ahead and indent by three spaces if you
+like.<a href="coding-style.html#7">[7]</a>
+</p>
+
+
+
+<h3>Once And Only Once</h3>
+
+<p>
+Parentheses and indentation aside, the important bit of my style is
+that I refactor ruthlessly.  I don&#39;t like redundancy, especially in
+the form of single use temporary variables and repetitive calls.  In
+XP, we call this the once and only once (OAOO) rule, and it&#39;s what you
+do when you refactor.
+</p>
+
+<p>
+For new code, I try to do the simplest thing that could possibly work
+(DTSTTCPW).  This is XP&#39;s most important coding guideline.  First I
+get it working simply.  I might have to copy and paste some code or
+create a temporary variable.  Once it passes the tests, I look at the
+design and simplify it so that each concept is expressed once and only
+once.  There are some time and planning trade offs here, and the
+<a href="refactoring.html">Refactoring</a> chapter discusses them.  The relevant point is
+that once and only once is an overarching style guidline, and one that
+I value highly.  When concepts are expressed once and only once, the
+code is more robust, more easily extensible, and performs better than
+code with needless duplication.
+</p>
+
+
+
+<h3>Refactored Example</h3>
+
+<p>
+The code that follows has been changed to demonstrate once and only
+once and other style choices I value.  The formatting matches the style
+used in this book.  More importantly, the rewritten code is more
+cohesive.  Not only should each concept be expressed only once, but
+each routine should implement only one concept.  <i>Strong
+cohesion</i> allows people to comprehend and to abstract code
+entities (routines and packages) easily.  By isolating and naming each
+behavior, we make it easy to understand what each piece of the
+software puzzle does.
+</p>
+
+<p>
+The four new routines are also <i>loosely coupled</i>.
+This means their inputs and outputs are few and well-defined.  Loose
+coupling is important when isolating behavior, because it is difficult
+to understand and to test a routine with many inputs and outputs.  In
+effect, the routine&#39;s identity is a combination of its name and its
+inputs and outputs, which is commonly know as its
+<i>signature</i>.  We remember shorter signatures and
+the behavior they identify more easily than longer ones.
+</p>
+
+<p>
+That&#39;s enough theory for now, here&#39;s the my version of
+<tt>plan</tt>:
+</p>
+
+<blockquote><pre>
+package Test;
+use strict;
+
+sub plan {
+    my($args) = {@_};
+    Carp::croak(&#39;should not be called more than once&#39;)
+        if $_TODO;
+    _reset_globals();
+    _read_program((caller)[1]);
+    _plan_print(_plan_args($args));
+    return;
+}
+
+sub _plan_args {
+    my($args) = @_;
+    $_ONFAIL = _plan_arg_assert($args, [&#39;onfail&#39;], &#39;CODE&#39;);
+    my($max) = _plan_arg_assert($args, [&#39;tests&#39;, &#39;test&#39;], &#39;integer&#39;) || 0;
+    # $_TODO is the initialization sentinel, so it&#39;s the last value set
+    $_TODO = {map {$_ =&gt; 1}
+        @{_plan_arg_assert($args, [&#39;todo&#39;, &#39;failok&#39;], &#39;ARRAY&#39;) || []}};
+    Carp::carp(&quot;@{[sort(keys(%$args))]}: skipping unrecognized or&quot;,
+        &#39; deprecated directive(s)&#39;)
+        if %$args;
+    return $max;
+}
+
+sub _plan_arg_assert {
+    my($args, $names, $type) = @_;
+    foreach my $n (@$names) {
+        next unless exists($args-&gt;{$n});
+        Carp::croak(&quot;$n: parameter must not be undef&quot;)
+            unless defined($args-&gt;{$n});
+        Carp::croak(&quot;$args-&gt;{$n}: $n must be $type&quot;)
+            unless $type eq &#39;integer&#39; ? $args-&gt;{$n} =~ /^\d+$/
+                : ref($args-&gt;{$n}) eq $type;
+        return delete($args-&gt;{$n})
+    }
+    return undef;
+}
+
+sub _plan_print {
+    my($max) = @_;
+    _print(join(&quot;\n# &quot;,
+        &quot;1..$max&quot;
+            . (%$_TODO ne &#39;&#39; &amp;&amp; &quot; todo @{[sort {$a &lt;=&gt; $b} keys(%$_TODO)]};&quot;),
+        &quot;Running under perl version $] for $^O&quot;
+            . (chr(65) ne &#39;A&#39; &amp;&amp; &#39; in a non-ASCII world&#39;),
+        defined(&amp;Win32::BuildNumber) &amp;&amp; defined(Win32::BuildNumber())
+            ? &#39;Win32::BuildNumber &#39; . Win32::BuildNumber() : (),
+        defined($MacPerl::Version)
+            ? &quot;MacPerl version $MacPerl::Version&quot; : (),
+        &#39;Current time local: &#39; . localtime($^T),
+        &#39;Current time GMT: &#39; . gmtime($^T),
+        &quot;Using Test.pm version $VERSION\n&quot;));
+    return;
+}
+
+sub _print {
+    local($\, $,);
+    return print($TESTOUT @_);
+}
+
+</pre></blockquote>
+
+
+
+
+<h3>Change Log</h3>
+
+<p>
+The following is a detailed list of changes, and why I made them.
+Most of the changes are refactorings, that is, they do not modify
+the way <tt>plan</tt> works from the caller&#39;s
+perspective.  A few changes improve the behavior ever so slightly, and
+are noted below.  This list is ordered from most important to trivial:
+</p>
+
+<ul>
+
+<li><p>
+The four main behaviors: control flow, validating arguments, type checking,
+and printing are contained in separate routines.  Each routine is
+responsible for one and only one behavior.
+</p></li>
+
+<li><p>
+The <tt>localtime</tt> and <tt>gmtime</tt> calls
+are now in the correct order.  This defect in the original version
+only became apparent to me when I separated the two output lines.
+</p></li>
+
+<li><p>
+Argument type validation is consistent, because it has been isolated
+into a single routine (<tt>_plan_arg_assert</tt>) that is used
+for all three parameters.  Several new cases are caught.  For example,
+passing <tt>undef</tt> to <tt>tests</tt> or
+passing both <tt>tests</tt> and <tt>test</tt>
+(deprecated form) is not allowed.
+</p></li>
+
+<li><p>
+Carp::croak unrecognized directive warning is printed once
+instead of a warning per unrecognized directive.
+The check for unrecognized directives still does not fail
+fast (<tt>croak</tt> or <tt>die</tt>).  I
+would have liked to correct this, because passing an invalid
+directives to <tt>plan</tt> probably indicates a broken
+test.  However,
+the broad user base of <tt>Test</tt> makes this change
+infeasible.  Somebody may be depending on the behavior that this is
+only a warning.
+</p></li>
+
+<li><p>
+Two temporary variables (<tt>@todo</tt> and
+<tt>$x</tt>) were eliminated by using a functional
+programming style.  By avoiding temporary variables, we simplify
+algorithms and eliminate ordering dependencies.  See
+the <a href="its-a-smop.html">It's a SMOP</a> chapter for a longer
+example of functional programming.
+</p></li>
+
+<li><p>
+<tt>$planned</tt> was eliminated after
+<tt>$_TODO</tt> was converted to a reference.
+<tt>$planned</tt> is known as a
+<i>denormalization</i>, because it can be computed
+from another value (<tt>$_TODO</tt> in this case).
+<i>Normal form</i> is when data structures and
+databases store the sources of all information once and only once.
+</p></li>
+
+<li><p>
+<tt>_plan_print</tt> writes a single string.  The seven
+calls <tt>print</tt> were unnecessary duplication.
+I often use logical
+operators instead of imperative statements to avoid the use of
+temporary variables, which are another form of duplication
+(denormalization).
+</p></li>
+
+<li><p>
+The return value from <tt>plan</tt> is better represented
+as an empty <tt>return</tt>, because it handles list and
+scalar return contexts correctly.  This is a subtle point about
+<tt>return</tt>, and it actually involves an interface
+change.  The following use assigns an empty list:
+</p>
+
+<blockquote><pre>
+my(@result) = Test::plan(tests =&gt; 1);
+</pre></blockquote>
+
+<p>
+In the old version, <tt>@result</tt> would contain the
+list <tt>(undef)</tt>, that is, a list with a single element
+containing the value <tt>undef</tt>.
+</p></li>
+
+<li><p>
+The check for an odd number of arguments is unnecessary, because the
+assignment to a hash will yield a warning and the argument parsing
+is more rigorous (no argument may be <tt>undef</tt>, for example).
+</p></li>
+
+<li><p>
+<tt>_print</tt> encapsulates the output function that is
+used throughout <tt>Test</tt>.  The concept that the output
+is directed to <tt>$TESTOUT</tt> is only expressed
+once.
+</p></li>
+
+<li><p>
+The global variables are named consistently
+(<tt>$_ONFAIL</tt> and <tt>$_TODO</tt>).  I name
+global variables in uppercase.  I use a leading underscore to
+identify variables and routines which are to be used internally to the
+package only.
+</p>
+
+<p>
+<tt>$TESTOUT</tt> was not renamed, because it is exported
+from the package <tt>Test</tt>.  
+In general, variables should never be exported, but this would be an
+interface change, not a refactoring.
+</p></li>
+
+<li><p>
+I fully qualify all names defined outside a package
+(<tt>Carp::carp</tt> and
+<tt>Carp::croak</tt>).  This helps the reader to know what
+is defined locally as well as enabling him to find the
+implementation of or documentation for external functions quickly.
+I apply this guideline to perl modules.  In specialized Perl scripts,
+such as, templates and tests, I prefer the brevity of the unqualified
+form.  For example, in the unit test example above, I used
+<tt>ok</tt>, not <tt>Test::ok</tt>.
+</p></li>
+
+<li><p>
+<tt>carp</tt> and <tt>croak</tt> print the
+file and line number for you, so including
+<tt>Test::plan</tt>
+in the error string is unnecessarily redundant.
+</p></li>
+
+<li><p>
+The spelling error (<tt>verison</tt>) in the
+<tt>$MacPerl::Version</tt> output string was corrected.
+</p></li>
+
+<li><p>
+The two calls to <tt>sprintf</tt> and
+<tt>scalar</tt> are unnecessary.  The concatenation
+operator (dot) is sufficient, more succinct, and used consistently.
+</p></li>
+
+<li><p>
+The old style call syntax
+(<tt>&amp;Win32::BuildNumber()</tt>)
+was eliminated, because it was not used in all places
+(<tt>_reset_globals()</tt>).
+</p></li>
+
+<li><p>
+The comment <tt># Retval never used:</tt> was removed,
+because it is superfluous, and it indicates an unprovable assertion.
+You can&#39;t know that the return value won&#39;t be used.
+</p></li>
+
+<li><p>
+The comment <tt># guard against -l and...</tt> was removed,
+because the context of <tt>_print</tt> is enough to
+explain why the <tt>local</tt> call is needed.<a href="coding-style.html#8">[8]</a>
+Even if
+you don&#39;t know what <tt>$,</tt> and <tt>$\</tt>
+are, you know they are relevent only to the call to
+<tt>print</tt>, since that&#39;s the only thing that it could
+possibly affect.
+</p></li>
+
+</ul>
+
+
+
+
+<h3>Refactoring</h3>
+
+<p>
+Now kids, don&#39;t try this at work.  Refactorings and small corrections
+are not an end to themselves.  The do not add business value--unless
+you are writing your coding style guideline as is the case here.
+Refactorings need to be related to the task at hand.  For
+example, if there I was given a story to fix the minor defects in
+<tt>plan</tt> or to add automatic test case counting, then
+I would have refactored the code to allow for those changes, and
+possibly a bit more.  However, random and extensive refactoring
+as I&#39;ve done here is worthless.  The original version works just fine,
+and all the corrections are minor.  If you spend your days refactoring
+and making small corrections without explicit customer approval,
+you&#39;ll probably lose your job.
+</p>
+
+<p>
+The new <tt>plan</tt> is also not just a refactoring.
+When an interface changes, it&#39;s only a refactoring if all its uses are
+changed simultaneously.  For public APIs like this one, that&#39;s
+impossible to do.  In this particular case, I took a chance that the
+return value of <tt>plan</tt> was not used in this rather
+obscure way, that is, expecting a single list containing
+<tt>undef</tt>.
+</p>
+
+
+
+
+<h3>Input Validation</h3>
+
+<p>
+Perl is a dynamically typed language.  The routine
+<tt>plan</tt> contains a set of <i>type
+assertions</i>, and the refactored version expanded on them.
+Is this the best way to write dynamically typed code?
+</p>
+
+<p>but
+It depends.  In this case, explicit type checking is possibly
+overkill.  For example, the <tt>$_TODO</tt> and
+<tt>$_ONFAIL</tt> are dereferenced elsewhere in the
+package.  Dereferencing a non-reference terminates execution in Perl,
+so the error will be caught anyway.  Since <tt>Test</tt>
+is only used in test programs, it&#39;s probably sufficient to catch an error at
+any point.
+</p>
+
+<p>
+On the other hand, <tt>Test</tt> is a very public API,
+which means it has a broad and unknown user base.  Explicit type
+checking almost always yields more easily understood error messages
+than implicit error checks.  This helps users debug incorrect
+parameters.  <tt>plan</tt> is only called once during a
+test execution so the performance impact of the additional checking is
+insignificant.  
+</p>
+
+<p>
+Here are some guidelines we use to determine when to add type
+assertions:
+</p>
+
+<ul>
+
+<li><p>
+Always validate data from untrusted sources, for example, users or
+third party services.  It&#39;s important to give informative error
+messages to end users.  This type of validation occurs at the
+outermost level of the system, where meaningful error messages can be
+returned with the appropriate context.
+</p></li>
+
+<li><p>
+Add type assertions to low level modules that define the data types,
+and leave them out at the middle levels where they would be redundant.
+There may be a performance trade off here.  In general, the more
+public the API, the more important validation is.  For example,
+<tt>plan</tt> defines and asserts that the test count is
+positive integer.
+</p></li>
+
+<li><p>
+Assert what is likely to be wrong.
+</p></li>
+
+<li><p>
+Write deviance tests, that is, tests which result in exceptions or
+type validation errors. Add assertions if the tests don&#39;t pass. The
+appropriateness of a particular type assertion is often hard to
+assess. Don&#39;t sweat it. You&#39;ll learn what&#39;s appropriate as your system
+evolves. 
+</p></li>
+
+<li><p>
+Don&#39;t expect to get it right, and think about the consequences if you
+get it wrong.  The more that&#39;s at stake, the more important assertions
+are.<a href="coding-style.html#9">[9]</a>
+</p></li>
+
+</ul>
+
+<p>
+Writing robust code is hard.  If you add too many assertions, their
+sheer volume will introduce more defects than they were intended to
+prevent.  Add too few assertions, and one day you&#39;ll find a cracker
+who has compromised your system, or worse.  Expect the code to evolve
+as it gets used.
+</p>
+
+
+
+
+<h3>You&#39;d Rather Die</h3>
+
+<p>
+Nothing is more boring than reading someone&#39;s opinion about coding
+style. Rather than kill off my readership, I&#39;ll stop here.  When you
+get up to stretch your legs, I&#39;d like you to walk away with five
+points:
+</p>
+
+<ul>
+
+<li><p>
+An XP team needs a consistent coding style.
+</p></li>
+
+
+<li><p>
+It doesn&#39;t matter what the style is, as long as everyone agrees to
+adhere to it.
+</p></li>
+
+<li><p>
+Take refactoring into consideration when determining your coding
+style.
+</p></li>
+
+<li><p>
+Do the simplest thing that could possibly work when writing new code.
+</p></li>
+
+<li><p>
+Simplify your design so that concepts are expressed once and only once.
+</p></li>
+</ul>
+
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+<i>Open Sources: Voices from the Open Source
+Revolution</i>, DiBona et al, 1999, O&#39;Reilly, p. 127.
+Available online at
+<a href="http://www.oreilly.com/catalog/opensources/book/larry.html">http://www.oreilly.com/catalog/opensources/book/larry.html</a>
+</p></li>
+<li><a name="2"></a><p>
+And more
+generally, "Business is a team sport." <i>Rich
+Kid, Smart Kid</i>, Kiyosaki et al, Warner Books, 2001,
+p. 224-225.
+</p></li>
+<li><a name="3"></a><p>
+<a href="http://www.perl.com/doc/manual/html/pod/perlstyle.html">http://www.perl.com/doc/manual/html/pod/perlstyle.html</a>
+</p></li>
+<li><a name="4"></a><p>
+<a href="http://search.cpan.org/src/SBURKE/Test-1.22/lib/Test.pm">http://search.cpan.org/src/SBURKE/Test-1.22/lib/Test.pm</a>
+</p></li>
+<li><a name="5"></a><p>
+You can download some refactoring functions for Emacs from
+<a href="http://www.bivio.biz/f/bOP/b-perl.el">http://www.bivio.biz/f/bOP/b-perl.el</a>
+</p></li>
+<li><a name="6"></a><p>
+Available for free from
+<a href="http://perltidy.sourceforge.net">http://perltidy.sourceforge.net</a>
+</p></li>
+<li><a name="7"></a><p>
+Even though it&#39;s a sin.
+</p></li>
+<li><a name="8"></a><p>
+In XP, "we comment methods only after doing everything possible to make
+the method not need a comment."  See
+<a href="http://xp.c2.com/ExtremeDocuments.html">http://xp.c2.com/ExtremeDocuments.html</a>
+for a document about documentation by XP&#39;s founders.
+</p></li>
+<li><a name="9"></a><p>
+Thanks to Ged Haywood for reminding me of this one.
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="logistics.html"><small>Previous: Chapter 9: Logistics</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="test-driven-design.html"><small>Next: Chapter 11: Test-Driven Design</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="coding-style.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

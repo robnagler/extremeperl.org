@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 14: Refactoring</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 14: Refactoring</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="unit-testing.html"><small>Previous: Chapter 13: Unit Testing</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="its-a-smop.html"><small>Next: Chapter 15: It's a SMOP</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="refactoring"></a>
+
+
+
+<blockquote>
+
+<p>
+In refactoring, there is a premium on knowing when to quit.
+</p>
+<div align="right">-- Kent Beck</div></blockquote>
+
+
+<p>
+Refactoring is an iterative design strategy.  Each refactoring
+improves an implementation in a small way without altering its
+observable behavior.  You refactor to make the implementation easier
+to repair and to extend.  The refactorings themselves add no business
+value.
+</p>
+
+<p>
+Programming in XP is a four part process: listening, testing, coding,
+and designing.  Design comes after you have a test for what the
+customer wants, and you have a simple implementation already coded.
+Of course, your simple implementation is based on your definition of
+simple.  Your first cut may even be optimally coded in which the
+design is complete for the task you are working on.  Your next task
+may require you to copy some similar code from another module, because
+there&#39;s no API to get at it.  Copying code is usually the simplest way
+to see if that code actually works, that is, passes your tests.
+Copying code is not good design.  After you get the copy working, you
+need to refactor the original module and your new code to use a common
+API.  And, that&#39;s <i>emergent design</i>.
+</p>
+
+<p>
+The designing emerges from the problem, completely naturally, like you
+organize a kitchen.  The figure out where to put things depending on
+how frequently they are used.  If you only use that fruitcake pan once
+a year, you probably tuck it away in the back of a hard to reach
+cabinet.  Similarly, if a routine is used only in one place, you keep
+it private within a module.  The first time it is used elsewhere, you
+may copy it.  If you find another use for it, you refactor all three
+uses so that they call a single copy of the routine.  In XP, we
+call this the <i>Rule of Three</i>, <a href="refactoring.html#1">[1]</a> and basically it says you only
+know some code is reusable if you copy it two times.  Refactoring
+is the process by which you make the code reusable.
+</p>
+
+<p>
+This chapter demonstrates several refactorings in the context of a
+single example, <tt>Mail::POP3Client</tt>.  We discuss
+how and when to refactor and why refactoring is a good design
+strategy.  We show how refactoring makes it easier to fix a couple of
+defects found by the unit test in <a href="unit-testing.html">Unit Testing</a>.
+</p>
+
+
+
+
+<h3>Design on Demand</h3>
+
+<p>
+XP has no explicit design phase.  We start coding right away.  The
+design evolves through expansions (adding or exposing
+function) and contractions (eliminating redundant or unused code).
+</p>
+
+<p>
+Refactoring occurs in both phases.  During contraction, we clean up
+excesses of the past, usually caused by copy-and-paste.  During
+expansion, we modularize function to make it accessible for the
+task at hand.  Expansion solves today&#39;s problems.  Contraction helps
+mitigate future problems.
+</p>
+
+
+
+
+<h3><tt>Mail::POP3Client</tt></h3>
+
+<p>
+The examples in this chapter use the foundation we laid in
+<a href="unit-testing.html">Unit Testing</a>.
+<tt>Mail::POP3Client</tt><a href="refactoring.html#2">[2]</a>
+is a CPAN class that implements the client side of the POP3 mail
+retrieval protocol.  Since refactoring does not change observable
+behavior, you don&#39;t need to understand how POP3 works to follow the
+examples in this chapter.
+</p>
+
+<p>
+I chose <tt>Mail::POP3Client</tt>, because it is
+well-written, mature, and solves a real problem.
+Some of the code is
+complex.  The meat of the example is highlighted in the changed
+version, so skip ahead if code complexity interferes with
+comprehension.  I have included entire subroutines for completeness,
+but the differences are just a few lines of code.
+</p>
+
+
+
+<h3>Remove Unused Code</h3>
+
+<p>
+We&#39;ll warm up with a very simple refactoring.   Here&#39;s the
+<tt>Host</tt> accessor from
+<tt>Mail::POP3Client</tt>:
+</p>
+
+<blockquote><pre>
+sub Host {
+    my $me = shift;
+    my $host = shift or return $me-&gt;{HOST};
+#   $me-&gt;{INTERNET_ADDR} = inet_aton( $host ) or
+#   $me-&gt;Message( &quot;Could not inet_aton: $host, $!&quot;) and return;
+    $me-&gt;{HOST} = $host;
+}
+
+</pre></blockquote>
+
+<p>
+This first refactoring removes the extraneous comment.  Unused code
+and comments distract the reader from the salient bits.  Should we
+need to resurrect the dead code, it remains in a file&#39;s history
+available from the source repository.  For now, we don&#39;t need it, and
+the refactored version is shorter and more readable:
+</p>
+
+<blockquote><pre>
+sub Host {
+    my $me = shift;
+    my $host = shift or return $me-&gt;{HOST};
+    $me-&gt;{HOST} = $host;
+}
+
+</pre></blockquote>
+
+<p>
+After each refactoring, even as simple as this one, we run the unit
+test.  In this case, the test will tell us if we deleted too much.
+Before we check
+in our changes, we run the entire unit test suite to make sure we
+didn&#39;t break anything.
+</p>
+
+<p>
+How often to check in is a matter of preference.  The more often you
+check in, the easier it is to back out an individual change.  The cost
+of checking in is a function of the size of your test suite.
+Some people like to
+check in after every refactoring.  Others will wait till the task is
+complete.  I wouldn&#39;t check in now unless this change was unrelated to
+the work I&#39;m doing.  For example, I might have deleted the dead code
+while trying to figure out how to use
+<tt>Mail::POP3Client</tt> in another class.
+</p>
+
+
+
+<a name="unit-testing-refactor-then"></a>
+<h3>Refactor Then Fix</h3>
+
+<p>
+As discussed in <a href="unit-testing.html#unit-testing-distinguish-error">Distinguish Error Cases Uniquely</a>, the
+<tt>Message</tt> method has a defect that doesn&#39;t let us
+clear its value.  Its implementation is identical to
+<tt>Host</tt> and six other accessors:
+</p>
+
+<blockquote><pre>
+sub Message {
+    my $me = shift;
+    my $msg = shift or return $me-&gt;{MESG};
+    $me-&gt;{MESG} = $msg;
+}
+
+</pre></blockquote>
+
+<p>
+The method tests the wrong condition: <tt>$msg</tt>
+being false.  It should test to see if <tt>$msg</tt> was
+passed at all: <tt>@_</tt> greater than 1.  For most of the
+other accessors, this isn&#39;t a real problem.  However, the
+<tt>Debug</tt> method only allows you to turn on
+debugging output, since it only saves true values:
+</p>
+
+<blockquote><pre>
+sub Debug
+{
+  my $me = shift;
+  my $debug = shift or return $me-&gt;{DEBUG};
+  $me-&gt;{DEBUG} = $debug;
+}
+
+</pre></blockquote>
+
+<p>
+We could fix all the accessors with the global replacement, but the
+repetition is noisy and distracting.  It&#39;s better to contract the code
+to improve its design while fixing the defects.
+</p>
+
+<p>
+We refactor first, so we can test the refactoring with the existing
+unit test.  Once we determine the refactoring hasn&#39;t changed the
+observable behavior, we fix the fault.  Usually, refactoring first
+cuts down on the work, because we only need to fix
+the fault in one place.
+</p>
+
+<p>
+The first step is to split out the existing logic into a separate
+subroutine, and update all accessors to use the new routine:
+</p>
+
+<blockquote><pre>
+sub Debug {
+    return _access(&#39;DEBUG&#39;, @_);
+}
+sub Host {
+    return _access(&#39;HOST&#39;, @_);
+}
+sub LocalAddr {
+    return _access(&#39;LOCALADDR&#39;, @_);
+}
+sub Message {
+    return _access(&#39;MESG&#39;, @_);
+}
+sub Pass {
+    return _access(&#39;PASSWORD&#39;, @_);
+}
+sub Port {
+    return _access(&#39;PORT&#39;, @_);
+}
+sub State {
+    return _access(&#39;STATE&#39;, @_);
+}
+sub User {
+    return _access(&#39;USER&#39;, @_);
+}
+sub _access {
+    my $field = shift;
+    my $me = shift;
+    my $value = shift or return $me-&gt;{$field};
+    $me-&gt;{$field} = $value;
+}
+
+</pre></blockquote>
+
+<p>
+Perl allows us to pass on the actual parameters of a routine simply.
+Since the <tt>$value</tt> parameter is optional, we put the
+new parameter <tt>$field</tt> before the rest of the
+parameters.  This simple trick reduces code complexity.  By the way,
+it&#39;s not something I&#39;d do if <tt>_access</tt> were public.
+If <tt>_access</tt> needed to be overriddable by a
+subclass, it would have been called as a method
+(<tt>$me-&gt;access</tt>).  However, the XP rule "you
+aren&#39;t going to need it" applies here.  We&#39;ll expose
+<tt>_access</tt> to subclasses when there&#39;s an explicit
+need to.
+</p>
+
+
+
+
+<h3>Consistent Names Ease Refactoring</h3>
+
+<p>
+The refactored accessors are repetitive.  In Perl it&#39;s common to
+generate repetitive code, and we&#39;ll do so here.<a href="refactoring.html#3">[3]</a>
+First, we need to rename <tt>MESG</tt> to
+<tt>MESSAGE</tt> to simplify generation.  There are only
+two references in <tt>Mail::POP3Client</tt> (one use not
+shown), so this refactoring is easy:
+</p>
+
+<blockquote><pre>
+sub Message {
+    return _access(&#39;MESSAGE&#39;, @_);
+}
+
+</pre></blockquote>
+
+<p>
+Next, we refactor the <tt>Pass</tt> accessor.  As noted in
+<a href="unit-testing.html#unit-testing-consistent-apis">Consistent APIs Ease Testing</a>, the inconsistent
+naming (<tt>Pass</tt> method and
+<tt>PASSWORD</tt> configuration parameter) made testing a
+bit more repetitive than it needed to be.  We don&#39;t change the
+parameter and instance field from <tt>PASSWORD</tt> to
+<tt>PASS</tt>, because abbreviations are less desirable.
+Rather, we refactor <tt>Pass</tt> as follows:
+</p>
+
+<blockquote><pre>
+sub Pass {
+    return shift-&gt;Password(@_);
+}
+sub Password {
+    return _access(&#39;PASSWORD&#39;, @_);
+}
+
+</pre></blockquote>
+
+<p>
+As a part of this refactoring, we need document that
+<tt>Pass</tt>
+is deprecated (will eventually go away).
+<tt>Mail::POP3Client</tt> is available on CPAN,
+so we can&#39;t fix
+all the code that uses it.  Deprecation is an important refactoring
+technique for very public APIs like this one.
+</p>
+
+
+
+
+<h3>Generate Repetitive Code</h3>
+
+<p>
+With the refactored names, we can now generate all eight accessors
+with this simple loop:
+</p>
+
+<blockquote><pre>
+foreach my $a (qw(
+    Debug
+    Host
+    LocalAddr
+    Message
+    Password
+    Port
+    State
+    User
+)) {
+    eval(qq{
+        sub $a {
+            return _access(&#39;@{[uc($a)]}&#39;, \@_);
+        }
+        1;
+    }) or die($@);
+}
+
+</pre></blockquote>
+
+<p>
+We check <tt>eval</tt>&#39;s result to be sure the generator
+works correctly.  The syntax to insert the field name
+is a bit funky,
+but I prefer it to using a temporary variable.
+The <tt>@{[any-expression]}</tt> idiom allows arbitrary Perl
+expressions to be interpolated in double-quoted strings.
+</p>
+
+
+
+
+<h3>Fix Once and Only Once</h3>
+
+<p>
+With the refactoring complete, we can now fix all eight accessors with
+one line of code.  <tt>_access</tt> should not check the
+value of its third argument, but should instead use the argument count:
+</p>
+
+<blockquote><pre>
+sub _access {
+    my $field = shift;
+    my $me = shift;<b>
+    @_</b> or return $me-&gt;{$field};
+    $me-&gt;{$field} = <b>shift</b>;
+}
+
+</pre></blockquote>
+
+<p>
+This is not a refactoring.  It changes the observable behavior.  Our
+unit test confirms this: three more test cases pass.
+</p>
+
+<table width="95%" border="1" cellpadding="5" bgcolor="#CCCCCC"><tr><td>
+<h3>Stylin&#39;</h3>
+
+<p>
+Coding style is important to consider when refactoring.  In this
+chapter, I chose to maintain the style of the source.<a href="refactoring.html#4">[4]</a>
+To contrast,
+here&#39;s what <tt>_access</tt> would look like in bOP style:
+</p>
+
+<blockquote><pre>
+sub _access {
+    my($field, $self, $value) = @_;
+    return @_ &gt;= 3 ? $self-&gt;{$field} = $value : $self-&gt;{$field};
+}
+
+</pre></blockquote>
+
+<p>
+The differences between the two styles are subtle, but the bOP version
+would stand out in the code and be an unnecessary
+distraction.  No one cares if you use <tt>$me</tt>,
+<tt>$self</tt>, or <tt>$i</tt><a href="refactoring.html#5">[5]</a>
+as long as you are consistent.
+</p>
+
+<p>
+Style updates are important, too.  If for some reason,
+<tt>Mail::POP3Client</tt> were to be incorporated into
+bOP, we would consider updating the implementation to match bOP style.
+Refactoring coding style is fine as long as you refactor and test
+independently from other changes.
+</p>
+
+</td></tr></table>
+
+
+
+<h3>Tactics Versus Strategy</h3>
+
+<p>
+When we begin a task, tactics are important.  We want to add business
+value as quickly as possible.  Doing the simplest thing that could
+possibly work is a tactic to reach our goal.
+</p>
+
+<p>
+Copy-and-paste is the weapon of choice when task completion is our
+only objective.  Generalizations, such as the refactorings shown thus
+far, are not easy to come up with when you&#39;re under pressure to get
+the job done.
+Besides, you don&#39;t know if the code you copy solves the problem until the
+implementation is finished.  It&#39;s much better to copy-and-paste
+to test an idea than
+to invent, to implement, and to use the wrong abstraction.
+</p>
+
+<p>
+As a design strategy, copy-and-paste poses problems.  The code is more
+difficult to comprehend, because it&#39;s difficult to see subtle
+differences.  Faults fixed in one place do not propagate themselves
+automatically.  For example, there&#39;s an alternative fix to the problem
+already embedded in two other accessors, <tt>Count</tt> and
+<tt>Size</tt>:
+</p>
+
+<blockquote><pre>
+sub Count {
+    my $me = shift;
+    my $c = shift;
+    if (defined $c and length($c) &gt; 0) {
+        $me-&gt;{COUNT} = $c;
+    } else {
+        return $me-&gt;{COUNT};
+    }
+}
+
+sub Size {
+    my $me = shift;
+    my $c = shift;
+    if (defined $c and length($c) &gt; 0) {
+        $me-&gt;{SIZE} = $c;
+    } else {
+        return $me-&gt;{SIZE};
+    }
+}
+
+</pre></blockquote>
+
+<p>
+These accessors behave differently from the other eight that we
+refactored and fixed above.  <tt>Count</tt> and
+<tt>Size</tt> need to be resettable to zero (mailboxes can
+be empty), which is why the accessors have an alternate
+implementation.
+</p>
+
+<p>
+The thought and debugging that went into fixing
+<tt>Count</tt> and <tt>Size</tt> could have
+also applied
+to the other accessors.  Since the code wasn&#39;t refactored at the time
+of the fix, it was probably easier to leave the other accessors alone.
+And, under the principle of "if it ain&#39;t broke, don&#39;t fix
+it" any change like this is not justified.
+</p>
+
+<p>
+XP legitimatizes fixing non-broke code.  It&#39;s something programmers do
+anyway, so XP gives us some structure and guidelines to do it safely.
+We can refactor <tt>Size</tt> and
+<tt>Count</tt> to use <tt>_access</tt> without
+fear.<a href="refactoring.html#6">[6]</a>
+The unit test covers the empty mailbox case.  If we didn&#39;t have
+a test for this case, we could add one.  Again, XP saves us.  Since
+the programmers are the testers, we&#39;re free to modify the test to suit
+our needs.
+</p>
+
+
+
+
+<h3>Refactor With a Partner</h3>
+
+<p>
+Pair programming supports refactoring, too.  Two people
+are better than one at assessing the need for, the
+side-effects of, and the difficulty of a change.
+The tradeoffs between tactics versus strategy are hard, and discussing
+them with a partner is both effective and natural.  Switching partners
+often brings new perspectives to old code, too.
+</p>
+
+<p>
+Sometimes I look at code and don&#39;t know where to begin refactoring.  The
+complexity overwhelms my ability to identify commonality.  For
+example, here&#39;s some code which needs refactoring:
+</p>
+
+<blockquote><pre>
+sub List {
+    my $me = shift;
+    my $num = shift || &#39;&#39;;
+    my $CMD = shift || &#39;LIST&#39;;
+    $CMD=~ tr/a-z/A-Z/;
+    $me-&gt;Alive() or return;
+    my @retarray = ();
+    my $ret = &#39;&#39;;
+    $me-&gt;_checkstate(&#39;TRANSACTION&#39;, $CMD) or return;
+    $me-&gt;_sockprint($CMD, $num ? &quot; $num&quot; : &#39;&#39;, $me-&gt;EOL());
+    my $line = $me-&gt;_sockread();
+    unless (defined $line) {
+        $me-&gt;Message(&quot;Socket read failed for LIST&quot;);
+        return;
+    }
+    $line =~ /^\+OK/ or $me-&gt;Message(&quot;$line&quot;) and return;
+    if ($num) {
+        $line =~ s/^\+OK\s*//;
+        return $line;
+    }
+    while (defined($line = $me-&gt;_sockread())) {
+        $line =~ /^\.\s*$/ and last;
+        $ret .= $line;
+        chomp $line;
+        push(@retarray, $line);
+    }
+    if ($ret) {
+        return wantarray ? @retarray : $ret;
+    }
+}
+
+sub ListArray {
+    my $me = shift;
+    my $num = shift || &#39;&#39;;
+    my $CMD = shift || &#39;LIST&#39;;
+    $CMD=~ tr/a-z/A-Z/;
+    $me-&gt;Alive() or return;
+    my @retarray = ();
+    my $ret = &#39;&#39;;
+    $me-&gt;_checkstate(&#39;TRANSACTION&#39;, $CMD) or return;
+    $me-&gt;_sockprint($CMD, $num ? &quot; $num&quot; : &#39;&#39;, $me-&gt;EOL());
+    my $line = $me-&gt;_sockread();
+    unless (defined $line) {
+        $me-&gt;Message(&quot;Socket read failed for LIST&quot;);
+        return;
+    }
+    $line =~ /^\+OK/ or $me-&gt;Message(&quot;$line&quot;) and return;
+    if ($num) {
+        $line =~ s/^\+OK\s*//;
+        return $line;
+    }
+    while (defined($line = $me-&gt;_sockread())) {
+        $line =~ /^\.\s*$/ and last;
+        $ret .= $line;
+        chomp $line;
+        my($num, $uidl) = split &#39; &#39;, $line;
+        $retarray[$num] = $uidl;
+    }
+    if ($ret) {
+        return wantarray ? @retarray : $ret;
+    }
+}
+
+sub Uidl {
+    my $me = shift;
+    my $num = shift || &#39;&#39;;
+    $me-&gt;Alive() or return;
+    my @retarray = ();
+    my $ret = &#39;&#39;;
+    $me-&gt;_checkstate(&#39;TRANSACTION&#39;, &#39;UIDL&#39;) or return;
+    $me-&gt;_sockprint(&#39;UIDL&#39;, $num ? &quot; $num&quot; : &#39;&#39;, $me-&gt;EOL());
+    my $line = $me-&gt;_sockread();
+    unless (defined $line) {
+        $me-&gt;Message(&quot;Socket read failed for UIDL&quot;);
+        return;
+    }
+    $line =~ /^\+OK/ or $me-&gt;Message($line) and return;
+    if ($num) {
+        $line =~ s/^\+OK\s*//;
+        return $line;
+    }
+    while (defined($line = $me-&gt;_sockread())) {
+        $line =~ /^\.\s*$/ and last;
+        $ret .= $line;
+        chomp $line;
+        my($num, $uidl) = split &#39; &#39;, $line;
+        $retarray[$num] = $uidl;
+    }
+    if ($ret) {
+        return wantarray ? @retarray : $ret;
+    }
+}
+
+</pre></blockquote>
+
+<p>
+Where are the differences?  What&#39;s the first step?  With a fresh
+perspective, the following stood out:
+</p>
+
+<blockquote><pre>
+sub Uidl {
+    my $me = shift;
+    my $num = shift;
+    return $me-&gt;ListArray($num, &#39;UIDL&#39;);
+}
+
+</pre></blockquote>
+
+<p>
+A partner helps you overcome familiarity and fear of change which make
+it hard to see simplifications like this one.
+</p>
+
+
+
+<h3>Sharing with Code References</h3>
+
+<p>
+It&#39;s clear that <tt>List</tt> and
+<tt>ListArray</tt> are almost identical.  The problem is
+that they differ in the middle of the loop.  Perl code references
+are a great way to factor out differences especially within loops:
+</p>
+
+<blockquote><pre>
+<b>sub List {
+    return _list(
+        sub {
+            my $line = shift;
+            my $retarray = shift;
+            push(@$retarray, $line);
+            return;
+        },
+        @_,
+    );
+}
+
+sub ListArray {
+    return _list(
+        sub {
+            my($num, $value) = split &#39; &#39;, shift;
+            my $retarray = shift;
+            $retarray-&gt;[$num] = $value;
+            return;
+        },
+        @_,
+    );
+}
+
+sub _list {
+    my $parse_line = shift;</b>
+    my $me = shift;
+    my $num = shift || &#39;&#39;;
+    my $CMD = shift || &#39;LIST&#39;;
+    $CMD =~ tr/a-z/A-Z/;
+    $me-&gt;Alive() or return;
+    my @retarray = ();
+    my $ret = &#39;&#39;;
+    $me-&gt;_checkstate(&#39;TRANSACTION&#39;, $CMD) or return;
+    $me-&gt;_sockprint($CMD, $num ? &quot; $num&quot; : &#39;&#39;, $me-&gt;EOL());
+    my $line = $me-&gt;_sockread();
+    unless (defined $line) {
+        $me-&gt;Message(&quot;Socket read failed for $CMD&quot;);
+        return;
+    }
+    $line =~ /^\+OK/ or $me-&gt;Message(&quot;$line&quot;) and return;
+    if ($num) {
+        $line =~ s/^\+OK\s*//;
+        return $line;
+    }
+    while (defined($line = $me-&gt;_sockread())) {
+        $line =~ /^\.\s*$/ and last;
+        $ret .= $line;
+        chomp $line;<b>
+        $parse_line-&gt;($line, \@retarray);</b>
+    }
+    if ($ret) {
+        return wantarray ? @retarray : $ret;
+    }
+}
+
+</pre></blockquote>
+
+<p>
+We pass an anonymous subroutine as <tt>_list</tt>&#39;s first
+parameter, 
+<tt>$parse_line</tt>, for the reason described in
+<a href="refactoring.html#unit-testing-refactor-then">Refactor Then Fix</a>.
+</p>
+
+
+
+
+<h3>Refactoring Illuminates Fixes</h3>
+
+<p>
+The <tt>List</tt>, <tt>ListArray</tt>, and
+<tt>Uidl</tt> methods are bimodal.  When called without
+arguments, they return a list of values.  When passed a message
+number, the value for that message number alone is returned.  The
+message number cases failed in our unit test.
+</p>
+
+<p>
+The code reference refactoring shows us where the fault lies:
+<tt>$parse_line</tt> is not called when
+<tt>_list</tt> is called with an argument.  It also needs
+to <tt>chomp</tt> the <tt>$line</tt> to match
+the behavior:
+</p>
+
+<blockquote><pre>
+    if ($num) {
+        $line =~ s/^\+OK\s*//;<b>
+        chomp $line;
+        return $parse_line-&gt;($line);</b>
+    }
+
+</pre></blockquote>
+
+<p>
+The anonymous subroutines in <tt>List</tt> and
+<tt>ListArray</tt> need to be bimodal for this refactoring
+to work:
+</p>
+
+<blockquote><pre>
+sub List {
+    return _list(
+        sub {
+            my $line = shift;
+            my $retarray = shift <b>or return $line;</b>
+            push(@$retarray, $line);
+            return;
+        },
+        @_,
+    );
+}
+
+sub ListArray {
+    return _list(
+        sub {
+            my($num, $value) = split &#39; &#39;, shift;<b>
+            my $retarray = shift or return $value;</b>
+            $retarray-&gt;[$num] = $value;
+            return;
+        },
+        @_,
+    );
+}
+
+</pre></blockquote>
+
+<p>
+By compressing the business logic, its essence and errors become
+apparent.  Less code is almost always better than more code.
+</p>
+
+<p>
+While advanced constructs like code references may be difficult to understand
+for those unfamiliar with them, dumbing down the code is not a good
+option.  Defaulting to the least common denominator produces dumb code
+and ignorant programmers.  In XP, change occurs not only the project
+artifacts but also in ourselves.  Learning and teaching are an
+integral part of the XP methodology.
+</p>
+
+
+
+<h3>Brush and Floss Regularly</h3>
+
+<p>
+This chapter presents a glimpse of design on demand.  Each
+refactoring was implemented and tested separately.  The trick to
+refactoring successfully is taking baby steps.
+</p>
+
+<p>
+I like to compare refactoring to brushing your teeth.  Your best shot
+at preventing tooth decay is to brush briefly after each meal and
+to floss daily.
+Alternatively, you could just wait for cavities to appear and have
+them filled.  The short term cost in pain, money, and time is much greater if
+you do.   In the long term, too many fillings create structural
+problems and the tooth has to be replaced.
+</p>
+
+<p>
+Refactoring is preventative maintenance, like tooth brushing.  Quick
+fixes are like fillings.  Eventually, they create structural problems
+and require the implementation to be replaced.  Like teeth, complete
+rewrites are unnecessarily painful and costly.
+</p>
+
+<p>
+XP encourages you to do the simplest thing that could possibly work
+(tactics) to address the immediate problem .  You refactor your code
+to express concepts once and only once (strategy) to prevent
+structural problems.  And, don&#39;t forget that brushing and flossing
+support pair programming.
+</p>
+
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+Don Roberts came up with this rule, and it is noted in
+<i>Refactoring: Improving the Design of Existing
+Code</i>, Martin Fowler, Addison Wesley, 1999, p. 58.
+</p></li>
+<li><a name="2"></a><p>
+<a href="http://search.cpan.org/author/SDOWD/POP3Client-2.12">http://search.cpan.org/author/SDOWD/POP3Client-2.12</a>
+</p></li>
+<li><a name="3"></a><p>
+There are numerous CPAN classes for generating accessors.  The
+purpose of this refactoring is to demonstrate the technique of
+generating code to reduced repetition.  In the real world, you&#39;d use
+one of the CPAN classes or, better yet, eschew accessors in favor
+a super-class which implements accessors via get and put methods.
+</p></li>
+<li><a name="4"></a><p>
+There are some minor changes to whitespace, indentation, and brace
+placement for consistency and brevity within this book.
+</p></li>
+<li><a name="5"></a><p>
+Except in FORTRAN, where the name of the variable can determine
+its type.
+</p></li>
+<li><a name="6"></a><p>
+When making changes to CPAN modules, XP, nor any other methodology,
+helps to validate uses in the (unknown) importers.
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="unit-testing.html"><small>Previous: Chapter 13: Unit Testing</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="its-a-smop.html"><small>Next: Chapter 15: It's a SMOP</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="refactoring.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 1: The Problem</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 1: The Problem</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="preface.html"><small>Previous: Preface</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="extreme-programming.html"><small>Next: Chapter 2: Extreme Programming</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="the-problem"></a>
+
+
+
+
+<blockquote>
+
+<p>
+In spite of what your client may tell you, there&#39;s always a problem.
+</p>
+<div align="right">-- Gerald Weinberg</div></blockquote>
+
+
+<p>
+Software is a scarce resource, in that the demand for software greatly
+outstrips the supply.  We hear about huge shortages of IT staff
+required to meet to this demand.  Costs are rising, too.  Some people
+believe the way we can increase output is to outsource
+development to places where qualified labor is cheap and plentiful.
+However, the problem with software development lies elsewhere, and
+increasing the number of programmers and separating them from the
+customer only makes the problem worse.
+</p>
+
+<p>
+A programmer&#39;s job is getting the details exactly right, exactly once.
+This isn&#39;t at all like physical manufacturing where the brunt of the
+cost is in the process of making the exact copies of a product.
+Outsourced manufacturing works well, because the details have already
+been decided in the design phase.  The manufacturing process
+merely replicates this fixed design.  With software, the cost of making
+copies is almost free, and it&#39;s the efficiency of design phase that
+governs its cost.  Cheap and abundant labor improves manufacturing
+efficiency, but this economy of scale does not make software
+development more efficient.
+</p>
+
+<p>
+The cost of programming is directly related to network effects.  As
+you add programmers to project, the communication costs increase
+proportionally with the square of the total number of programmers.
+There are that many more links over which the details must be
+communicated.  And, as the customer and programmers drift farther
+apart, the cost of the most important link increases.  Reducing the
+cost of communication between the programmers and the customer is
+crucial to getting the details right efficiently.  A time lag along
+this link multiplies the cost. To improve efficiency, the customer
+needs instantaneous communication with the programmers, and
+programmers need immediate feedback from the customer.
+</p>
+
+<p>
+This chapter differentiates software development from physical
+manufacturing.  We explain why traditional, plan-driven development
+methodologies increase project risk, and how fostering failure
+reduces risk.  The chapter ends with a parable that shows the way to
+reduce both requirements and implementation risk is to bring the customer
+closer to development.
+</p>
+
+
+
+
+<h3>Some Statistics</h3>
+<p>
+According to the Business Software Alliance, the software industry is
+growing rapidly to meet a seemingly unlimited demand.  From 1990 to
+1998, the U.S. software industry&#39;s revenue grew by 13% per
+year.<a href="the-problem.html#1">[1]</a>
+</p>
+
+<p>
+Despite, or perhaps as a result of this rapid growth, the software
+industry remains highly inefficient.  While sales grew by 18% in
+1998, an astounding 26% of U.S. software projects failed and another
+46% were labeled as challenged by the Standish Group
+International.<a href="the-problem.html#2">[2]</a>
+They also estimate 37% of our resources are wasted on failed and challenged
+software projects.
+</p>
+
+<p>
+We need to understand why software development is so inefficient and
+why projects fail.
+</p>
+
+
+
+<h3>Risk Averse Methodologies</h3>
+
+<p>
+It&#39;s not that failure is all bad.  People learn from mistakes.
+However, we don&#39;t want to be driving on the mistake bridge builders learn
+from.  We don&#39;t want to be flying in an engineering error, to live near a
+nuclear plant failure, or even to stand near a pancake griddle
+meltdown.<a href="the-problem.html#3">[3]</a>
+</p>
+
+<p>
+To reduce risk, engineering methodologies are
+<i>plan-driven</i>.  The plans help us ensure we catch
+mistakes as early as possible.  The planning process involves many
+redundant steps.  Emerging plans must pass reviews and consistency
+checks during the numerous phases of the project.  The public is
+protected by layers of methodology and in some cases government
+regulations and laws.
+</p>
+
+<p>
+Although public safety is certainly a concern, business probably
+evolved these risk mitigation methodologies for another
+reason: to reduce the risk of production failures.  When you are
+manufacturing physical widgets, you don&#39;t want to find an error after
+you have produced one million widgets, or even a thousand.  The cost
+of the raw materials plus the time to fix the error, to retool, and to
+rerun the job is usually high in comparison to the cost of the extra
+procedures to catch errors during the planning and design phases.
+</p>
+
+<p>
+Software development is quite different from manufacturing.
+The cost of
+producing the physical software package is nominal, especially
+considering most software is developed for only one
+customer.<a href="the-problem.html#4">[4]</a>
+Today, automated updates via the Web further reduce the cost of
+software delivery.  The cost of software production is borne almost
+entirely by research, development, and maintenance.
+</p>
+
+<p>
+While software lacks the characteristics of physical products, we
+still develop most software with the same <i>implementation
+risk</i> averse methodologies.  We are told "If [a
+requirements] error is not corrected until the maintenance phase, the
+correction involves a much larger inventory of specifications, code,
+user and maintenance manuals, and training
+material."<a href="the-problem.html#5">[5]</a>
+Mistakes are expensive, because we have "inventory" to
+update.  Plan-driven software development is firmly
+grounded in avoiding production failures, which slows development in the
+name of implementation risk mitigation.   
+</p>
+
+
+
+
+<h3>Fostering Failure</h3>
+
+<p>
+Implementation risk mitigation is expensive.  The most obvious cost is
+the bookkeeping material (documents defining requirements,
+specifications, architecture, and detailed design) in addition to the
+code we need to maintain.  Less risk averse methodologies lower the
+cost of software production.  Reducing redundancy in the planning
+process means there is less to change when a requirements error is
+inevitably discovered.  By not creating inventory in the first place
+we further reduce our overhead and inefficiencies.
+</p>
+
+<p>
+When we improve efficiency in one part of the process, we gain
+flexibility in other areas.  We have more resources and time to correct
+errors in all phases of the project.  The fewer errors, the better the
+chance the project will succeed.
+</p>
+
+<p>
+Implementation risk aversion is costly in other ways.  We avoid change
+later in the project even if that change is justified.  The cost of
+change is proportional to the amount of inventory.  In plan-driven
+methodologies, change is increasingly costly as the project
+progresses.  Not only do we have to update all the bookkeeping
+material, but it must pass the same manual reviews and consistency
+checks that were used to validate the existing plan and design.
+</p>
+
+<p>
+And possibly the most important cost is risk aversion
+itself.  Failure is a natural part of creation.  We don&#39;t like to
+fail, but when we do, we usually learn from the experience.  According
+to management gurus Jim Collins and Jerry Porras, "What looks
+<i>in retrospect</i> like brilliant foresight and
+preplanning was often the result of 'Let&#39;s try a lot of stuff
+and keep what works.'"<a href="the-problem.html#6">[6]</a>
+</p>
+
+<p>
+An interesting side-effect of reducing the cost of correcting errors is
+that we reduce the risk associated with trying new and innovative solutions.
+</p>
+
+
+
+
+<h3>Get Me a Rock</h3>
+
+<p>
+Reducing the cost of correcting errors is one part of the problem.
+One reason projects fail is that they do not satisfy the end-users&#39;
+needs.  To help ensure a project&#39;s success, we need to mitigate
+<i>requirements risk</i>.  The following
+story about a manager and his subordinate 
+demonstrates the difficulty of specifying and satisfying requirements:
+</p>
+
+<br>
+<i>Boss:</i>&nbsp;Get&nbsp;me&nbsp;a&nbsp;rock.<br>
+<i>Peon:</i>&nbsp;Yes,&nbsp;sir.<br>
+
+
+<p>
+...a little while later...
+</p>
+
+<br>
+<i>Peon:</i>&nbsp;Here&#39;s&nbsp;your&nbsp;rock,&nbsp;sir.<br>
+<i>Boss:</i>&nbsp;This&nbsp;rock&nbsp;is&nbsp;all&nbsp;wrong.&nbsp;&nbsp;We&nbsp;need&nbsp;a&nbsp;big&nbsp;rock.<br>
+
+
+<p>
+...another delay...
+</p>
+
+<br>
+<i>Peon:</i>&nbsp;Here&nbsp;ya&nbsp;go,&nbsp;boss.<br>
+<i>Boss:</i>&nbsp;We&nbsp;can&#39;t&nbsp;use&nbsp;this&nbsp;rock.&nbsp;&nbsp;It&#39;s&nbsp;not&nbsp;smooth.<br>
+
+
+<p>
+...yet another delay...
+</p>
+
+<br>
+<i>Peon:</i>&nbsp;[panting]&nbsp;Smooth,&nbsp;big&nbsp;rock,&nbsp;sir.<br>
+<i>Boss:</i>&nbsp;The&nbsp;other&nbsp;rocks&nbsp;you&nbsp;brought&nbsp;were&nbsp;black,<br>
+but&nbsp;this&nbsp;one&#39;s&nbsp;brown.&nbsp;Get&nbsp;a&nbsp;black&nbsp;one.<br>
+
+
+<p>
+And the story goes on and on.  We&#39;ve all been there.  Both roles are
+difficult.  It is hard to specify exactly what you want when you&#39;re
+not sure yourself, or even when you are sure, you may have difficulty
+explaining to another person what you want.  On the flip side, the
+subordinate probably doesn&#39;t speak the language of
+rocks, so he can&#39;t elicit what the manager wants in
+terms the manager understands.
+</p>
+
+<p>
+The plan-driven lesson to be learned is: Customers must give precise
+instructions (specifications).  Programmers should not be expected to
+be mind readers.
+</p>
+
+
+
+<h3>Requirements Risk</h3>
+
+<p>
+Most software projects are as ill-defined as the requirements in this
+story.<a href="the-problem.html#7">[7]</a>
+The plan-driven approach is to spend a lot of time up front defining
+the requirements in order to reduce the cost of the implementation.
+The theory is that planning is cheap, and programming is expensive.
+Once we get through the specification phase, we can ship the spec off to a
+source of cheap labor whose job it is to translate the spec
+into working code.  That would work fine if the specification were
+exactly right, but it most likely is missing a lot of important
+detail, and the details it identifies probably aren&#39;t exactly
+right either.  The Rock example doesn&#39;t do justice to the amount of
+detail involved in software.  Large programs contain
+hundreds of thousands and sometimes millions of details
+that must be exactly right, or the software contains faults.
+</p>
+
+<p>
+The cumulative effect of software faults is what causes projects to
+fail.  It&#39;s easy to fix a few faults but not thousands.  When users
+throw up their hands and scream in exasperation, they&#39;re saying the
+program misses the mark by a mile.  It&#39;s insufficient to tell them the
+specification was right or that the programmers simply misunderstood
+it.  It&#39;s the code users are frustrated with, and it&#39;s the code
+that is just plain wrong.
+</p>
+
+<p>
+Planning and specification does not guarantee end-user satisfaction.
+Plan-driven methodologies ignore requirements risk, that is, the risk
+that details may be incorrect, missing, or somehow not quite what the
+customer wants.  When we gather requirements, write the specification,
+ship it off, and only check the program against user expectations at
+the end, we are setting ourselves up for failure.  Requirements change
+in this scenario is very expensive.  This is what we see in the Rock
+example.  The requirements risk is proportional
+to this time lag.  Given the predominance of plan-driven software
+development, it&#39;s likely that a large number of project failures are
+directly attributable to too little requirements risk mitigation.
+</p>
+
+
+
+
+<h3>Let&#39;s Rock And Roll</h3>
+
+<p>
+Fortunately, there is an alternative version of the Get Me a Rock
+story, which solves the ill-defined requirements problem
+with greater efficiency:
+</p>
+
+<br>
+<i>Boss:</i>&nbsp;Get&nbsp;me&nbsp;a&nbsp;rock.<br>
+<i>Peon:</i>&nbsp;Sure,&nbsp;boss.&nbsp;&nbsp;Let&#39;s&nbsp;go&nbsp;for&nbsp;a&nbsp;ride&nbsp;to&nbsp;the&nbsp;quarry.<br>
+
+
+<p>
+...a little while later...
+</p>
+
+<br>
+<i>Boss:</i>&nbsp;Thanks&nbsp;for&nbsp;pointing&nbsp;out&nbsp;this&nbsp;rock.<br>
+I&nbsp;would&nbsp;have&nbsp;missed&nbsp;it&nbsp;if&nbsp;I&nbsp;went&nbsp;by&nbsp;myself.<br>
+<i>Peon:</i>You&#39;re&nbsp;welcome,&nbsp;boss.<br>
+
+
+<p>
+The moral of this story is: to increase efficiency and quality, bring
+the customer as close as possible to a project&#39;s implementation.
+</p>
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+Business Software Alliance, <i>Forecasting a Robust Future: An
+Economic Study of the U.S. Software Industry</i>, Business
+Software Alliance. June 16, 1999.
+<a href="http://www.bsa.org/usa/globallib/econ/us_econ_study99.pdf">http://www.bsa.org/usa/globallib/econ/us_econ_study99.pdf</a>
+</p></li>
+<li><a name="2"></a><p>
+The Standish Group conducted a study of 23,000 software projects
+between 1994 and 1998.  Failed means "The project was canceled
+before completion."  Challenged means "The project is
+completed and operational, but over-budget, over the time estimate and
+with fewer features and functions than initially specified."
+See <i>CHAOS: A Recipe for Sucess</i>, The Standish Group
+International, Inc., 1999.
+</p></li>
+<li><a name="3"></a><p>
+Our breakfast suddenly turned into splattered, molten metal one Sunday.
+Fortunately, no one was hurt.
+</p></li>
+<li><a name="4"></a>
+<p>
+The Business Software Alliance report estimates 64% of software sales
+is in the customized software and integrated system design services.
+This does not include internal IT budgets.
+</p></li>
+<li><a name="5"></a><p>
+<i>Software Engineering
+Economics</i>, Barry Boehm. Prentice-Hall, Inc. 1981,
+pp. 39-40.  This classical reference is old but unfortunately not
+outdated, viz., <i>Get Ready for Agile Methods with
+Care</i>, Barry Boehm.  IEEE Software.  Jan, 2002, pp. 64-69.
+</p></li>
+<li><a name="6"></a>
+<p>
+<i>Built to Last</i>, Jim Collins and Jerry Porras,
+HarperBusiness. 1997, p. 9.
+</p></li>
+<li><a name="7"></a>
+<p>
+On page 310 of <i>Software Engineering Economics</i>,
+Barry Boehm states, "When we first begin to evaluate alternative
+concepts for a new software application, the relative range of our
+software cost estimates is roughly a factor of four on either the high
+or low side.  This range stems from the wide range of uncertainty we
+have at this time about the actual nature of the product."
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="preface.html"><small>Previous: Preface</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="extreme-programming.html"><small>Next: Chapter 2: Extreme Programming</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="the-problem.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 15: It&#39;s a SMOP</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 15: It&#39;s a SMOP</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="refactoring.html"><small>Previous: Chapter 14: Refactoring</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="its-a-smop"></a>
+
+
+
+
+<blockquote>
+
+<p>
+Representation <i>is</i> the essence of programming.
+</p>
+<div align="right">-- Fred Brooks</div></blockquote>
+
+<p>
+Implementing Extreme Perl is a simple matter of programming.  Practicing XP
+clarifies its values.  Perl&#39;s virtues come alive as you read and write
+it.  The subject matter language crystallizes as the subject matter
+oriented program evolves along with the programmers&#39; mastery of the
+problem domain.
+</p>
+
+<p>
+This chapter coalesces the book&#39;s themes (XP, Perl, and SMOP) into a
+single example: a DocBook XML to HTML translator.  We walk through the
+planning game, split the story into tasks, discuss coding style,
+design simply, pair program, test first, and iterate.  The subject
+matter oriented program (SMOP) is a hash of XML to HTML tags
+interpreted by a declarative algorithm.  Along the way, declarative
+programming is defined and related to other paradigms (object-oriented
+and imperative programming).
+</p>
+
+
+
+<h3>The Problem</h3>
+
+<p>
+The example in this chapter converts DocBook XML<a href="its-a-smop.html#1">[1]</a> (the source form of
+this book) to HTML.  The example went beyond this chapter, and the
+version here was enhanced to produce the review copies for the entire
+book.<a href="its-a-smop.html#2">[2]</a>
+</p>
+
+<p>
+DocBook is a technical document description language.  I described the
+paragraphs, sections, terms, etc. of this book with tags as follows:
+</p>
+
+<blockquote><pre>
+&lt;blockquote&gt;&lt;para&gt;
+To learn about &lt;firstterm&gt;XML&lt;/firstterm&gt;, visit
+&lt;systemitem role=&quot;url&quot;&gt;http://www.w3c.org/XML&lt;/systemitem&gt;.
+&lt;/para&gt;&lt;/blockquote&gt;
+
+</pre></blockquote>
+
+<p>
+It&#39;s unreadable in source form, and my resident reviewer in chief pointed
+this out after I asked her to review the first chapter in source form.
+She was expecting something like this:
+</p>
+
+<blockquote><p>
+To learn about <i>XML</i>, visit
+<a href="http://www.w3c.org/XML">http://www.w3c.org/XML</a>.
+</p></blockquote>
+
+<p>
+Since eating your own dog food is a great way to make sure it&#39;s
+palatable, my resident reviewer in chief agreed to act as the on-site
+customer<a href="its-a-smop.html#3">[3]</a>
+for a DocBook to HTML translator.
+</p>
+
+<p>
+I am happy to say she is satisfied with the output of the
+program.<a href="its-a-smop.html#4">[4]</a>
+</p>
+
+
+
+<h3>Planning Game</h3>
+
+<p>
+The planning game was brief.  There was only one story card (shown
+completed):
+</p>
+
+
+<center><b>The Story Card</b></center>
+<div align="center"><img border="0" src="../i/docbook-to-html.jpg"></div>
+
+
+<p>
+Note the simplicity of the story.  One sentence is usually sufficient
+to describe the problem.
+</p>
+
+<p>
+During the planning game, we decided almost immediately the output
+would be HTML.  We briefly discussed simply stripping the XML tags to
+produce a plain text document.  We dropped this idea quickly, because
+the output would not be very easy to read, for example, footnotes
+would appear in the middle of the text.  We touched on alternative
+formatting languages, such as, Rich Text Format (RTF), but the
+simplicity of HTML and its relatedness to XML made the decision for
+us.  HTML provides enough formatting to give a sense of the layout,
+which is all Joanne needed to read and print the chapters.
+</p>
+
+
+
+
+<h3>Dividing the Story into Tasks</h3>
+
+<p>
+We already had a chapter as a sample input.  This made it easy to
+define the tasks.  I needed the tasks to be bite-sized chunks, because
+my programming partners were only available for brief periods.
+</p>
+
+<p>
+The task split was simple.  I scanned the chapter looking for
+problematic tags.  The first task specifies simple tags. The other
+tasks specify one problematic tag each.  Only DocBook
+tags used in the chapter were included, and each tag can be found in
+at least one test case.
+</p>
+
+
+
+
+<h3>Coding Style</h3>
+
+<p>
+The story card does not mention declarative programming.  It also
+doesn&#39;t specify what language, operating system, or hardware is to be
+used.  The customer simply wants readable and printable chapters.  She
+doesn&#39;t care how we do it.
+</p>
+
+<p>
+Too often we begin coding without an explicit discussion about how
+we&#39;re going to code, that is. what language and what style.  For this project,
+we chose Perl for the following reasons:
+</p>
+
+<ul>
+
+<li><p>
+XML maps naturally to Perl&#39;s built-in data structures (lists and
+hashes),
+</p></li>
+
+<li><p>
+CPAN has several ready-to-use XML parsers,
+</p></li>
+
+<li><p>
+It&#39;s easy to generate HTML in Perl, and
+</p></li>
+
+<li><p>
+I needed an example for this book.
+</p></li>
+
+</ul>
+
+<p>
+The last reason is important to list.  One of the core values of XP is
+communication.  By listing my personal motivation, I&#39;m being honest
+with my team.  Miscommunication often comes from hidden agendas.
+</p>
+
+
+
+
+<h3>Simple Design</h3>
+
+<p>
+The problem lends itself to simplicity.  XML and HTML are declarative
+languages, and an important property of declarative languages is ease
+of manipulation.  For example, consider the following DocBook snippet:
+</p>
+
+<blockquote><pre>
+&lt;para&gt;
+&lt;classname&gt;XML::Parser&lt;/classname&gt; parses XML into a tree.
+&lt;/para&gt;
+
+</pre></blockquote>
+
+<p>
+The relationships are clear, and the mapping to HML is simply:
+</p>
+
+<blockquote><pre>
+&lt;p&gt;
+&lt;tt&gt;XML::Parser&lt;/tt&gt; parses XML into a tree.
+&lt;/p&gt;
+
+</pre></blockquote>
+
+<p>
+One could translate the tags with a simple tag for tag mapping, such as:
+</p>
+
+<blockquote><pre>
+s{&lt;(/?)para&gt;}{&lt;$1p&gt;}g;
+s{&lt;(/?)classname&gt;}{&lt;$1tt&gt;}g;
+
+</pre></blockquote>
+
+<p>
+This design is too simple, however.  It assumes the XML is well-formed, which
+it often isn&#39;t when I write it.  For example, if I were to leave off
+<tt>&lt;/classname&gt;</tt>, the closing
+<tt>&lt;/tt&gt;</tt> would be missing in the HTML,
+and the output would be in
+<tt>tt</tt> font for the rest of the document.
+The classic response to this is: garbage in, garbage out.
+However, we did better without added complexity<a href="its-a-smop.html#5">[5]</a>,
+and the solution evolved with minimal changes.
+</p>
+
+<p>
+We favored hubris and impatience over doing the simplest thing that
+could possibly work.  A little chutzpah is not bad every now and then
+as long as you have benchmarks to measure your progress.  If the
+implementation size grew too rapidly, we would have backed off to the
+simpler solution.  If we blew our task estimates, we&#39;d have to ask if
+we didn&#39;t under-estimate the complexity of the more radical approach.
+</p>
+
+<p>
+The design we chose starts with the output of the CPAN package,
+<tt>XML::Parser</tt>.  If the XML is not well-formed,
+<tt>XML::Parser</tt> dies.  There is no output when
+the input is garbage.
+</p>
+
+<p>
+<tt>XML::Parser</tt> preserves the semantic structure of
+the input.  The translation is an in-order tree traversal,
+so the output is likely to be well-formed HTML, which also is a tree.
+</p>
+
+
+
+<h4>Imperative versus Declarative</h4>
+
+<p>
+To help understand the benefits of declarative languages, let&#39;s
+consider an alternate problem.  Suppose I was writing this book in
+<tt>troff</tt><a href="its-a-smop.html#6">[6]</a>,
+an imperative text formatting language:
+</p>
+
+<blockquote><pre>
+.PP
+\fBXML::Parser\fR parses XML into a tree.
+
+</pre></blockquote>
+
+<p>
+The commands in <tt>troff</tt> are not relational.  The
+<tt>.PP</tt> does not bracket the paragraph it introduces.
+<tt>troff</tt> interprets the <tt>.PP</tt> as a
+paragraph break, and what follows need not be a paragraph at all.  The
+command is imperative, because it means do something right now
+irrespective of context.
+</p>
+
+<p>
+The <tt>\fB</tt> and <tt>\fR</tt> commands do not
+relate to the value they surround, either.  <tt>\fB</tt>
+turns on bold output, and <tt>\fR</tt> turns off all
+emphasis statefully.  Drop one or the other, and the
+<tt>troff</tt> is still well-formed.
+<tt>troff</tt> commands are unrelated to one another except
+by the order in which they appear in the text.
+</p>
+
+<p>
+Writing a <tt>troff</tt> parser is straightforward.  The
+complete grammar is
+not much more complicated than the example above.  Translating
+<tt>troff</tt> to HTML is much more difficult.<a href="its-a-smop.html#7">[7]</a>
+For example, consider the following <tt>troff</tt>:
+</p>
+
+<blockquote><pre>
+\fBXML::Parser\fI is sweet!\fR
+
+</pre></blockquote>
+
+<p>
+The equivalent HTML is:
+</p>
+
+<blockquote><pre>
+&lt;b&gt;XML::Parser&lt;/b&gt;&lt;i&gt; is sweet!&lt;/i&gt;
+
+</pre></blockquote>
+
+<p>
+A simple command-to-tag translation is insufficient.  The program
+must maintain the state of the font in use, and output the corresponding
+closing tag (<tt>&lt;/b&gt;</tt>) when the font changes
+before appending the font tag (<tt>&lt;i&gt;</tt>).
+The same is true for font sizes, indentation
+level, line spacing, and other stateful <tt>troff</tt>
+commands.  The program has to do two jobs: map commands to tags and
+emulate the state management of <tt>troff</tt>.
+</p>
+
+<p>
+As you&#39;ll see, the XML to HTML translator does not maintain global
+input state to perform its job.  The XML tags are translated based on
+minimal local context only.  The only relational information required
+is the parent of the current tag.  The mapping is stateless and therefore
+simpler due to XML&#39;s declarativeness.
+</p>
+
+
+
+
+<h3>Pair Programming</h3>
+
+<p>
+Programming courses rarely mention declarative programming.
+Imperative programming is the norm.  It is all too easy to use
+imperative forms out of habit or as a quick fix, especially when
+working alone under pressure.  You may need to refactor several times
+to find appropriate declarative forms.   
+</p>
+
+<p>
+Dogmatic pursuit of declarative forms is not an end in itself,
+however.  Sometimes it&#39;s downright counter-productive.  Since Perl allows us
+to program in multiple paradigms, it is tricky to choose how or when
+to program using objects, imperatively, and declaratively.
+</p>
+
+<p>
+For these reasons, it&#39;s helpful to program in pairs when
+coding declarative constructs.  
+It takes time to learn how to code declaratively, just like it takes time
+to test-first, code simply, and refactor.  The learning process is
+accelerated when you program in pairs.
+</p>
+
+<p>
+All tasks and tests in this chapter were implemented in pairs.  I would
+like to thank Alex Viggio for partnering with me on the last three
+tasks and Justin Schell for helping with the first.  Thanks to Stas Bekman
+for being my virtual partner in the final  refactoring-only iteration.
+</p>
+
+
+
+
+<h3>Test First, By Intention</h3>
+
+<p>
+The first task involves simple tags only.  This allowed us to
+address the basic problem: mapping XML tags to HTML tags.  Each XML tag in
+the first test case maps to zero, one, or two HTML tags. 
+</p>
+
+<p>
+The first test case input is the trivial DocBook file:
+</p>
+
+<blockquote><pre>
+&lt;chapter&gt;
+&lt;title&gt;Simple Chapter&lt;/title&gt;
+&lt;simplesect&gt;
+&lt;para&gt;Some Text&lt;/para&gt;
+&lt;/simplesect&gt;
+&lt;/chapter&gt;
+
+</pre></blockquote>
+
+<p>
+Here&#39;s the expected result:
+</p>
+
+<blockquote><pre>
+&lt;html&gt;&lt;body&gt;
+&lt;h1&gt;Simple Chapter&lt;/h1&gt;
+
+&lt;p&gt;Some Text&lt;/p&gt;
+
+&lt;/body&gt;&lt;/html&gt;
+</pre></blockquote>
+
+<p>
+The test case input and expected result are stored in
+two files named <tt>01.xml</tt> and
+<tt>01.html</tt>, respectively.  In my experience, it pays
+to put the test cases in a separate subdirectory
+(<tt>DocBook</tt>), and to check the test
+cases into the collective repository.  If the program runs amok and
+overwrites these files, you can always retrieve them from the
+repository.  Also, storing all the test data and programs in the
+repository ensures programmer workstations are stateless.  This allows you to
+switch tasks and/or workplaces easily.
+</p>
+
+<p>
+The unit test program is:
+</p>
+
+<blockquote><pre>
+#!perl -w
+use strict;
+use Bivio::Test;
+use Bivio::IO::File;
+Bivio::Test-&gt;new(&#39;Bivio::XML::DocBook&#39;)-&gt;unit([
+    &#39;Bivio::XML::DocBook&#39; =&gt; [
+        to_html =&gt; [
+            [&#39;DocBook/01.xml&#39;] =&gt; [Bivio::IO::File-&gt;read(&#39;DocBook/01.html&#39;)],
+        ],
+    ],
+]);
+
+</pre></blockquote>
+
+<p>
+The function <tt>to_html</tt> takes a file name as an
+argument and returns a string reference, which simplifies testing.
+There is no need to create a temporary output file nor delete it when
+the test is over.  A testable design is a natural outcome of
+test-first programming.
+</p>
+
+<p>
+<tt>Bivio::IO::File-&gt;read</tt> returns the contents of
+the file name passed to it.  The output is a scalar reference.  If the
+file does not exist or an I/O error occurs, the function dies.
+</p>
+
+
+
+<h3>Statelessness</h3>
+
+<p>
+<tt>Bivio::IO::File-&gt;read</tt> is stateless, or
+<i>idempotent</i>.  It always does the same thing
+given the same arguments.  This isn&#39;t to say the file that it reads
+is stateless.  Files and I/O are stateful.  Rather, the operation
+retains no state itself.  If the underlying file does not change,
+exactly the same data is returned after each call.
+</p>
+
+<p>
+Many of Perl&#39;s I/O functions are stateful.  For example, Perl&#39;s
+<tt>read</tt> returns different values when called with
+the same arguments, because it maintains an internal buffer and file pointer.
+Each call returns the current buffer contents and advances an internal
+buffer index, possibly filling the buffer if it is empty.  If the
+underlying file changes between calls, the old buffered contents are
+returned regardless.  <tt>read</tt> buffers the file (uses
+state) to
+improve performance (decrease time), and we pay a price: the data read may not
+match a valid file state (old and new states may be mixed).
+</p>
+
+<p>
+<tt>Bivio::IO::File-&gt;read</tt> cannot be used in all
+cases.  Sometimes the file is too large to fit in memory, or the file
+may be a device that needs to be read/written alternately in a
+conversational mode.  For our test program,
+<tt>Bivio::IO::File-&gt;read</tt> meets our needs, and
+the declarative operation simplifies the code and
+ensures data integrity.<a href="its-a-smop.html#8">[8]</a>
+</p>
+
+<p>
+In terms of XP, stateless programming supports unit testing.
+It is easier to test stateless than stateful
+operations.  Internal state changes, such as caching results in buffers,
+multiply the inputs and outputs implicitly.  It&#39;s harder
+to keep track of what you are testing.  Stateful test cases must take
+ordering into account, and tests of implicit state changes make unit
+tests harder to read.
+</p>
+
+<p>
+Stateless APIs can be tested independently.  You only need to consider
+the explicit inputs and outputs for each case, and the cases can be
+written in any order.  The tests are easier to read and maintain.
+</p>
+
+
+
+
+<h3><tt>XML::Parser</tt></h3>
+<p>
+Before we dive into the implementation, we need to understand the
+output of <tt>XML::Parser</tt>.  It parses the XML into a
+tree that constrains our
+implementation choices.  Given <tt>01.xml</tt>,
+the following data structure is returned by <tt>parsefile</tt>:
+</p>
+
+<blockquote><pre>
+[
+    chapter =&gt; [
+        {},
+        0 =&gt; &quot;\n&quot;,
+        title =&gt; [
+            {},
+            0 =&gt; &#39;Simple Chapter&#39;,
+        ],
+        0 =&gt; &quot;\n&quot;,
+        simplesect =&gt; [
+            {},
+            0 =&gt; &quot;\n&quot;,
+            para =&gt; [
+                {},
+                0 =&gt; &#39;Some Text&#39;,
+            ],
+            0 =&gt; &quot;\n&quot;,
+        ],
+        0 =&gt; &quot;\n&quot;,
+    ],
+];
+
+
+</pre></blockquote>
+
+<p>
+The tree structure is realized by nesting arrays. The first element in the
+array is a hash of attribute tags, which we can ignore for this first
+implementation, because <tt>01.xml</tt> doesn&#39;t use XML attributes.
+The special tag <tt>0</tt> indicates raw 
+text, that is, the literal strings bracketed by the XML tags.
+</p>
+
+
+
+<h3>First SMOP</h3>
+
+<p>
+The implementation of the first task begins with the map from DocBook
+to HTML, which is the subject matter oriented program (SMOP):
+</p>
+
+
+<blockquote><pre>
+my($_TO_HTML) = {
+    chapter =&gt; [&#39;html&#39;, &#39;body&#39;],
+    para =&gt; [&#39;p&#39;],
+    simplesect =&gt; [],
+    title =&gt; [&#39;h1&#39;],
+};
+
+</pre></blockquote>
+
+<p>
+The subject matter (tags and their relationships) is expressed
+succinctly without much syntactic clutter.Perl&#39;s simple quoting comma
+(<tt>=&gt;</tt>) describes the program&#39;s intention to replace
+the tag on the left with the list of tags on the right. As an
+exercise, try to translate this SMOP to another programming language.
+You&#39;ll find that Perl&#39;s expressiveness is hard to beat.
+</p>
+
+
+
+
+<h3>First Interpreter</h3>
+
+<p>
+The SMOP above is known as <i>descriptive
+declarativeness</i>, just like HTML and XML.  The primary
+advantage of descriptive languages is that they are easy to evaluate.
+The first interpreter is therefore quite short<a href="its-a-smop.html#9">[9]</a>:
+</p>
+
+
+<blockquote><pre>
+sub to_html {
+    my($self, $xml_file) = @_;
+    return _to_html(XML::Parser-&gt;new(Style =&gt; &#39;Tree&#39;)-&gt;parsefile($xml_file));
+}
+
+sub _to_html {
+    my($tree) = @_;
+    my($res) = &#39;&#39;;
+    $res .= _to_html_node(splice(@$tree, 0, 2))
+        while @$tree;
+    return \$res;
+}
+
+sub _to_html_node {
+    my($tag, $tree) = @_;
+    return HTML::Entities::encode($tree)
+        unless $tag;
+    die($tag, &#39;: unhandled tag&#39;)
+        unless $_TO_HTML-&gt;{$tag};
+    # We ignore the attributes for now.
+    shift(@$tree);
+    return _to_html_tags($_TO_HTML-&gt;{$tag}, &#39;&#39;)
+        . ${_to_html($tree)}
+        . _to_html_tags([reverse(@{$_TO_HTML-&gt;{$tag}})], &#39;/&#39;);
+}
+
+sub _to_html_tags {
+    my($names, $prefix) = @_;
+    return join(&#39;&#39;, map({&quot;&lt;$prefix$_&gt;&quot;} @$names));
+}
+
+</pre></blockquote>
+
+<p>
+The execution is driven by the XML, not our SMOP.
+<tt>to_html</tt> starts the recursive (in order
+tree traversal) algorithm by calling <tt>parsefile</tt> with the
+appropriate arguments.  The XML tree it returns is passed to
+<tt>_to_html</tt>.  The tags are translated by the SMOP as
+they are encountered by <tt>_to_html_node</tt>, the
+workhorse of the program.  The tag names in the SMOP are converted to
+HTML tags (surrounded by angle brackets, <tt>&lt;&gt;</tt>)
+by <tt>_to_html_tags</tt>.
+</p>
+
+
+
+<h3>Functional Programming</h3>
+
+<p>
+The subroutine <tt>_to_html_tags</tt> is a
+<i>pure function</i>, also known as a function without side
+effects.  A pure function is a <i>declarative
+operation</i>, which is defined formally as follows
+<a href="its-a-smop.html#10">[10]</a>:
+</p>
+
+<blockquote><p>
+A declarative operation is <i>independent</i>
+(does not depend on any execution state outside itself),
+<i>stateless</i> (has no internal execution state that is
+remembered between calls), and <i>deterministic</i>
+(always gives the same results when given the same arguments).
+</p></blockquote>
+
+<p>
+<tt>_to_html_tags</tt> only depends on its inputs.  Its
+output (the HTML tags) is the only state change to the program.  And,
+we expect it to do exactly the same thing every time we call it.
+</p>
+
+<p>
+<i>Functional programming</i> is the branch of
+declarative programming that uses pure functions exclusively.  One of
+Perl&#39;s strengths is its functional programming support.
+For example,
+<tt>map</tt> and <tt>join</tt> allowed us
+to implement <tt>_to_html_tags</tt> functionally.
+</p>
+
+<p>
+Other Perl operations, such as <tt>foreach</tt>, support
+imperative programming only.  Code that uses
+<tt>foreach</tt> must rely on stateful side-effects for
+its outputs.  To illustrate this point, let&#39;s look at
+<tt>_to_html_tags</tt> implemented with
+<tt>foreach</tt>:
+</p>
+
+<blockquote><pre>
+sub _to_html_tags_imperatively {
+    my($names, $prefix) = @_;
+    my($res) = &#39;&#39;;
+    foreach my $name (@$names) {
+        $res .= &quot;&lt;$prefix$name&gt;&quot;;
+    }
+    return $res;
+}
+
+</pre></blockquote>
+
+<p>
+The <tt>foreach</tt> does its job of iterating through
+<tt>$names</tt>, and nothing more.  It abdicates any
+responsibility for achieving a result.  The surrounding code must
+introduce a variable (<tt>$res</tt>) to extract the output
+from inside the loop.  The variable adds complexity that is
+unnecessary in the functional version.
+</p>
+
+
+<h4>Outside In</h4>
+
+<p>
+Like most programmers, I was trained to think imperatively.  It&#39;s
+hard to think declaratively after years of programming languages like
+C and Java.  For example, <tt>_to_html</tt> in our
+first interpreter uses the
+imperative <tt>while</tt>, because a functional version
+didn&#39;t spring to mind.  This was the simplest thing that could
+possibly work.  It was Stas who suggested the functional
+refactoring in <a href="its-a-smop.html#its-a-smop-final-implementation">Final Implementation</a>.
+</p>
+
+<p>
+Functional programming requires a paradigm shift from traditional
+imperative thinking.
+<tt>_to_html_tags_imperatively</tt> concatenates its
+result on the <i>inside</i> of the
+<tt>foreach</tt>.  The functional
+<tt>_to_html_tags</tt> concatenates the result on the
+<i>outside</i> of the <tt>map</tt>.
+Functional programming is like turning an imperative program inside
+out.<a href="its-a-smop.html#11">[11]</a>
+Or, as some of my co-workers have noted, it&#39;s like programming
+while standing on your head.
+</p>
+
+
+
+
+<h4>May I, Please?</h4>
+
+<p>
+The inside out analogy helps us refactor.  We can use it to
+simplify imperative programs.  To program functionally from
+the outset, a different analogy may help: think in terms of
+requests, not demands.  Paul Graham states this eloquently, "A
+functional program tells you what it wants; an imperative program
+tells you what to do."<a href="its-a-smop.html#12">[12]</a>
+</p>
+
+<p>
+When we apply this analogy to the example, we see that
+<tt>_to_html_tags_imperatively</tt> tells us it
+formats tag names one at a time, and it appends them to the end of a string.
+When its done with that, it&#39;ll return the result.
+</p>
+
+<p>
+The functional <tt>_to_html_tags</tt> has a list of tag
+names and wants a string to return, so it asks
+<tt>join</tt>, a function that conatenates a list into a
+string.  <tt>join</tt> asks for a separator and a list
+of tags to concatenate.  <tt>map</tt> wants to format
+tag names, so it asks for a formatter
+(<tt>{&quot;&lt;$prefix$_&gt;&quot;}</tt>) and a list of tag names.
+</p>
+
+<p>
+All we&#39;re missing is some polite phrases like please and may I, and we
+can expand this analogy to familial relationships.  Imperative kids
+tell their parents, "I&#39;m taking the car." Declarative
+kids politely ask, "May I borrow the car, please?".  By
+communicating their desires instead of demands, declarative kids give
+their parents more leeway to implement their requests.
+</p>
+
+<p>
+Pure functions, and declarative programs in general, are more flexible
+than their imperative cousins.  Instead of demanding a calling order
+that is implicitly glued together with state (variables), declarative
+programs define relationships syntactically.  This reduces the problem
+of refactoring from an implicit global problem of maintaining state
+transitions to an explicit local one of preserving syntactic
+relationships.  Functional programs are easier to refactor.
+</p>
+
+
+
+
+
+<h3>Second Task</h3>
+
+<p>
+The second task introduces asymmetric output.  The test case input
+file (<tt>02.html</tt>) is:
+</p>
+
+<blockquote><pre>
+&lt;chapter&gt;
+&lt;title&gt;Chapter with Epigraph&lt;/title&gt;
+&lt;epigraph&gt;
+&lt;para&gt;
+Representation &lt;emphasis&gt;is&lt;/emphasis&gt; the essence of programming.
+&lt;/para&gt;<b>
+&lt;attribution&gt;Fred Brooks&lt;/attribution&gt;</b>
+&lt;/epigraph&gt;
+&lt;simplesect&gt;
+&lt;para&gt;Some Text&lt;/para&gt;
+&lt;/simplesect&gt;
+&lt;/chapter&gt;
+
+</pre></blockquote>
+
+<p>
+The output file (<tt>02.xml</tt>) we expect is:
+</p>
+
+<blockquote><pre>
+&lt;html&gt;&lt;body&gt;
+&lt;h1&gt;Chapter with Epigraph&lt;/h1&gt;
+
+&lt;p&gt;
+Representation &lt;b&gt;is&lt;/b&gt; the essence of programming.
+&lt;/p&gt;<b>
+&lt;div align=right&gt;-- Fred Brooks&lt;/div&gt;</b>
+
+
+&lt;p&gt;Some Text&lt;/p&gt;
+
+&lt;/body&gt;&lt;/html&gt;
+</pre></blockquote>
+
+<p>
+The XML <tt>attribute</tt> tag doesn&#39;t map to a simple
+HTML <tt>div</tt> tag, so the existing SMOP language didn&#39;t
+work.  But first we had to update the unit test.
+</p>
+
+
+
+
+<h3>Unit Test Maintenance</h3>
+ 
+<p>
+To add the new case to the unit test, we copied the line
+containing the first test case, and changed the the filenames:
+</p>
+
+<blockquote><pre>
+#!perl -w
+use strict;
+use Bivio::Test;
+use Bivio::IO::File;
+Bivio::Test-&gt;new(&#39;Bivio::XML::DocBook&#39;)-&gt;unit([
+    &#39;Bivio::XML::DocBook&#39; =&gt; [
+        to_html =&gt; [
+            [&#39;DocBook/01.xml&#39;] =&gt; [Bivio::IO::File-&gt;read(&#39;DocBook/01.html&#39;)],
+            [&#39;DocBook/02.xml&#39;] =&gt; [Bivio::IO::File-&gt;read(&#39;DocBook/02.html&#39;)],
+        ],
+    ],
+]);
+
+
+</pre></blockquote>
+
+<p>
+Woops!  We fell into the dreaded copy-and-paste trap.  The new line is
+identical to the old except for two characters out of 65.  That&#39;s too
+much redundancy (97% fat and 3% meat).  It&#39;s hard to tell the
+difference between the two lines, and as we add more tests it will be
+even harder.  This makes it easy to forget to add a test, or
+we might copy-and-paste a line and forget to change it.
+</p>
+
+<p>
+We factored out the common code to reduce redundancy:
+</p>
+
+<blockquote><pre>
+#!perl -w
+use strict;
+use Bivio::Test;
+use Bivio::IO::File;
+Bivio::Test-&gt;new(&#39;Bivio::XML::DocBook&#39;)-&gt;unit([
+    &#39;Bivio::XML::DocBook&#39; =&gt; [
+        to_html =&gt; [<b>
+            map({
+                my($html) = $_;
+                $html =~ s/xml$/html/;
+                [$_] =&gt; [Bivio::IO::File-&gt;read($html)];
+            } sort(&lt;DocBook/*.xml&gt;))</b>
+        ],
+    ],
+]);
+
+
+</pre></blockquote>
+
+<p>
+This  version of the unit test is maintenance free.  The test
+converts all <tt>.xml</tt> files in the
+<tt>DocBook</tt> subdirectory.  All we need to do is
+<i>declare</i> them, i.e., create the
+<tt>.xml</tt> and <tt>.html</tt> files.
+We can execute the cases in any order, so we chose to sort them to
+ease test case identification.
+</p>
+
+
+
+
+<h3>Second SMOP</h3>
+
+<p>
+We extended the SMOP grammar to accommodate asymmetric output.  The
+new mappings are shown below:
+</p>
+
+<blockquote><pre>
+my($_TO_HTML) = <b>_to_html_compile(</b>{<b>
+    attribution =&gt; {
+        prefix =&gt; &#39;&lt;div align=right&gt;-- &#39;,
+        suffix =&gt; &#39;&lt;/div&gt;&#39;,
+    },</b>
+    chapter =&gt; [&#39;html&#39;, &#39;body&#39;],<b>
+    emphasis =&gt; [&#39;b&#39;],
+    epigraph =&gt; [],</b>
+    para =&gt; [&#39;p&#39;],
+    simplesect =&gt; [],
+    title =&gt; [&#39;h1&#39;],
+<b>}</b>);
+
+</pre></blockquote>
+
+<p>
+<tt>attribution</tt> maps to a hash that defines the
+prefix and suffix.  For the other tags, the prefix and suffix is
+computed from a simple name.  We added
+<tt>_to_html_compile</tt> which is called once at
+initialization to convert the simple tag mappings (arrays) into the
+more general prefix/suffix form (hashes) for efficiency.
+</p>
+
+
+
+<h3>Second SMOP Interpreter</h3>
+
+<p>
+We extended <tt>_to_html_node</tt> to handle asymmetric
+prefixes and suffixes.  The relevant bits of code are:
+</p>
+
+<blockquote><pre>
+<b>
+sub _to_html_compile {
+    my($config) = @_;
+    while (my($xml, $html) = each(%$config)) {
+        $config-&gt;{$xml} = {
+            prefix =&gt; _to_html_tags($html, &#39;&#39;),
+            suffix =&gt; _to_html_tags([reverse(@$html)], &#39;/&#39;),
+        } if ref($html) eq &#39;ARRAY&#39;;
+    }
+    return $config;
+}</b>
+
+sub _to_html_node {
+    my($tag, $tree) = @_;
+    return HTML::Entities::encode($tree)
+        unless $tag;
+    die($tag, &#39;: unhandled tag&#39;)
+        unless $_TO_HTML-&gt;{$tag};
+    # We ignore the attributes for now.
+    shift(@$tree);
+    return <b>$_TO_HTML-&gt;{$tag}-&gt;{prefix}
+        . ${_to_html($tree)}
+        . $_TO_HTML-&gt;{$tag}-&gt;{suffix};</b>
+}
+
+</pre></blockquote>
+
+<p>
+<tt>_to_html_compile</tt> makes
+<tt>_to_html_node</tt> simpler and more efficient, because
+it no longer calls <tt>_to_html_tags</tt> with the ordered
+and reversed HTML tag name lists.  Well, I thought it was more
+efficient.  After performance testing, the version in
+<a href="its-a-smop.html#its-a-smop-final-implementation">Final Implementation</a> turned out to be just as
+fast.<a href="its-a-smop.html#13">[13]</a>
+</p>
+
+<p>
+The unnecessary compilation step adds complexity without improving
+performance.  We added it at my insistence.
+I remember saying to Alex, "We might as well add
+the compilation step now, since we&#39;ll need it later anyway."
+Yikes!  Bad programmer!  Write "I&#39;m not going to need it"
+one hundred times in your PDA.  Even in pairs, it&#39;s hard to avoid
+the evils of pre-optimization.
+</p>
+
+
+
+
+<h3>Spike Solutions</h3>
+
+<p>
+As long as I am playing true confessions, I might as well note that
+I implemented a <i>spike solution</i> to this problem
+before involving my programming partners.  A spike solution in XP is a
+prototype that you intend to throw away.  I wrote a spike to see how
+easy it was to translate DocBook to HTML.  Some of my partners knew about it,
+but none of them saw it.
+</p>
+
+<p>
+The spike solution affected my judgement. It had a compilation step,
+too.  Programming alone led to the pre-optimization. I was too
+confident that it was necessary when pairing with Alex.
+</p>
+
+
+<p>
+Spike solutions are useful, despite my experience in this case.  You
+use them to shore up confidence in estimates and feasibility of a
+story.  You write a story card for the spike, which estimates the cost
+to research possibilities.  Spike solutions reduce risk through
+exploratory programming.
+</p>
+
+
+
+<h3>Third Task</h3>
+
+<p>
+The third task introduces contextually related XML tags.  The DocBook
+<tt>title</tt> tag is interpreted differently depending on
+its enclosing tag.  The test case input file
+(<tt>03.xml</tt>) is:
+</p>
+
+<i>[COMMENT: The following wastes printed pages.  Should I trim the test cases
+or compact them to save printed pages?]</i>
+
+<blockquote><pre>
+&lt;chapter&gt;<b>
+&lt;title&gt;Chapter with Section Title&lt;/title&gt;</b>
+&lt;simplesect&gt;
+&lt;programlisting&gt;
+print(values(%{{1..8}}));
+&lt;/programlisting&gt;
+
+&lt;para&gt;
+Some other tags:
+&lt;literal&gt;literal value&lt;/literal&gt;,
+&lt;function&gt;function_name&lt;/function&gt;, and
+&lt;command&gt;command-name&lt;/command&gt;.
+&lt;/para&gt;
+
+&lt;blockquote&gt;&lt;para&gt;
+A quoted paragraph.
+&lt;/para&gt;&lt;/blockquote&gt;
+&lt;/simplesect&gt;
+
+&lt;sect1&gt;<b>
+&lt;title&gt;Statelessness Is Next to Godliness&lt;/title&gt;</b>
+&lt;para&gt;
+A new section.
+&lt;/para&gt;
+&lt;/sect1&gt;
+&lt;/chapter&gt;
+
+</pre></blockquote>
+
+<p>
+The expected output file (<tt>03.html</tt>) is:
+</p>
+
+<blockquote><pre>
+&lt;html&gt;&lt;body&gt;<b>
+&lt;h1&gt;Chapter with Section Title&lt;/h1&gt;</b>
+
+&lt;blockquote&gt;&lt;pre&gt;
+print(values(%{{1..8}}));
+&lt;/pre&gt;&lt;/blockquote&gt;
+
+&lt;p&gt;
+Some other tags:
+&lt;tt&gt;literal value&lt;/tt&gt;,
+&lt;tt&gt;function_name&lt;/tt&gt;, and
+&lt;tt&gt;command-name&lt;/tt&gt;.
+&lt;/p&gt;
+
+&lt;blockquote&gt;&lt;p&gt;
+A quoted paragraph.
+&lt;/p&gt;&lt;/blockquote&gt;
+
+
+<b>
+&lt;h2&gt;Statelessness Is Next to Godliness&lt;/h2&gt;</b>
+&lt;p&gt;
+A new section.
+&lt;/p&gt;
+
+&lt;/body&gt;&lt;/html&gt;
+</pre></blockquote>
+
+<p>
+The <tt>chapter</tt> <tt>title</tt>
+translates to an HTML <tt>h1</tt> tag.  The
+<tt>section</tt> <tt>title</tt>
+translates to an <tt>h2</tt> tag.
+We extended our SMOP language to handle these two contextually different
+renderings of <tt>title</tt>.
+</p>
+
+
+
+
+<h3>Third SMOP</h3>
+
+<p>
+We discussed a number of ways to declare the contextual
+relationships in our SMOP.  We could have added a
+<tt>parent</tt> attribute to the hashes (on the right)
+or nested <tt>title</tt> within a
+hash pointed to by the <tt>chapter</tt> tag.  The syntax
+we settled on is similar to the one used by XSLT.<a href="its-a-smop.html#14">[14]</a>
+The XML tag names can be prefixed with a parent tag name, for example,
+<tt>&quot;chapter/title&quot;</tt>.  The SMOP became:
+</p>
+
+<blockquote><pre>
+my(<b>$_XML_TO_HTML_PROGRAM</b>) = <b>_compile_program</b>({
+    attribution =&gt; {
+        prefix =&gt; &#39;&lt;div align=right&gt;-- &#39;,
+        suffix =&gt; &#39;&lt;/div&gt;&#39;,
+    },<b>
+    blockquote =&gt; [&#39;blockquote&#39;],
+    &#39;chapter/title&#39; =&gt; [&#39;h1&#39;],</b>
+    chapter =&gt; [&#39;html&#39;, &#39;body&#39;],<b>
+    command =&gt; [&#39;tt&#39;],</b>
+    emphasis =&gt; [&#39;b&#39;],
+    epigraph =&gt; [],<b>
+    function =&gt; [&#39;tt&#39;],
+    literal =&gt; [&#39;tt&#39;],</b>
+    para =&gt; [&#39;p&#39;],<b>
+    programlisting =&gt; [&#39;blockquote&#39;, &#39;pre&#39;],
+    sect1 =&gt; [],
+    &#39;sect1/title&#39; =&gt; [&#39;h2&#39;],</b>
+    simplesect =&gt; [],
+});
+
+</pre></blockquote>
+
+
+
+
+<h3>Third SMOP Interpreter</h3>
+
+<p>
+We refactored the code a bit to encapsulate the contextual lookup in
+its own subroutine:
+</p>
+
+<blockquote><pre>
+sub to_html {
+    my($self, $xml_file) = @_;
+    return _to_html(<b>
+        &#39;&#39;,</b>
+        XML::Parser-&gt;new(Style =&gt; &#39;Tree&#39;)-&gt;parsefile($xml_file));
+}
+
+sub <b>_eval_child</b> {
+    my($tag, $children, <b> $parent_tag</b>) = @_;
+    return HTML::Entities::encode($children)
+        unless $tag;
+    # We ignore the attributes for now.
+    shift(@$children);
+    return <b>_eval_op(
+        _lookup_op($tag, $parent_tag),
+        _to_html($tag, $children));</b>
+}
+
+<b>
+sub _eval_op {
+    my($op, $html) = @_;
+    return $op-&gt;{prefix} . $$html . $op-&gt;{suffix};
+}
+
+sub _lookup_op {
+    my($tag, $parent_tag) = @_;
+    return $_XML_TO_HTML_PROGRAM-&gt;{&quot;$parent_tag/$tag&quot;}
+        || $_XML_TO_HTML_PROGRAM-&gt;{$tag}
+        || die(&quot;$parent_tag/$tag: unhandled tag&quot;);
+}
+</b>
+
+sub _to_html {
+    my(<b>$tag,</b> $children) = @_;
+    my($res) = &#39;&#39;;
+    $res .= <b>_eval_child</b>(splice(@$children, 0, 2), <b>$tag</b>)
+        while @$children;
+    return \$res;
+}
+<b>
+# Renamed _compile_program and _compile_tags_to_html not shown for brevity.
+</b>
+</pre></blockquote>
+
+<p>
+The algorithmic change is centralized in
+<tt>_lookup_op</tt>, which wants a tag and its parent to
+find the correct relation in the SMOP.  Precedence is given to
+contextually related tags (<tt>&quot;$parent_tag/$tag&quot;</tt>)
+over simple XML tags (<tt>$tag</tt>).  Note that the root
+tag in <tt>to_html</tt> is the empty string
+(<tt>&#39;&#39;</tt>).  We defined it to avoid complexity in the
+lower layers.  <tt>_lookup_op</tt> need not be specially
+coded to handle the empty parent tag case.
+</p>
+
+
+
+
+<h3>The Metaphor</h3>
+
+<p>
+This task implementation includes several name changes. Alex didn&#39;t
+feel the former names were descriptive enough, and they lacked coherency.
+To help think up good names, Alex suggested that our program was
+similar to a compiler, because it translates a high-level language
+(DocBook) to a low-level language (HTML).
+</p>
+
+<p>
+We refactored the names to reflect this new
+<i>metaphor</i>.  <tt>$_TO_HML</tt> became
+<tt>$_XML_TO_HTML_PROGRAM</tt>, and
+<tt>_to_html_compile</tt> to
+<tt>_compile_program</tt>.  and so on.  An
+<tt>$op</tt> is the implementation of an operator, and
+<tt>_lookup_op</tt> parallels a compiler&#39;s symbol table
+lookup.  <tt>_eval_child</tt> evokes a compiler&#39;s
+recursive descent algorithm.
+</p>
+
+<p>
+The compiler metaphor helped guide our new name choices.  In an XP
+project, the metaphor subsitutes for an architectural overview
+document.  Continuous design means that the architecture evolves with
+each iteration, sometimes dramatically, but a project still needs to
+be coherent.  The metaphor brings consistency without straitjacketing
+the implementation.  In my opinion, you don&#39;t need a metaphor at the
+start of a project.  Too little is known about the code or the
+problem.  As the code base grows, the metaphor may present itself
+naturally as it did here.
+</p>
+
+
+
+
+<h3>Fourth Task</h3>
+
+<p>
+The fourth and final task introduces state to generate the HTML for
+DocBook <tt>footnotes</tt>.  The test case input file
+(<tt>04.xml</tt>) is:
+</p>
+
+<blockquote><pre>
+&lt;chapter&gt;
+&lt;title&gt;Chapter with Footnotes&lt;/title&gt;
+&lt;simplesect&gt;
+
+&lt;para&gt;
+Needs further clarification.<b>
+&lt;footnote&gt;&lt;para&gt;
+Should appear at the end of the chapter.
+&lt;/para&gt;&lt;/footnote&gt;</b>
+&lt;/para&gt;
+
+&lt;itemizedlist&gt;
+&lt;listitem&gt;&lt;para&gt;
+First item
+&lt;/para&gt;&lt;/listitem&gt;
+&lt;listitem&gt;&lt;para&gt;
+Second item
+&lt;/para&gt;&lt;/listitem&gt;
+&lt;/itemizedlist&gt;
+
+&lt;para&gt;
+Something about XML.<b>
+&lt;footnote&gt;&lt;para&gt;
+Click here &lt;systemitem role=&quot;url&quot;&gt;http://www.w3c.org/XML/&lt;/systemitem&gt;
+&lt;/para&gt;&lt;/footnote&gt;</b>
+&lt;/para&gt;
+
+&lt;para&gt;
+&lt;classname&gt;SomeClass&lt;/classname&gt;
+&lt;varname&gt;$some_var&lt;/varname&gt;
+&lt;property&gt;a_property&lt;/property&gt;
+&lt;filename&gt;my/file/name.PL&lt;/filename&gt;
+&lt;citetitle&gt;War &amp;amp; Peace&lt;/citetitle&gt;
+&lt;quote&gt;I do declare!&lt;/quote&gt;
+&lt;/para&gt;
+
+&lt;/simplesect&gt;
+&lt;/chapter&gt;
+
+</pre></blockquote>
+
+<p>
+The expected output file (<tt>04.html</tt>) is:
+</p>
+
+<blockquote><pre>
+&lt;html&gt;&lt;body&gt;
+&lt;h1&gt;Chapter with Footnotes&lt;/h1&gt;
+
+
+&lt;p&gt;
+Needs further clarification.<b>
+&lt;a href=&quot;#1&quot;&gt;[1]&lt;/a&gt;</b>
+&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;
+First item
+&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;
+Second item
+&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;
+Something about XML.<b>
+&lt;a href=&quot;#2&quot;&gt;[2]&lt;/a&gt;</b>
+&lt;/p&gt;
+
+&lt;p&gt;
+&lt;tt&gt;SomeClass&lt;/tt&gt;
+&lt;tt&gt;$some_var&lt;/tt&gt;
+&lt;tt&gt;a_property&lt;/tt&gt;
+&lt;tt&gt;my/file/name.PL&lt;/tt&gt;
+&lt;i&gt;War &amp;amp; Peace&lt;/i&gt;
+&quot;I do declare!&quot;
+&lt;/p&gt;
+
+<b>
+&lt;h2&gt;Footnotes&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;a name=&quot;1&quot;&gt;&lt;/a&gt;&lt;p&gt;
+Should appear at the end of the chapter.
+&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a name=&quot;2&quot;&gt;&lt;/a&gt;&lt;p&gt;
+Click here &lt;a href=&quot;http://www.w3c.org/XML/&quot;&gt;http://www.w3c.org/XML/&lt;/a&gt;
+&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;</b>
+&lt;/body&gt;&lt;/html&gt;
+</pre></blockquote>
+
+<p>
+The footnotes are compiled at the end in a
+<tt>Footnotes</tt> section.  Each footnote is linked through
+HTML anchor tags (<tt>#1</tt> and <tt>#2</tt>).
+Incremental indexes and relocatable output were the new challenges in
+this implementation.
+</p>
+
+
+
+
+<h3>Fourth SMOP</h3>
+
+<p>
+We pulled another blade out of our Swiss Army chainsaw for this task.  Perl&#39;s
+anonymous subroutines were used to solve the footnote problem.  The
+subroutines bound to <tt>chapter</tt> and
+<tt>footnote</tt> use variables to glue
+the footnotes to their indices and the footnotes section to the end of
+the chapter.  Here are the additions to the SMOP:
+</p>
+
+<blockquote><pre>
+<b>    chapter =&gt; sub {
+        my($html, $clipboard) = @_;
+        $$html .= &quot;&lt;h2&gt;Footnotes&lt;/h2&gt;&lt;ol&gt;\n$clipboard-&gt;{footnotes}&lt;/ol&gt;\n&quot;
+            if $clipboard-&gt;{footnotes};
+        return &quot;&lt;html&gt;&lt;body&gt;$$html&lt;/body&gt;&lt;/html&gt;&quot;;
+    },
+    citetitle =&gt; [&#39;i&#39;],
+    classname =&gt; [&#39;tt&#39;],
+    footnote =&gt; sub {
+        my($html, $clipboard) = @_;
+        $clipboard-&gt;{footnote_idx}++;
+        $clipboard-&gt;{footnotes}
+            .= qq(&lt;li&gt;&lt;a name=&quot;$clipboard-&gt;{footnote_idx}&quot;&gt;&lt;/a&gt;$$html&lt;/li&gt;\n);
+        return qq(&lt;a href=&quot;#$clipboard-&gt;{footnote_idx}&quot;&gt;)
+            . &quot;[$clipboard-&gt;{footnote_idx}]&lt;/a&gt;&quot;;
+    },
+    itemizedlist =&gt; [&#39;ul&#39;],
+    listitem =&gt; [&#39;li&#39;],
+    property =&gt; [&#39;tt&#39;],
+    quote =&gt; {
+        prefix =&gt; &#39;&quot;&#39;,
+        suffix =&gt; &#39;&quot;&#39;,
+    },
+    systemitem =&gt; sub {
+        my($html) = @_;
+        return qq(&lt;a href=&quot;$$html&quot;&gt;$$html&lt;/a&gt;);
+    },
+    varname =&gt; [&#39;tt&#39;],</b>
+
+</pre></blockquote>
+
+<p>
+We didn&#39;t see a simple functional solution.  Although it&#39;s certainly
+possible to avoid the introduction of <tt>$clipboard</tt>,
+we let laziness win out over dogma.  There was no point in smashing
+our collective head against a brick wall when an obvious solution was
+staring right at us.  Besides, you&#39;ve got enough functional
+programming examples already, so you can stop standing on your head
+and read this code right side up.
+</p>
+
+
+
+
+<h3>Fourth SMOP Interpreter</h3>
+
+<p>
+The interpreter changed minimally:
+</p>
+
+<blockquote><pre>
+sub to_html {
+    my($self, $xml_file) = @_;
+    return _to_html(
+        &#39;&#39;,
+        XML::Parser-&gt;new(Style =&gt; &#39;Tree&#39;)-&gt;parsefile($xml_file),<b>
+        {}</b>);
+}
+
+sub _eval_op {
+    my($op, $html, <b>$clipboard</b>) = @_;<b>
+    return $op-&gt;($html, $clipboard)
+        if ref($op) eq &#39;CODE&#39;;</b>
+    return $op-&gt;{prefix} . $$html . $op-&gt;{suffix};
+}
+
+</pre></blockquote>
+
+<p>
+<tt>$clipboard</tt> is initialized as a reference to an empty hash by
+<tt>to_html</tt>.  If <tt>$op</tt> is
+a <tt>CODE</tt> reference, <tt>_eval_op</tt>
+invokes the subroutine with <tt>$clipboard</tt> and the html
+generated by the children of the current tag.  The anonymous
+subroutines bound to the tags can then use all of Perl to fulfill
+their mapping obligation.
+</p>
+
+
+
+<a name="its-a-smop-object-oriented"></a>
+<h3>Object-Oriented Programming</h3>
+
+<p>
+<tt>$clipboard</tt> is a reference to a simple hash.  An alternative
+solution would be to instantiate
+<tt>Bivio::DocBook::XML</tt>, and to store
+<tt>footnote_idx</tt> and <tt>footnotes</tt>
+in its object fields.
+</p>
+
+<p>
+Objects are very useful, but they would be overkill here.  To
+instantiate <tt>Bivio::DocBook::XML</tt> in Perl, it&#39;s
+traditional to declare a factory method called
+<tt>new</tt> to construct the object.  This would clutter
+the interface with another method.  We also have the option in Perl to
+<tt>bless</tt> a hash reference inline to instantiate the object.  In either case, an
+objectified hash reference is more complex than a simple hash, and does not add
+value.  The semantics are not attached to the hash but are embedded in
+the anonymous subroutines.  Objects as simple state containers are
+unnecessarily complex.
+</p>
+
+<p>
+Additionally, object field values are less private than those stored
+in <tt>$clipboard</tt>.  An object has fields to enable
+communication between external calls, for example, a file handle has
+an internal buffer and an index so that successive
+<tt>read</tt> calls know what to return.  However, it&#39;s
+common to abuse object fields for intra-call communication, just like
+global variables are abused in structured languages (C, FORTRAN,
+Pascal, etc.).  In most pure object-oriented languages, there&#39;s no
+practical alternative to object fields to pass multiple temporary
+values to private methods.  Choice is one of Perl&#39;s strengths, and a
+simple hash localizes the temporary variable references to the
+subroutines that need them.
+</p>
+
+<p>
+Hashes and lists are the building blocks of functional programming.
+Perl and most functional languages include them as primitive
+data types.  It&#39;s the simple syntax of a Perl hash that makes the SMOPs in
+this chapter easy to read.  In many languages,
+constructing and using a hash is cumbersome, and SMOP languages like
+this one are unnatural and hard to read, defeating their purpose.
+</p>
+
+
+<p>
+In object-oriented programming, state and function are inextricably
+bound together. Encapsulating state and function in objects
+is useful.  However, if all you&#39;ve got is a hammer, every problem
+looks like a nail.  In functional programming, state and function are
+distinct entities.  Functional languages decouple function reuse from
+state sharing, giving programmers two independent tools instead of one.
+</p>
+
+
+
+<h3>Success!</h3>
+
+<p>
+ The first iteration is complete.  We added all the business value the
+customer has asked for.  The customer can translate a complete
+chapter.  Time for a victory dance!  Yeeha!
+</p>
+
+<p>
+Now sit down and stop hooting.  We&#39;re not through yet.  The customer
+gave us some time to clean up our code for this book.  It&#39;s time for a
+little refactoring.  We missed a couple of things, and the code could
+be more functional.
+</p>
+
+
+
+<h3>Virtual Pair Programming</h3>
+
+<p>
+The second iteration evolved from some review comments by Stas.
+I wrangled him into partnering with me after he suggested the code
+could be more functional.  The one hitch was that Stas lives in
+Australia, and I live in the U.S.
+</p>
+
+<p>
+Pair programming with someone you&#39;ve never met and who lives on the
+other side of the world is challenging.  Stas was patient with me, and
+he paired remotely before.<a href="its-a-smop.html#15">[15]</a>
+His contribution was worth the hassle, and I learned a lot from the
+experience.
+The fact that he lived in Australia was an added bonus.
+After all, he was already standing on his head from my perspective,
+and he was always a day ahead of me.
+</p>
+
+<table width="95%" border="1" cellpadding="5" bgcolor="#CCCCCC"><tr><td><a name="its-a-smop-open-source"></a>
+<h3>Open Source Development with XP</h3>
+
+<p>
+Correspondence coding is quite common.  Many open source projects,
+such as GNU, Apache, and Linux, are developed by people who live apart
+and sometimes have never met, as was the case with Stas and me.
+Open source development is on the rise as result of our increased
+communications capabilities.  The Internet and the global
+telecommunication network enables us to practice
+XP remotely almost as easily as we can locally.
+</p>
+
+<p>
+Huge collective repositories, such as <a href="http://www.sourceforge.net">http://www.sourceforge.net</a> and <a href="http://www.cpan.org">http://www.cpan.org</a>, enable geographically
+challenged teams to share code as easily as groups of developers
+working in the same building.  Sometimes it&#39;s easier to share on the
+Internet than within some corporate development environments I&#39;ve
+worked in!  Open source encourages developers to program egolessly.
+You have to expect feedback when you share your code.  More
+importantly, open source projects are initiated, are used, and
+improve, because a problem needs to be solved, often quickly.
+Resources are usually limited, so a simple story is all that is
+required to begin development.
+</p>
+
+<p>
+Open source and XP are a natural fit.  As I&#39;ve noted before, Perl--one
+of the oldest open source projects--shares many of XP&#39;s values.
+CPAN is Perl&#39;s collective repository.  Testing is a core practice in
+the Perl community.  Simplicity is what makes Perl so accessible to
+beginners.  Feedback is what makes Perl so robust.  And so on.
+Open source customers may not speak in one voice, so you need to
+listen to them carefully, and unify their requests.  But, pair
+programming is possible with practice.
+</p>
+
+<p>
+Geographically challenged programmers can communicate as effectively
+as two programmers sitting at the same computer.  It&#39;s our attitude
+that affects the quality of the communication.  Stas and I wanted to
+work together, and we communicated well despite our physical
+separation and lack of common experience.  Open source works for the
+same reason: programmers want it to.
+</p>
+
+<p>
+To learn more about the open source development, read
+the book <i>Open Sources: Voices from the Open
+Source Revolution</i>, edited by Chris DiBona et al.
+available in paperback and also online at
+<a href="http://www.oreilly.com/catalog/opensources">http://www.oreilly.com/catalog/opensources</a>.
+</p>
+
+</td></tr></table>
+
+
+
+
+<h3>Deviance Testing</h3>
+
+<p>
+We forgot to test for deviance in the prior iteration.
+<tt>XML::Parser</tt>
+handles missing or incomplete tags, so we don&#39;t need to test for them
+here.  The unit test should avoid testing other APIs to keep
+the overall test suite size as small as possible.
+However, <tt>XML::Parser</tt>
+treats all tags equally, and
+<tt>Bivio::XML::DocBook</tt>
+should die if a tag is not in the SMOP.  We added the following test
+(<tt>05-dev.xml</tt>) to validate this case:
+</p>
+
+<blockquote><pre>
+&lt;chapter&gt;
+&lt;unknowntag&gt;&lt;/unknowntag&gt;
+&lt;/chapter&gt;
+
+</pre></blockquote>
+
+<p>
+The case tests that <tt>_lookup_op</tt> throws an
+exception when it encounters <tt>unknowntag</tt>.
+</p>
+
+<p>
+The unit test had to change to expect a <tt>die</tt>
+for deviance cases.  We also made the code more functional:
+</p>
+
+<blockquote><pre>
+#!perl -w
+use strict;
+use Bivio::Test;
+use Bivio::IO::File;
+Bivio::Test-&gt;new(&#39;Bivio::XML::DocBook&#39;)-&gt;unit([
+    &#39;Bivio::XML::DocBook&#39; =&gt; [
+        to_html =&gt; [<b>
+            map({
+                [&quot;$_.xml&quot;] =&gt; $_ =~ /dev/
+                   ? Bivio::DieCode-&gt;DIE
+                   : [Bivio::IO::File-&gt;read(&quot;$_.html&quot;)];
+            } sort(map(/(.*)\.xml$/, &lt;DocBook/*.xml&gt;))),</b>
+        ],
+    ],
+]);
+
+</pre></blockquote>
+
+<p>
+The <tt>map</tt> inside the <tt>sort</tt>
+returns the case base names (<tt>DocBook/01</tt>,
+<tt>DocBook/05-dev</tt>, etc.), and the outer
+<tt>map</tt> reconstructs the filenames from them.
+This purely functional solution is shorter than the previous
+version.
+</p>
+
+<p>
+If the case file name matches the <tt>/dev/</tt> regular
+expression, the <tt>map</tt>
+declares the deviance case by returning a
+<tt>Bivio::DieCode</tt> as the expected value.
+Otherwise, the input file is conformant, and the
+<tt>map</tt> returns the expected HTML wrapped in an
+array.
+</p>
+
+<p>
+<tt>Bivio::Test</tt> lets us declare deviance and
+conformance cases similarly.  When picking or building your test
+infrastructure, make sure deviance case handling is built in.  If it&#39;s
+hard to test APIs that <tt>die</tt>, you&#39;ll probably write
+fewer tests for the many error branches in your code.
+</p>
+
+
+<a name="its-a-smop-final-implementation"></a>
+<h3>Final Implementation</h3>
+
+<p>
+The final SMOP and interpreter are shown together with comments, and
+POD, and changes highlighted:
+</p>
+
+<blockquote><pre>
+package Bivio::XML::DocBook;
+use strict;
+our($VERSION) = sprintf(&#39;%d.%02d&#39;, q$Revision: 1.10 $ =~ /\d+/g);
+
+=head1 NAME
+
+Bivio::XML::DocBook - converts DocBook XML files to HTML
+
+=head1 SYNOPSIS
+
+    use Bivio::XML::DocBook;
+    my($html_ref) = Bivio::XML::DocBook-&gt;to_html($xml_file);
+
+=head1 DESCRIPTION
+
+C&lt;Bivio::XML::DocBook&gt; converts DocBook XML files to HTML.  The mapping is only
+partially implemented.  It&#39;s good enough to convert a simple chapter.
+
+=cut
+
+#=IMPORTS
+use Bivio::IO::File ();
+use HTML::Entities ();
+use XML::Parser ();
+
+#=VARIABLES
+my($_XML_TO_HTML_PROGRAM) = {
+    attribution =&gt; {
+        prefix =&gt; <b>&#39;&lt;div align=&quot;right&quot;&gt;-- &#39;,</b>
+        suffix =&gt; &#39;&lt;/div&gt;&#39;,
+    },
+    blockquote =&gt; [&#39;blockquote&#39;],
+    &#39;chapter/title&#39; =&gt; [&#39;h1&#39;],
+    chapter =&gt; sub {
+        my($html, $clipboard) = @_;
+        $$html .= &quot;&lt;h2&gt;Footnotes&lt;/h2&gt;&lt;ol&gt;\n$clipboard-&gt;{footnotes}&lt;/ol&gt;\n&quot;
+            if $clipboard-&gt;{footnotes};
+        return &quot;&lt;html&gt;&lt;body&gt;$$html&lt;/body&gt;&lt;/html&gt;&quot;;
+    },
+    citetitle =&gt; [&#39;i&#39;],
+    classname =&gt; [&#39;tt&#39;],
+    command =&gt; [&#39;tt&#39;],
+    emphasis =&gt; [&#39;b&#39;],
+    epigraph =&gt; [],
+    filename =&gt; [&#39;tt&#39;],
+    footnote =&gt; sub {
+        my($html, $clipboard) = @_;
+        $clipboard-&gt;{footnote_idx}++;
+        $clipboard-&gt;{footnotes}
+            .= qq(&lt;li&gt;&lt;a name=&quot;$clipboard-&gt;{footnote_idx}&quot;&gt;&lt;/a&gt;$$html&lt;/li&gt;\n);
+        return qq(&lt;a href=&quot;#$clipboard-&gt;{footnote_idx}&quot;&gt;)
+            . &quot;[$clipboard-&gt;{footnote_idx}]&lt;/a&gt;&quot;;
+    },
+    function =&gt; [&#39;tt&#39;],
+    itemizedlist =&gt; [&#39;ul&#39;],
+    listitem =&gt; [&#39;li&#39;],
+    literal =&gt; [&#39;tt&#39;],
+    para =&gt; [&#39;p&#39;],
+    programlisting =&gt; [&#39;blockquote&#39;, &#39;pre&#39;],
+    property =&gt; [&#39;tt&#39;],
+    quote =&gt; {
+        prefix =&gt; &#39;&quot;&#39;,
+        suffix =&gt; &#39;&quot;&#39;,
+    },
+    sect1 =&gt; [],
+    &#39;sect1/title&#39; =&gt; [&#39;h2&#39;],
+    simplesect =&gt; [],
+    systemitem =&gt; sub {
+        my($html) = @_;
+        return qq(&lt;a href=&quot;$$html&quot;&gt;$$html&lt;/a&gt;);
+    },
+    varname =&gt; [&#39;tt&#39;],
+};
+
+=head1 METHODS
+
+=cut
+
+=for html &lt;a name=&quot;to_html&quot;&gt;&lt;/a&gt;
+
+=head2 to_html(string xml_file) : string_ref
+
+Converts I&lt;xml_file&gt; from XML to HTML.  Dies if the XML is not well-formed or
+if a tag is not handled by the mapping.  See the initialization of
+$_XML_TO_HTML_PROGRAM for the list of handled tags.
+
+=cut
+
+sub to_html {
+    my($self, $xml_file) = @_;
+    return _to_html(
+        &#39;&#39;,
+        XML::Parser-&gt;new(Style =&gt; &#39;Tree&#39;)-&gt;parsefile($xml_file),
+        {});
+}
+
+#=PRIVATE SUBROUTINES
+
+# _eval_child(string tag, array_ref children, string parent_tag, hash_ref clipboard) : string
+#
+# Look up $tag in context of $parent_tag to find operator, evaluate $children,
+# and then evaluate the found operator.  Returns the result of _eval_op.
+# Modifies $children so this routine is not idempotent.
+#
+sub _eval_child {
+    my($tag, $children, $parent_tag, $clipboard) = @_;
+    return HTML::Entities::encode($children)
+        unless $tag;
+    # We ignore the attributes for now.
+    shift(@$children);
+    return _eval_op(
+        _lookup_op($tag, $parent_tag),
+        _to_html($tag, $children, $clipboard),
+        $clipboard);
+}
+
+# _eval_op(any op, string_ref html, hash_ref clipboard) : string
+#
+# Wraps $html in HTML tags defined by $op.  If $op is a ARRAY, call
+# _to_tags() to convert the simple tag names to form the prefix and
+# suffix.  If $op is a HASH, use the explicit prefix and suffix.  If $op
+# is CODE, call the subroutine with $html and $clipboard.  Dies if
+# $op&#39;s type is not handled (program error in $_XML_TO_HTML_PROGRAM).
+#
+sub _eval_op {
+    my($op, $html, $clipboard) = @_;<b>
+    return &#39;ARRAY&#39; eq ref($op)
+            ? _to_tags($op, &#39;&#39;) . $$html . _to_tags([reverse(@$op)], &#39;/&#39;)
+
+        : &#39;HASH&#39; eq ref($op)
+            ? $op-&gt;{prefix} . $$html . $op-&gt;{suffix}
+
+        : &#39;CODE&#39; eq ref($op)
+            ? $op-&gt;($html, $clipboard)
+
+        :  die(ref($op) || $op, &#39;: invalid $_XML_TO_HTML_PROGRAM op&#39;);</b>
+}
+
+# _lookup_op(string tag, string parent_tag) : hash_ref
+#
+# Lookup $parent_tag/$tag or $tag in $_XML_TO_HTML_PROGRAM and return.
+# Dies if not found.
+#
+sub _lookup_op {
+    my($tag, $parent_tag) = @_;
+    return $_XML_TO_HTML_PROGRAM-&gt;{&quot;$parent_tag/$tag&quot;}
+        || $_XML_TO_HTML_PROGRAM-&gt;{$tag}
+        || die(&quot;$parent_tag/$tag: unhandled tag&quot;);
+}
+
+# _to_html(string tag, array_ref children, hash_ref clipboard) : string_ref
+#
+# Concatenate evaluation of $children and return the resultant HTML.
+#
+sub _to_html {
+    my($tag, $children, $clipboard) = @_;<b>
+    return \(join(&#39;&#39;,
+        map({
+            _eval_child(@$children[2 * $_ .. 2 * $_ + 1], $tag, $clipboard);
+        } 0 .. @$children / 2 - 1),
+    ));</b>
+}
+
+# _to_tags(array_ref names, string prefix) : string
+#
+# Converts @$names to HTML tags with prefix (&#39;/&#39; or &#39;&#39;), and concatenates
+# the tags into a string.
+#
+sub <b>_to_tags</b> {
+    my($names, $prefix) = @_;
+    return join(&#39;&#39;, map({&quot;&lt;$prefix$_&gt;&quot;} @$names));
+}
+
+1;
+
+</pre></blockquote>
+
+<p>
+To keep the explanation brief and your attention longer, here are the
+list of changes we made in the order they appear above:
+</p>
+
+<ul>
+
+<li><p>
+The <tt>attribution</tt> mapping was not fully compliant
+HTML.  Values must be surrounded by quotes.
+</p></li>
+
+<li><p>
+The compilation of <tt>$_XML_TO_HTML_PROGRAM</tt>
+was eliminated.  This version is less complex, and is not perceptibly
+slower.
+</p></li>
+
+<li><p>
+<tt>_eval_op</tt> implements the SMOP operator based on its
+type.  Stas and I had a (too) long discussion about the formatting and
+statement choices.  Do you prefer the version above or would you like
+to see a if/elsif/else construct?  The former is functional, and the
+latter is imperative.
+</p></li>
+
+<li><p>
+<tt>_to_html</tt> was refactored to be a pure function by
+replacing the <tt>while</tt> and <tt>$res</tt>
+with a <tt>join</tt> and a <tt>map</tt>.
+The implementation is no longer destructive.  The
+<tt>splice</tt> in the previous version modified
+<tt>$children</tt>.
+<tt>_eval_child</tt> is still destructive, however.
+</p></li>
+
+<li><p>
+<tt>_to_tags</tt> was renamed from
+<tt>_compile_tags_to_html</tt>.
+</p></li>
+
+</ul>
+
+
+
+
+<h3>Separate Concerns</h3>
+
+<p>
+This completes the second and final iteration of our DocBook XML to
+HTML translator.  The second iteration didn&#39;t change anything the
+customer would notice, but it improved the program&#39;s quality.
+Pride of craftsmanship is a motivating factor for most people.  The
+customer benefits directly when programmers are giving the freedom to
+fix up their code like this.  Quality is the intangible output of
+motivated people.
+</p>
+
+<p>
+Craftsmanship plays a role in many professions.  For example, one of
+my favorite pastimes is baking bread.  It&#39;s hard to bake well.  There
+are so many variables, such as, ambient temperature, humidity, and
+altitude.  A skilled baker knows how to balance them all.
+</p>
+
+<p>
+Anybody can bake bread by following a recipe.  Just buy the ingredients,
+and follow the step-by-step instructions.  These days even inexpensive
+kitchen appliances can do it.
+While fresh bread from a bread machine tastes fine, it wouldn&#39;t win a
+competition against a skilled  baker.
+My bread wouldn&#39;t either, but I might beat out a bread machine.
+</p>
+
+<p>
+Becoming a skilled baker takes practice.  Following a recipe
+isn&#39;t enough.  Indeed, most good bakers instinctively adjust the
+recipe for temperature, humidity, altitude, and so on.  They probably
+won&#39;t follow the instructions exactly as written either.  A simple recipe
+tells them what the customer wants, that is, the ingredient
+combination, but the know how of a good baker would fill a book.
+</p>
+
+<p>
+When you separate the what from the how, you get qualitative
+differences that are impossible to specify.  In the case of our
+translator, the SMOP is the what and the interpreter is the how.  The
+quality is the succinctness of the mapping from DocBook to HTML.
+The program is less than 100 lines of Perl without documentation, and
+we can add new mappings with just one line.  You can&#39;t get more
+concise than that.
+</p>
+
+<p>
+XP achieves quality by asking the customer what she wants and allowing
+programmers to implement it the best they know how.  The feedback
+built in to XP gives the customer confidence that she&#39;s getting what
+she wants, much like the feedback from testing tells the
+programmers the code does what they want.
+</p>
+
+<p>
+In plan-driven methodologies, the lines between the what and the how
+are blurred.  Specifications are often an excuse for the customers and
+analysts to attempt to control how the programmers code.
+While the aim is to ensure quality, the result is often the opposite.
+The programmers act like unthinking automatons following
+the specifications to the letter, even when they know the spec is
+wrong.
+</p>
+
+<p>
+The programmers are craftsmen, and XP respects their knowledge and
+experience.  The customer is also a craftsmen, and XP teaches
+programmers to respect her skills, too.  XP separates concerns to
+allow people to excel at their jobs.
+</p>
+
+
+
+
+<h3> Travel Light</h3>
+
+<p>
+When two craftsmen communicate, you don&#39;t hear much.  Acronyms
+abound.  Their common experience lets them skip over the details lay
+people need spelled out for them, like a recipe.
+</p>
+
+<p>
+Perl, XP, and SMOP are terse.  In Perl, you don&#39;t call the
+<tt>regular_expression</tt> function, you say
+<tt>//</tt>.
+A skilled Perl programmer reads and writes <tt>//</tt>
+instinctively.  An XP customer writes brief story cards without a
+thought about whether the programmers will understand them.
+She knows the programmers will ask for elaboration.
+There&#39;s no need for big fat stateful specifications and programs to
+slow down the pipeline from the customer to the programmers to the
+computer to deliver value to the users.
+</p>
+
+<p>
+An experienced traveler knows that the more baggage you carry, the
+harder it is to change planes, switch trains, and climb mountains.
+Extreme Perl works best when you drop those bags, and hit the ground
+running.  Brief plans change easily when reality happens.
+Concise code adapts to changed plans rapidly.  Travel light, and get
+there faster.
+</p>
+
+
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+<i>DocBook: The Definitive Guide</i>
+by Norman Walsh and Leonard Muellner, available online at
+<a href="http://www.docbook.org/tdg/en/html/docbook.html">http://www.docbook.org/tdg/en/html/docbook.html</a>
+</p></li>
+<li><a name="2"></a><p>
+The most recent version is available with bOP.
+</p></li>
+<li><a name="3"></a><p>
+To be sure, I added it to her wedding vows
+<i>ex post facto</i>.
+</p></li>
+<li><a name="4"></a><p>
+One reviewer would have preferred Perl POD.  However, XP only works
+when the customer speaks in one voice, so I ignored him for the sake
+of matrimonial harmony.
+</p></li>
+<li><a name="5"></a><p>
+One of the reviewers implemented the simple approach, and the two
+solutions are of comparable size and complexity.
+</p></li>
+<li><a name="6"></a><p>
+<tt>troff</tt> is a
+text-formatting language for UNIX man pages and other documents.
+After 25 years, it&#39;s still in use.  For more information, visit
+<a href="http://www.kohala.com/start/troff/troff.html">http://www.kohala.com/start/troff/troff.html</a>.
+</p></li>
+<li><a name="7"></a><p>
+Eric Raymond&#39;s <tt>doclifter</tt> performs an even
+more herculean task: the program converts <tt>troff</tt> to
+DocBook.  <tt>doclifter</tt> uses the implicit relations of
+common usage patterns to extract higher-level semantics, such as,
+knowing that man page references usually match the regular expression:
+<tt>/\w+\(\d+\)/</tt>.  The 6,000 line program is
+written declaratively in Python, and can be downloaded from
+<a href="http://www.tuxedo.org/~esr/doclifter">http://www.tuxedo.org/~esr/doclifter</a>.
+</p></li>
+<li><a name="8"></a><p>
+For purists, the implementation of
+<tt>Bivio::IO::File-&gt;read</tt> does not lock the file,
+although it could.  But <tt>read</tt> can&#39;t, because it
+is defined imperatively, and it cannot assume the file can be
+read into the buffer in its entirety.
+</p></li>
+<li><a name="9"></a><p>
+For brevity, I&#39;ve excluded Perl boilerplate, such as
+<tt>package</tt> and <tt>use</tt> statements.
+The final version is listed in full regalia including header comments
+for the subroutines.
+</p></li>
+<li><a name="10"></a><p>
+From <i>Concepts, Techniques, and Models of Computer
+Programming</i> by Peter Van Roy and Seif Haridi, draft version
+dated January 6, 2003, p. 109, available at
+<a href="http://www.info.ucl.ac.be/people/PVR/book.pdf">http://www.info.ucl.ac.be/people/PVR/book.pdf</a>
+</p></li>
+<li><a name="11"></a><p>
+In <i>On Lisp</i>, Paul Graham explains and
+demonstrates this inside-out concept (page 34).
+The book is out of print, but you can download it from
+<a href="http://www.paulgraham.com/onlisp.html">http://www.paulgraham.com/onlisp.html</a>.
+</p></li>
+<li><a name="12"></a><p>
+<i>On Lisp</i>, Paul Graham, p. 33.
+</p></li>
+<li><a name="13"></a><p>
+Thanks to Greg Compestine for asking the questions: What are the
+alternatives, and how do you know is faster?
+</p></li>
+<li><a name="14"></a><p>
+The XML Stylesheet Language Translation is an XML programming language
+for translating XML into XML and other output formats (e.g., PDF and
+HTML).  For more info, see
+<a href="http://www.w3.org/Style/XSL/">http://www.w3.org/Style/XSL/</a>
+</p></li>
+<li><a name="15"></a><p>
+Stas Bekman co-wrote the
+book <i>Practical mod_perl</i> with Eric Cholet who
+lives in France.  Stas is also an active contributor to the mod_perl code
+base and documentation
+(<a href="http://perl.apache.org">http://perl.apache.org</a>).
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="refactoring.html"><small>Previous: Chapter 14: Refactoring</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="its-a-smop.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

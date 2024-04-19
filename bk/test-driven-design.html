@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 11: Test-Driven Design</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 11: Test-Driven Design</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="coding-style.html"><small>Previous: Chapter 10: Coding Style</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="continuous-design.html"><small>Next: Chapter 12: Continuous Design</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="test-driven-design"></a>
+
+
+
+<blockquote>
+
+<p>
+The belief that a change will be easy to do correctly makes it less
+likely that the change will be done correctly.
+</p>
+<div align="right">-- Gerald Weinberg<a href="test-driven-design.html#1">[1]</a></div></blockquote>
+
+<p>
+An XP programmer writes a unit test to clarify his intentions before
+he makes a change.  We call this <i>test-driven
+design</i> (TDD) or <i>test-first
+programming</i>, because an API&#39;s design and implementation are
+guided by its test cases.  The programmer writes the test the way he
+wants the API to work, and he implements the API to fulfill the
+expectations set out by the test.  
+</p>
+
+<p>
+Test-driven design helps us invent testable and usable
+interfaces.  In many ways, testability and usability are one in the
+same.  If you can&#39;t write a test for an API, it&#39;ll probably be
+difficult to use, and vice-versa.  Test-driven design gives feedback on
+usability before time is wasted on the implementation of an awkward API.
+As a bonus, the test documents how the API works, by example.
+</p>
+
+<p>
+All of the above are good things, and few would argue with them.  One
+obvious concern is that test-driven design might slow down
+development.  It does take time to write tests, but by writing the
+tests first, you gain insight into the implementation, which speeds
+development.  Debugging the implementation is faster, too, thanks to
+immediate and reproducible feedback that only an automated test can
+provide.
+</p>
+
+<p>
+Perhaps the greatest time savings from unit testing comes a few months
+or years after you write the test, when you need to extend the API.
+The unit test not only provides you with reliable documentation for
+how the API works, but it also validates the assumptions that went
+into the design of the API.  You can be fairly sure a change didn&#39;t
+break anything if the change passes all the unit tests written before
+it.  Changes that fiddle with fundamental API assumptions cause
+the costliest defects to debug.  A comprehensive unit test suite is
+probably the most effective defense against such unwanted changes.
+</p>
+
+<p>
+This chapter introduces test-driven design through the
+implementation of an exponential moving average (EMA), a simple but
+useful mathematical function.  This chapter also explains how to use
+the CPAN modules <tt>Test::More</tt> and
+<tt>Test::Exception</tt>.
+</p>
+
+
+
+
+<h3>Unit Tests</h3>
+
+<p>
+A unit test validates the programmer&#39;s view of the application.  This
+is quite different from an acceptance test, which is written from the
+customer&#39;s perspective and tests end-user functionality, usually
+through the same interface that an ordinary user uses.  In constrast,
+a unit test exercises an API, formally known as a unit.  Usually, we test an entire Perl package with a
+single unit test.
+</p>
+
+<p>
+Perl has a strong tradition of unit testing, and virtually every CPAN
+module comes with one or more unit tests.  There are also many
+test frameworks available from CPAN.  This and subsequent chapters
+use
+<tt>Test::More</tt>, a popular and well documented
+test module.<a href="test-driven-design.html#2">[2]</a>
+I also use <tt>Test::Exception</tt> to test deviance
+cases that result in calls to <tt>die</tt>.<a href="test-driven-design.html#3">[3]</a>
+</p>
+
+
+
+
+<h3>Test First, By Intention</h3>
+
+<p>
+Test-driven design takes unit testing to the extreme.  Before you
+write the code, you write a unit test.  For example, here&#39;s the first
+test case for the EMA (exponential moving average) module:
+</p>
+
+<blockquote><pre>
+use strict;
+use Test::More tests =&gt; 1;
+BEGIN {
+    use_ok(&#39;EMA&#39;);
+}
+
+</pre></blockquote>
+
+<p>
+This is the minimal <tt>Test::More</tt> test.  You tell
+<tt>Test::More</tt> how many tests to expect, and you
+import the module with <tt>use_ok</tt> as the first test
+case.  The <tt>BEGIN</tt> ensures the module&#39;s
+prototypes and functions are available during compilation of the rest
+of the unit test.
+</p>
+
+
+<p>
+The next step is to run this test to make sure that it fails:
+</p>
+
+<blockquote><pre>
+% perl -w EMA.t
+1..1
+not ok 1 - use EMA;
+#     Failed test (EMA.t at line 4)
+#     Tried to use &#39;EMA&#39;.
+#     Error:  Can&#39;t locate EMA.pm in @INC <i>[trimmed]</i>
+# Looks like you failed 1 tests of 1.
+</pre></blockquote>
+
+<p>
+At this stage, you might be thinking, "Duh! Of course, it
+fails." Test-driven design does involve lots of duhs in the
+beginning.  The baby steps are important, because they help to put you
+in the mindset of writing a small test followed by just enough code to
+satisfy the test.
+</p>
+
+<p>
+If you have maintenance programming experience, you may already be
+familiar with this procedure.  Maintenance programmers know they need
+a test to be sure that their change fixes what they think is broken.
+They write the test and run it before fixing anything to make sure
+they understand a failure and that their fix works.  Test-driven
+design takes this practice to the extreme by clarifying your
+understanding of all changes before you make them.
+</p>
+
+<p>
+Now that we have clarified the need for a module called
+<tt>EMA</tt> (duh!), we implement it:
+</p>
+
+<blockquote><pre>
+package EMA;
+use strict;
+1;
+
+</pre></blockquote>
+
+<p>
+And, duh, the test passes:
+</p>
+
+<blockquote><pre>
+% perl -w EMA.t
+1..1
+ok 1 - use EMA;
+</pre></blockquote>
+
+<p>
+Yeeha!  Time to celebrate with a double cappuccino so we don&#39;t fall asleep.
+</p>
+
+<p>
+That&#39;s all there is to the test-driven design loop: write a test,
+see it fail, satisfy the test, and watch it pass.  For brevity,
+the rest of the
+examples leave out the test execution steps and the concomitant duhs
+and yeehas. However, it&#39;s important to remember to include these simple
+steps when test-first programming.  If you don&#39;t remember, your
+programming partner probably will.<a href="test-driven-design.html#4">[4]</a>
+</p>
+
+
+
+
+<h3>Exponential Moving Average</h3>
+
+<p>
+Our hypothetical customer for this example would like to maintain a
+running average of closing stock prices for her website.  An EMA is
+commonly used for this purpose, because it is an efficient way to
+compute a running average.  You can see why if you look at the basic
+computation for an EMA:
+</p>
+
+<blockquote>
+today&#39;s price x weight + yesterday&#39;s average x (1 - weight)
+</blockquote>
+
+<p>
+This algorithm produces a weighted average that favors recent history.
+The effect of a price on the average decays exponentially over time.
+It&#39;s a simple function that only needs to
+maintain two values: yesterday&#39;s average and the weight.  Most other types
+of moving averages, require more data storage and more complex
+computations.
+</p>
+
+<p>
+The weight, commonly called <i>alpha</i>, is
+computed in terms of uniform time periods (days, in this example):
+</p>
+
+<blockquote>
+2 / (number of days + 1)
+</blockquote>
+
+<p>
+For efficiency, alpha is usually computed once, and stored along with
+the current value of the average.  I chose to use an object to hold
+these data and a single method to compute the average.
+</p>
+
+
+
+
+<h3>Test Things That Might Break</h3>
+
+<p>
+Since the first cut design calls for a stateful object, we need to
+instantiate it to use it.  The next case tests object creation:
+</p>
+
+<blockquote><pre>
+ok(EMA-&gt;new(3));
+
+</pre></blockquote>
+
+<p>
+I sometimes forget to return the instance (<tt>$self</tt>)
+so the test calls <tt>ok</tt> to check that
+<tt>new</tt>
+returns some non-zero value.  This case tests what I think might
+break.  An alternative, more extensive test is:
+</p>
+
+<blockquote><pre>
+# Not recommended: Don&#39;t test what is unlikely to break
+ok(UNIVERSAL::isa(EMA-&gt;new(3), &#39;EMA&#39;));
+
+</pre></blockquote>
+
+<p>
+This case checks that <tt>new</tt> returns a blessed reference of class
+<tt>EMA</tt>.  To me, this test is unnecessarily
+complex.  If <tt>new</tt> returns something, it&#39;s probably
+an instance.  It&#39;s reasonable to rely on the simpler case on that
+basis alone.  Additionally, there will be other test cases that will use
+the instance, and those tests will fail if <tt>new</tt>
+doesn&#39;t return an instance of class <tt>EMA</tt>.
+</p>
+
+<p>
+This point is subtle but important, because the size of a unit test
+suite matters.  The larger and slower the suite, the less useful it
+will be.  A slow unit test suite means programmers will hesitate
+before running all the tests, and there will be more checkins which
+break unit and/or acceptance tests.  Remember, programmers are lazy
+and impatient, and they don&#39;t like being held back by their
+programming environment.  When you test only what might break, your
+unit test suite will remain a lightweight and effective development
+tool.
+</p>
+
+<p>
+Please note that if you and your partner are new to test-driven
+design, it&#39;s probably better to err on the side of caution and to test
+too much.  With experience, you&#39;ll learn which tests are redundant and
+which are especially helpful.  There are no magic formulas here.
+Testing is an art that takes time to master.
+</p>
+
+
+
+
+<h3>Satisfy The Test, Don&#39;t Trick It</h3>
+<p>
+Returning to our example, the implementation of
+<tt>new</tt> that satisfies this case is:
+</p>
+
+<blockquote><pre>
+sub new {
+    my($proto, $length) = @_;
+    return bless({}, ref($proto) || $proto);
+}
+
+</pre></blockquote>
+
+<p>
+This is the minimal code which satisfies the above test.
+<tt>$length</tt> doesn&#39;t need to be stored, and we don&#39;t
+need to compute alpha.  We&#39;ll get to them when we need to.
+</p>
+
+<p>
+But wait, you say, wouldn&#39;t the following code satisfy the test, too?
+</p>
+
+<blockquote><pre>
+# Not recommended: Don&#39;t fake the code to satisfy the test
+sub new {
+    return 1;
+}
+
+</pre></blockquote>
+
+<p>
+Yes, you can trick any test.  However, it&#39;s nice to treat programmers
+like grown-ups (even though we don&#39;t always act that way).  No one is
+going to watch over your shoulder to make sure you aren&#39;t cheating
+your own test.  The first implementation of <tt>new</tt>
+is the right amount of code, and the test is sufficient to
+help guide that implementation.  The design calls for an object to
+hold state, and an object creation is what needed to be coded.
+</p>
+
+
+
+
+<h3>Test Base Cases First</h3>
+
+<p>
+What we&#39;ve tested thus far are the <i>base cases</i>,
+that is, tests that validate the basic assumptions of the API.
+When we test basic assumptions first, we
+work our way towards the full complexity of the complete
+implementation, and it also makes the test more readable.  Test-first
+design works best when the implementation grows along with
+the test cases.
+</p>
+
+<p>
+There are two base cases for the <tt>compute</tt>
+function.  The first base case is that the initial value of the
+average is just the number itself.
+There&#39;s also the case of inputting a value equal to the average,
+which should leave the average unchanged.  These cases are coded as
+follows:
+</p>
+
+<blockquote><pre>
+ok(my $ema = EMA-&gt;new(3));
+is($ema-&gt;compute(1), 1);
+is($ema-&gt;compute(1), 1);
+
+</pre></blockquote>
+
+<p>
+The <tt>is</tt> function from
+<tt>Test::More</tt> lets us compare scalar values.  Note
+the change to the instantiation test case that allows us to use the
+instance (<tt>$ema</tt>) for subsequent cases.  Reusing
+results of previous tests shortens the test, and makes it easier to
+understand.
+</p>
+
+<p>
+The implementation that satisfies these cases is:
+</p>
+
+<blockquote><pre>
+package EMA;
+use strict;
+
+sub new {
+    my($proto, $length) = @_;
+    return bless({
+        alpha =&gt; 2 / ($length + 1),
+    }, ref($proto) || $proto);
+}
+
+sub compute {
+    my($self, $value) = @_;
+    return $self-&gt;{avg} = defined($self-&gt;{avg})
+        ? $value * $self-&gt;{alpha} + $self-&gt;{avg} * (1 - $self-&gt;{alpha})
+        : $value;
+}
+
+1;
+
+</pre></blockquote>
+
+<p>
+The initialization of <tt>alpha</tt> was added to
+<tt>new</tt>, because <tt>compute</tt> needs
+the value.
+<tt>new</tt> initializes the state of the object,
+and <tt>compute</tt> implements the EMA algorithm.
+<tt>$self-&gt;{avg}</tt> is initially
+<tt>undef</tt>
+so that case can be detected.
+</p>
+
+<p>
+Even though the implementation looks finished, we aren&#39;t done testing.
+The above code might be defective. Both <tt>compute</tt>
+test cases use the same value, and the test would pass even if, for
+example, <tt>$self-&gt;{avg}</tt> and
+<tt>$value</tt> were accidentally switched.  We also need to
+test that the average changes when given different values.  The test
+as it stands is too static, and it doesn&#39;t serve as a good example of
+how an EMA works.
+</p>
+
+
+
+
+<h3>Choose Self-Evident Data</h3>
+
+<p>
+In a test-driven environment, programmers use the tests to learn how
+the API works.  You may hear that XPers don&#39;t like documentation.
+That&#39;s not quite true.  What we prefer is self-validating
+documentation in the form of tests.  We take care to write tests that
+are readable and demonstrate how to use the API.
+</p>
+
+<p>
+One way to create readable tests is to pick good test data.  However,
+we have a little bootstrapping problem: To pick good test data, we need valid
+values from the results of an EMA computation, but we need an EMA
+implementation to give us those values.  One solution is to calculate
+the EMA values by hand.  Or, we could use another EMA implementation
+to come up with the values.  While either of these choices would work,
+a programmer reading the test cases would have to trust them or to
+recompute them to verify they are correct.  Not to mention that we&#39;d
+have to get the precision exactly right for our target platform.
+</p>
+
+
+
+<h3>Use The Algorithm, Luke!</h3>
+
+<p>
+A better alternative is to work backwards through the algorithm
+to figure out some self-evident test data.<a href="test-driven-design.html#5">[5]</a>
+To accomplish this, we treat the EMA algorithm as two equations by
+fixing some values.
+Our goal is to have integer values for the results so
+we avoid floating point precision issues.  In addition, integer values make it
+easier for the programmer to follow what is going on.
+</p>
+
+<p>
+When we look at the equations, we see alpha is the most constrained
+value:
+</p>
+
+<blockquote>
+today&#39;s average = today&#39;s price x alpha + yesterday&#39;s average x (1 - alpha)
+</blockquote>
+
+<p>
+where:
+</p>
+
+<blockquote>
+alpha = 2 / (length + 1)
+</blockquote>
+
+<p>
+Therefore it makes sense to try and figure out a value of alpha that
+can produce integer results given integer prices.
+</p>
+
+<p>
+Starting with length 1, the values of alpha decrease as follows: 1,
+2/3, 1/2, 2/5, 1/3, 2/7, and 1/4.  The values 1, 1/2, and 2/5 are good
+candidates, because they can be represented exactly in binary floating
+point.  1 is a degenerate case, the average of a single value is
+always itself.  1/2 is not ideal, because
+<tt>alpha</tt> and <tt>1 - alpha</tt> are
+identical, which creates a symmetry in the first equation:
+</p>
+
+<blockquote>
+today&#39;s average = today&#39;s price x 0.5 + yesterday&#39;s average x 0.5
+</blockquote>
+
+<p>
+We want asymmetric weights so that defects, such as swapping today&#39;s
+price and yesterday&#39;s average, will be detected.  A length of 4 yields
+an alpha of 2/5 (0.4), and makes the equation asymmetric:
+</p>
+
+<blockquote>
+today&#39;s average = today&#39;s price x 0.4 + yesterday&#39;s average x 0.6
+</blockquote>
+
+<p>
+With alpha fixed at 0.4, we can pick prices that make today&#39;s average
+an integer.  Specifically, multiples of 5 work nicely.  I like prices
+to go up, so I chose 10 for today&#39;s price and 5 for yesterday&#39;s average.
+(the initial price).  This
+makes today&#39;s average equal to 7, and our test becomes:
+</p>
+
+<blockquote><pre>
+ok(my $ema = EMA-&gt;new(4));
+is($ema-&gt;compute(5), 5);
+is($ema-&gt;compute(5), 5);
+is($ema-&gt;compute(10), 7);
+
+</pre></blockquote>
+
+<p>
+Again, I revised the base cases to keep the test short.  Any value in
+the base cases will work so we might as well save testing time through
+reuse.
+</p>
+
+<p>
+Our test and implementation are essentially complete.  All paths through
+the code are tested, and <tt>EMA</tt> could be used in
+production if it is used properly.  That is,
+<tt>EMA</tt> is complete if all we care about is
+<i>conformant</i> behavior.
+The implementation currently ignores what happens
+when <tt>new</tt> is given an invalid value for
+<tt>$length</tt>.
+</p>
+
+
+
+
+<h3>Fail Fast</h3>
+
+<p>
+Although <tt>EMA</tt> is a small part of the
+application, it can have a great impact on quality.  For example, if
+<tt>new</tt> is passed a <tt>$length</tt> of -1,
+Perl throws a divide-by-zero exception when alpha is computed.  For
+other invalid values for <tt>$length</tt>, such as -2,
+<tt>new</tt> silently accepts the errant value, and
+<tt>compute</tt> faithfully produces non-sensical values
+(negative averages for positive prices).  We can&#39;t simply ignore these
+cases.  We need to make a decision about what to do when
+<tt>$length</tt> is invalid.
+</p>
+
+<p>
+One approach would be to assume garbage-in garbage-out.  If a
+caller supplies -2 for <tt>$length</tt>, it&#39;s the caller&#39;s
+problem.  Yet this isn&#39;t what Perl&#39;s divide function does, and it
+isn&#39;t what happens, say, when you try to de-reference a scalar which
+is not a reference.  The Perl interpreter calls
+<tt>die</tt>, and I&#39;ve already mentioned in the
+<a href="coding-style.html">Coding Style</a> chapter that I prefer failing fast
+rather than waiting until the program can do some real damage.  In
+our example, the customer&#39;s web site would display an invalid moving
+average, and one her customers might make an incorrect investment
+decision based on this information.   That would be bad.  It is better
+for the web site to return a server error page than to display
+misleading and incorrect information.
+</p>
+
+<p>
+Nobody likes program crashes or server errors.  Yet calling
+<tt>die</tt> is an efficient way to communicate semantic
+limits (couplings) within the application.  The UI programmer, in our
+example, may not know that an EMA&#39;s length must be a positive integer.
+He&#39;ll find out when the application dies.  He can then change the
+design of his code and the EMA class to make this limit visible to
+the end user.  Fail fast is an important feedback mechanism.  If we
+encounter an unexpected <tt>die</tt>, it tells us the
+application design needs to be improved.
+</p>
+
+
+
+
+<h3>Deviance Testing</h3>
+<p>
+In order to test for an API that fails fast, we
+need to be able to catch calls to <tt>die</tt> and then
+call <tt>ok</tt> to validate the call did indeed end in an
+exception.  The function <tt>dies_ok</tt> in the module
+<tt>Test::Exception</tt> does this for us.
+</p>
+
+<p>
+Since this is our last group of test cases in this chapter, here&#39;s the
+entire unit test with the changeds for the new
+<i>deviance</i> cases highlighted:
+</p>
+
+<blockquote><pre>
+use strict;
+use Test::More tests =&gt; <b>9</b>;<b>
+use Test::Exception;</b>
+BEGIN {
+    use_ok(&#39;EMA&#39;);
+}
+ok(my $ema = EMA-&gt;new(4));
+is($ema-&gt;compute(5), 5);
+is($ema-&gt;compute(5), 5);
+is($ema-&gt;compute(10), 7);<b>
+dies_ok {EMA-&gt;new(-2)};
+dies_ok {EMA-&gt;new(0)};
+lives_ok {EMA-&gt;new(1)};
+dies_ok {EMA-&gt;new(2.5)};
+</b>
+
+</pre></blockquote>
+
+<p>
+There are now 9 cases in the unit test.
+The first deviance case validates
+that
+<tt>$length</tt> can&#39;t be negative.  We already know -1 will
+die with a divide-by-zero exception so -2 is a better choice.
+The zero case checks the boundary condition.  The first valid length
+is 1.  Lengths must be integers, and 2.5 or any other floating point
+number is not allowed.  <tt>$length</tt> has no explicit
+upper limit.  Perl automatically converts integers to floating point
+numbers if they are too large.  The test already checks that floating
+point numbers are not allowed so no explicit upper limit check is
+required.
+</p>
+
+<p>
+The implementation that satisfies this test follows:
+</p>
+
+<blockquote><pre>
+package EMA;
+use strict;
+
+sub new {
+    my($proto, $length) = @_;<b>
+    die(&quot;$length: length must be a positive 32-bit integer&quot;)
+        unless $length =~ /^\d+$/ &amp;&amp; $length &gt;= 1 &amp;&amp; $length &lt;= 0x7fff_ffff;</b>
+    return bless({
+        alpha =&gt; 2 / ($length + 1),
+    }, ref($proto) || $proto);
+}
+
+sub compute {
+    my($self, $value) = @_;
+    return $self-&gt;{avg} = defined($self-&gt;{avg})
+        ? $value * $self-&gt;{alpha} + $self-&gt;{avg} * (1 - $self-&gt;{alpha})
+        : $value;
+}
+1;
+
+</pre></blockquote>
+
+<p>
+The only change is the addition of a call to <tt>die</tt>
+with an <tt>unless</tt> clause.  This simple fail fast
+clause doesn&#39;t complicate the code or slow down the API, and yet
+it prevents subtle errors by converting an assumption into an
+assertion.
+</p>
+
+
+
+
+<h3>Only Test The New API</h3>
+
+<p>
+One of the most difficult parts of testing is to know when to stop.
+Once you have been test-infected, you may want to keep on adding cases
+to be sure that the API is "perfect".  For example, a
+interesting test case would be to pass a NaN (Not a Number) to
+<tt>compute</tt>, but that&#39;s not a test of
+<tt>EMA</tt>.  The floating point implementation of Perl
+behaves in a particular way with respect to NaNs<a href="test-driven-design.html#6">[6]</a>, and <tt>Bivio::Math::EMA</tt> will
+conform to that behavior.  Testing that NaNs are handled properly is a
+job for the Perl interpreter&#39;s test suite.
+</p>
+
+<p>
+Every API relies on a tremendous amount of existing code.  There isn&#39;t
+enough time to test all the existing APIs and your new API as well.
+Just as an API should <i>separate concerns</i> so must
+a test.  When testing a new API, your concern should be that API and
+no others.
+</p>
+
+
+
+
+<h3>Solid Foundation</h3>
+
+<p>
+In XP, we do the simplest thing that could possibly work so we can
+deliver business value as quickly as possible.  Even as we write the
+test and implementation, we&#39;re sure the code will change.  When we
+encounter a new customer requirement, we refactor the code, if need
+be, to facilitate the additional function. This iterative process is
+called <i>continuous design</i>, which is the subject of
+the next chapter.  It&#39;s like renovating your house whenever your needs
+change.
+<a href="test-driven-design.html#7">[7]</a>
+</p>
+
+<p>
+A system or house needs a solid foundation in order to support
+continuous renovation.  Unit tests are the foundation of an XP
+project.  When designing continuously, we make sure the house doesn&#39;t
+fall down by running unit tests to validate all the assumptions about
+an implementation.  We also grow the foundation before adding new
+functions.  Our test suite gives us the confidence to embrace change.
+</p>
+
+
+
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+<i>Quality Software Management: Vol. 1 Systems Thinking</i>,
+Gerald Weinberg, Dorset House, 1991, p. 236.
+</p></li>
+<li><a name="2"></a><p>
+Part of the Test-Simple distribution, available at
+<a href="http://search.cpan.org/search?query=Test-Simple">http://search.cpan.org/search?query=Test-Simple</a>
+I used version 0.47 for this book.
+</p></li>
+<li><a name="3"></a><p>
+Version 0.15 used here.  Available at
+<a href="http://search.cpan.org/search?query=Test-Exception">http://search.cpan.org/search?query=Test-Exception</a>
+</p></li>
+<li><a name="4"></a><p>
+Just a friendly
+reminder to program in pairs, especially when trying something new.
+</p></li>
+<li><a name="5"></a><p>
+Thanks to Ion Yadigaroglu for teaching me this technique.
+</p></li>
+<li><a name="6"></a><p> In
+some implementations, use of NaNs will cause a run-time error.  In
+others, they will cause all subsequent results to be a NaN.
+</p></li>
+<li><a name="7"></a><p>
+Don&#39;t let the thought of continuous
+house renovation scare you off.  Programmers are much quieter and less
+messy than construction workers.
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="coding-style.html"><small>Previous: Chapter 10: Coding Style</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="continuous-design.html"><small>Next: Chapter 12: Continuous Design</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="test-driven-design.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

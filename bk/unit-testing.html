@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 13: Unit Testing</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 13: Unit Testing</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="continuous-design.html"><small>Previous: Chapter 12: Continuous Design</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="refactoring.html"><small>Next: Chapter 14: Refactoring</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="unit-testing"></a>
+
+
+
+<blockquote>
+
+<p>
+A successful test case is one that detects an as-yet undiscovered
+error.
+</p>
+<div align="right">-- Glenford Myers<a href="unit-testing.html#1">[1]</a></div></blockquote>
+
+<p>
+The second and third examples
+test a post office protocol (POP3) client available from
+CPAN.  These two unit tests for
+<tt>Mail::POP3Client</tt> indicate some design issues,
+which are addressed in the <a href="refactoring.html">Refactoring</a> chapter.
+The third example also demonstrates how to use
+<tt>Test::MockObject</tt>, a CPAN module that makes it
+easy to test those tricky paths through the code, such as, error
+cases.
+</p>
+
+
+
+
+<h3>Testing Isn&#39;t Hard</h3>
+
+<p>
+One of the common complaints I&#39;ve heard about testing is that it is
+too hard for complex APIs, and the return on investment is therefore
+too low.  The problem of course is the more complex the API, the more
+it needs to be tested in isolation.  The rest of the chapter demonstrates
+a few tricks that simplify testing complex APIs.  What I&#39;ve found,
+however, the more testing I do, the easier it is to write tests
+especially for complex APIs.
+</p>
+
+<p>
+Testing is also infectious.  As your suite grows, there are more
+examples to learn from, and the harder it becomes to
+<i>not</i> test.  Your test infrastructure also evolves
+to better match the language of your APIs.  Once and only once applies
+to test software, too.  This is how <tt>Bivio::Test</tt>
+came about.  We were tired of repeating ourselves.
+<tt>Bivio::Test</tt> lets us write subject matter
+oriented programs, even for complex APIs.
+</p>
+
+
+
+
+<h3><tt>Mail::POP3Client</tt></h3>
+
+<p>
+The POP3 protocol<a href="unit-testing.html#2">[2]</a>
+is a common way for mail user agents to retrieve messages from mail
+servers.  As is often the case, there&#39;s a CPAN module available that
+implements this protocol.
+</p>
+
+<p>
+<tt>Mail::POP3Client</tt><a href="unit-testing.html#3">[3]</a>
+has been around for a few years.  The unit test shown below was
+written in the spirit of test first programming.  Some of the test
+cases fail, and in <a href="refactoring.html">Refactoring</a>, we refactor
+<tt>Mail::POP3Client</tt> to make it easier to fix some
+of the defects found here.
+</p>
+
+<p>
+This unit test shows how to test an interface that uses sockets to
+connect to a server and has APIs that write files.  This test touches
+on a number of test and API design issues.
+</p>
+
+<p>
+To minimize page flipping the test is broken into pieces, one part per
+section.  The first two sections discuss initialization and data
+selection.  In <a href="unit-testing.html#unit-testing-validate-basic">Validate Basic Assumptions First</a> and the
+next section, we test the server capabilities and authentication
+mechanisms match our assumptions.  We test basic message retrieval
+starting in <a href="unit-testing.html#unit-testing-distinguish-error">Distinguish Error Cases Uniquely</a> followed
+by retrieving to files.  The <tt>List</tt>,
+<tt>ListArray</tt>, and <tt>Uidl</tt> methods
+are tested in <a href="unit-testing.html#unit-testing-relate-results">Relate Results When You Need To</a>.
+Destructive tests (deletion) occur next after we have finished testing
+retrieval and listing.  We validate the accessors
+(<tt>Host</tt>, <tt>Alive</tt>, etc.) in
+<a href="unit-testing.html#unit-testing-consistent-apis">Consistent APIs Ease Testing</a>.  The final test cases
+cover failure injection.
+</p>
+
+
+
+<h3>Make Assumptions</h3>
+
+<blockquote><pre>
+use strict;
+use Test::More tests =&gt; 85;
+use IO::File;
+use IO::Scalar;
+BEGIN {
+    use_ok(&#39;Mail::POP3Client&#39;);
+}
+
+my($cfg) = {
+    HOST =&gt; &#39;localhost&#39;,
+    USER =&gt; &#39;pop3test&#39;,
+    PASSWORD =&gt; &#39;password&#39;,
+};
+
+</pre></blockquote>
+
+<p>
+To access a POP3 server, you need an account, password, and the name
+of the host running the server.  We made a number of assumptions to
+simplify the test without compromising the quality of the test cases.
+The POP3 server on the
+local machine must have an account <tt>pop3test</tt>, and
+it must support APOP, CRAM-MD5, CAPA, and UIDL.
+</p>
+
+<p>
+The test that comes with <tt>Mail::POP3Client</tt>
+provides a way of configuring the POP3 configuration via environment
+variables.  This makes it easy to run the test in a variety of
+environments.  The purpose of that test is to test the basic functions
+on any machine.  For a CPAN module, you need this to allow anybody to
+run the test.  A CPAN test can&#39;t make a lot of assumptions about the
+execution environment.
+</p>
+
+<p>
+In test-first programming, the most important step is writing the
+test.  Make all the assumptions you need to get the test written and
+working.  Do the simplest thing that could possibly work, and assume
+you aren&#39;t going to need to write a portable test.  If you decide to
+release the code and test to CPAN, relax the test constraints after
+your API works.  Your first goal is to create the API which solves
+your customer&#39;s problem.
+</p>
+
+
+
+
+<h3>Test Data Dependent Algorithms</h3>
+
+<blockquote><pre>
+my($subject) = &quot;Subject: Test Subject&quot;;
+my($body) = &lt;&lt;&#39;EOF&#39;;
+Test Body
+A line with a single dot follows
+.
+And a dot and a space
+. 
+EOF
+
+open(MSG, &quot;| /usr/lib/sendmail -i -U $cfg-&gt;{USER}\@$cfg-&gt;{HOST}&quot;);
+print(MSG $subject . &quot;\n\n&quot; . $body);
+close(MSG)
+    or die(&quot;sendmail failed: $!&quot;);
+sleep(1);
+
+my($body_lines) = [split(/\n/, $body)];
+$body = join(&quot;\r\n&quot;, @$body_lines, &#39;&#39;);
+
+
+</pre></blockquote>
+
+<p>
+The POP3 protocol uses a dot (.) to terminate multi-line responses.
+To make sure
+<tt>Mail::POP3Client</tt> handles dots correctly, we put
+leading dots in the message body.  The message should be retrieved in
+its entirety, including the lines with dots.  It&#39;s
+important to test data dependencies like this.
+</p>
+
+<p>
+The test only sends one message.  This is sufficient to validate the
+client implementation.  Testing the server, however, would be much
+more complex, and would require multiple clients, messages, and
+message sizes.
+</p>
+
+<p>
+The <tt>sleep(1)</tt> is used to give
+<tt>sendmail</tt> time to deliver the message before the
+test starts.
+</p>
+
+
+
+<a name="unit-testing-validate-basic"></a>
+<h3>Validate Basic Assumptions First</h3>
+
+<blockquote><pre>
+my($pop3) = Mail::POP3Client-&gt;new(HOST =&gt; $cfg-&gt;{HOST});
+$pop3-&gt;Connect;
+is($pop3-&gt;State, &#39;AUTHORIZATION&#39;);
+like($pop3-&gt;Capa, qr/UIDL.*CRAM.*|CRAM.*UIDL/is);
+ok($pop3-&gt;Close);
+
+</pre></blockquote>
+
+<p>
+The first case group validates some assumptions used in the rest of
+the cases.  It&#39;s important to put these first to aid debugging.  If the entire test fails
+catastrophically (due to a misconfigured server, for example), it&#39;s
+much easier to diagnose the errors when the basic assumptions fail first.
+</p>
+
+<p>
+<tt>Bivio::Test</tt> allows you to ignore the return
+result of conformance cases by specifying <tt>undef</tt>.
+The return value of <tt>Connect</tt> is not well-defined,
+so it&#39;s unimportant to test it, and the test documents the way the
+API works.
+</p>
+
+<p>
+This case raises a design issue. Perl subroutines always return a
+value.  <tt>Connect</tt> does not have an explicit
+<tt>return</tt> statement, which means it returns an
+arbitrary value.  Perl has no implicit <tt>void</tt> context
+like C and Java do.  It&#39;s always safe to put in an explicit
+<tt>return;</tt> in subroutines
+when you don&#39;t intend to return anything.
+This helps ensure predictable behavior in any calling context, and
+improves testability.
+</p>
+
+<p>
+The second case tests the server supports CAPA (capabilities), UIDL
+(unique identifiers), and CRAM (challenge/response authentication).
+The capability list is unordered so we check the list for UIDL then
+CRAM or the reverse.  <tt>Bivio::Test</tt> allows us to
+specify a <tt>Regexp</tt> instance
+(<tt>qr//</tt>) as the expected value.  The case passes if
+the expected regular expression matches the actual return, which is
+serialized by <tt>Data::Dumper</tt>.
+</p>
+
+
+
+<a name="unit-testing-validate-using"></a>
+<h3>Validate Using Implementation Knowledge</h3>
+
+<blockquote><pre>
+foreach my $mode (qw(BEST APOP CRAM-MD5 PASS)) {
+    $pop3 = Mail::POP3Client-&gt;new(%$cfg, AUTH_MODE =&gt; $mode);
+    is_deeply([$pop3-&gt;Body(1)], $body_lines);
+    is($pop3-&gt;Close, 1);
+}
+
+$pop3 = Mail::POP3Client-&gt;new(%$cfg, AUTH_MODE =&gt; &#39;BAD-MODE&#39;);
+like($pop3-&gt;Message, qr/BAD-MODE/);
+is($pop3-&gt;State, &#39;AUTHORIZATION&#39;);
+is($pop3-&gt;Close, 1);
+
+$pop3 = Mail::POP3Client-&gt;new(
+    %$cfg, AUTH_MODE =&gt; &#39;BEST&#39;, PASSWORD =&gt; &#39;BAD-PASSWORD&#39;);
+like($pop3-&gt;Message, qr/PASS failed/);
+is($pop3-&gt;State, &#39;AUTHORIZATION&#39;);
+is($pop3-&gt;Close, 1);
+
+$pop3 = Mail::POP3Client-&gt;new(
+    %$cfg, AUTH_MODE =&gt; &#39;APOP&#39;, PASSWORD =&gt; &#39;BAD-PASSWORD&#39;);
+like($pop3-&gt;Message, qr/APOP failed/);
+is($pop3-&gt;Close, 1);
+
+
+</pre></blockquote>
+
+<p>
+Once we have validated the server&#39;s capabilities, we test the
+authentication interface.  <tt>Mail::POP3Client</tt>
+defaults to <tt>AUTH_MODE</tt> <tt>BEST</tt>, but
+we test each mode explictly here.  The other cases test the default
+mode.  To be sure authentication was successful, we download
+the body of the first message and compare it with the value we sent.
+POP3 authentication implies authorization to access your messages.
+We only know we are authorized if we can access the mail user&#39;s data.
+</p>
+
+<p>
+In <tt>BEST</tt> mode the implementation tries all
+authentication modes with <tt>PASS</tt> as the last
+resort.  We use knowledge of the implementation to validate that
+<tt>PASS</tt> 
+is the last mode tried.  The <tt>Message</tt> method
+returns <tt>PASS failed</tt>, which gives the caller
+information about which <tt>AUTH_MODE</tt> was used.
+</p>
+
+<p>
+The test doesn&#39;t know the details of the conversation between the
+server and client, so it assumes the implementation doesn&#39;t have
+two defects (using <tt>PASS</tt> when it shouldn&#39;t and
+returning incorrect <tt>Message</tt> values).  We&#39;ll see
+in  <a href="unit-testing.html#unit-testing.mock-objects">Mock Objects</a> how to address
+this issue without such assumptions.
+</p>
+
+<p>
+The authentication conformance cases are incomplete, because there
+might be a defect in the authentication method selection logic.  We&#39;d
+like know if we specify <tt>APOP</tt> that
+<tt>Mail::POP3Client</tt> doesn&#39;t try
+<tt>PASS</tt> first.  The last case group in this section
+attempts to test this, and uses the knowledge that
+<tt>Message</tt> returns <tt>APOP failed</tt>
+when <tt>APOP</tt> fails.  Again, it&#39;s unlikely
+<tt>Message</tt> will return the wrong error message.
+</p>
+
+
+
+<a name="unit-testing-distinguish-error"></a>
+<h3>Distinguish Error Cases Uniquely</h3>
+
+<blockquote><pre>
+sub _is_match {
+    my($actual, $expect) = @_;
+    return ref($expect) eq &#39;Regexp&#39;
+        ? like(ref($actual) ? join(&#39;&#39;, @$actual) : $actual, $expect)
+        : is_deeply($actual, $expect);
+}
+
+$pop3 = Mail::POP3Client-&gt;new(%$cfg);
+foreach my $params (
+    [Body =&gt; $body_lines],
+    [Head =&gt; qr/\Q$subject/],
+    [HeadAndBody =&gt; qr/\Q$subject\E.*\Q$body_lines-&gt;[0]/s],
+) {
+    my($method, $expect) = @$params;
+    _is_match([$pop3-&gt;$method(1)], $expect);
+    is($pop3-&gt;Message(&#39;&#39;), &#39;&#39;);
+    is_deeply([$pop3-&gt;$method(999)], []);
+    like($pop3-&gt;Message, qr/No such message|Bad message number/i);
+}
+
+
+</pre></blockquote>
+
+<p>
+The <tt>Body</tt> method returns the message body,
+<tt>Head</tt> returns the message head, and
+<tt>HeadAndBody</tt> returns the entire message.  We
+assume that <tt>999</tt> is a valid message number and that
+there aren&#39;t 999 messages in the mailbox.
+</p>
+
+<p>
+<tt>Body</tt> returns an empty array when a message is not
+found.  Should <tt>Body</tt>
+return something else or <tt>die</tt> in the deviance
+case?  I think so.  Otherwise, an empty message body is indistinguishable from
+a message which isn&#39;t found.  The deviance test identifies this design
+issue.  That&#39;s one reason why deviance tests are so important.
+</p>
+
+<p>
+To workaround this problem, we clear the last error
+<tt>Message</tt> saved in the
+<tt>Mail::POP3Client</tt> instance before calling the
+download method.  We then validate that <tt>Message</tt> is
+set (non-blank) after the call.
+</p>
+
+<p>
+The test case turned out to be successful unexpectedly.
+It detected a defect in
+<tt>Message</tt>: You can&#39;t clear an existing
+<tt>Message</tt>.  This is a side-effect of the current
+test, but a defect nonetheless.  One advantage of validating the
+results of every call is that you get bonuses like this without
+trying.
+</p>
+
+
+
+
+<h3>Avoid Context Sensitive Returns</h3>
+
+<blockquote><pre>
+foreach my $params (
+    [Body =&gt; $body],
+    [Head =&gt; qr/\Q$subject/],
+    [HeadAndBody =&gt; qr/\Q$subject\E.*\Q$body/s],
+) {
+    my($method, $expect) = @$params;
+    _is_match(scalar($pop3-&gt;$method(1)), $expect);
+    is(scalar($pop3-&gt;$method(999)), undef);
+}
+
+
+</pre></blockquote>
+
+<p>
+When <tt>Body</tt>, <tt>Head</tt>, and
+<tt>HeadAndBody</tt> are invoked in a scalar context, the
+result is a single string, and <tt>undef</tt> is returned
+on errors, which simplifies deviance testing.  (Note that
+<tt>Bivio::Test</tt> distinguishes <tt>undef</tt> from
+<tt>[undef]</tt>.  The former ignores the result, and the
+latter expects a single-valued result of <tt>undef</tt>.)
+</p>
+
+<p>
+<tt>Bivio::Test</tt> invokes methods in a list context
+by default.  Setting <tt>want_scalar</tt> forces a scalar
+context.  This feature was added to test non-bOP classes like
+<tt>Mail::POP3Client</tt>.
+</p>
+
+<p>
+In bOP, methods are invocation context insensitive.  Context sensitive
+returns like <tt>Body</tt> are
+problematic.<a href="unit-testing.html#4">[4]</a>
+We use <tt>wantarray</tt> to ensure methods that return
+lists behave identically in scalar and list contexts.  In general, we
+avoid list returns, and return array references instead.
+</p>
+
+
+
+
+<h3>Use <tt>IO::Scalar</tt> for Files</h3>
+
+<blockquote><pre>
+foreach my $params (
+    [BodyToFile =&gt; $body],
+    [HeadAndBodyToFile =&gt; qr/\Q$subject\E.*\Q$body/s],
+) {
+    my($method, $expect) = @$params;
+    my($buf) = &#39;&#39;;
+    is($pop3-&gt;$method(IO::Scalar-&gt;new(\$buf), 1), 1);
+    _is_match($buf, $expect);
+}
+
+
+</pre></blockquote>
+
+<p>
+<tt>BodyToFile</tt> and
+<tt>HeadAndBodyToFile</tt> accept a file glob to write the
+message parts.  This API design is easily testable with the use of
+<tt>IO::Scalar</tt>, an in-memory file object.  It
+avoids file naming and disk clean up issues.
+</p>
+
+<p>
+We create the <tt>IO::Scalar</tt> instance in
+<tt>compute_params</tt>, which
+<tt>Bivio::Test</tt> calls before each method
+invocation.
+<tt>check_return</tt> validates that the method returned
+true, and then calls <tt>actual_return</tt> to set the
+return value to the contents of the <tt>IO::Scalar</tt>
+instance.   It&#39;s convenient to let <tt>Bivio::Test</tt>
+perform the structural comparison for us.
+</p>
+
+
+
+
+
+<h3>Perturb One Parameter per Deviance Case</h3>
+
+<blockquote><pre>
+foreach my $method (qw(BodyToFile HeadAndBodyToFile)) {
+    is($pop3-&gt;$method(IO::Scalar-&gt;new(\(&#39;&#39;)), 999), 0);
+    my($handle) = IO::File-&gt;new(&#39;&gt; /dev/null&#39;);
+    $handle-&gt;close;
+    is($pop3-&gt;$method($handle, 1), 0);
+}
+
+
+</pre></blockquote>
+
+<p>
+We test an invalid message number and a closed file handle<a href="unit-testing.html#5">[5]</a> in two
+separate deviance cases.  You shouldn&#39;t perturb two unrelated
+parameters in the same deviance case, because you won&#39;t know which
+parameter causes the error.
+</p>
+
+<p>
+The second case uses a one-time <tt>compute_params</tt>
+closure in place of a list of parameters.  Idioms like this simplify
+the programmer&#39;s job.  Subject matter oriented programs use idioms to
+eliminate repetitious boilerplate that obscures the subject matter.
+At the same time, idioms create a barrier to understanding for
+outsiders.  The myriad <tt>Bivio::Test</tt> may seem
+overwhelming at first. For the test-first programmer,
+<tt>Bivio::Test</tt> clears away the clutter so you can
+see the API in action.
+</p>
+
+
+
+<a name="unit-testing-relate-results"></a>
+<h3>Relate Results When You Need To</h3>
+
+<blockquote><pre>
+foreach my $method (qw(Uidl List ListArray)) {
+    my($first) = ($pop3-&gt;$method())[$method eq &#39;List&#39; ? 0 : 1];
+    ok($first);
+    is_deeply([$pop3-&gt;$method(1)], [$first]);
+    is_deeply([$pop3-&gt;$method(999)], []);
+}
+
+
+</pre></blockquote>
+
+
+<p>
+<tt>Uidl</tt> (Unique ID List), <tt>List</tt>,
+and <tt>ListArray</tt> return lists of information about
+messages.  <tt>Uidl</tt> and
+<tt>ListArray</tt> lists are indexed by message number
+(starting at one, so the zeroeth element is always
+<tt>undef</tt>).  The values of these lists are the
+message&#39;s unique ID and size, respectively.  <tt>List</tt>
+returns a list of unparsed lines with the zeroeth being the first
+line.
+All three methods also accept a single message number as a parameter, and
+return the corresponding value.  There&#39;s also a
+scalar return case which I didn&#39;t include for brevity in the book.
+</p>
+
+<p>
+The first case retrieves the entire list, and saves the value for
+the first message.  As a sanity check, we make sure the value is
+non-zero (true).  This is all we can guarantee about the value in all
+three cases.
+</p>
+
+<p>
+The second case requests the value for the first message from
+the POP3 server, and validates this value agrees with the value saved from the
+list case.  The one-time <tt>check_return</tt>
+closure defers the evaluation of <tt>$_SAVE</tt> until
+after the list case sets it.
+</p>
+
+<p>
+We cross-validate the results, because the expected values are
+unpredictable.  Unique IDs are server specific, and message sizes
+include the head, which also is server specific.  By relating two
+results, we are ensuring two different execution paths end in the same
+result.  We assume the implementation is reasonable, and isn&#39;t trying
+to trick the test.  These are safe assumptions in XP, since the
+programmers write both the test and implementation.
+</p>
+
+
+
+
+<h3>Order Dependencies to Minimize Test Length</h3>
+
+<blockquote><pre>
+my($count) = $pop3-&gt;Count();
+ok($count &gt;= 1);
+is($pop3-&gt;Delete(1), 1);
+is($pop3-&gt;Delete(999), 0);
+$pop3-&gt;Reset;
+is($pop3-&gt;Close, 1);
+$pop3-&gt;Connect;
+is($pop3-&gt;Count, $count);
+# Clear mailbox, which also cleans up aborted or bad test runs
+foreach my $i (1 .. $count) {
+    $pop3-&gt;Delete($i);
+};
+is($pop3-&gt;Close, 1);
+$pop3-&gt;Connect;
+is($pop3-&gt;Count, 0);
+is($pop3-&gt;Close, 1);
+
+
+</pre></blockquote>
+
+<p>
+We put the destructive cases (<tt>Delete</tt>) near the
+end.  The prior tests all need a message in the mailbox.  If we
+tested delete first, we&#39;d have to resend a message to test the
+retrieval and list methods.  The case ordering reduces test
+length and complexity.
+</p>
+
+<p>
+Note that we cannot guarantee anything about
+<tt>Count</tt> except that is at least one.  A prior test
+run may have aborted prematurely and left another message in the test
+mailbox.  What we do know is that if we <tt>Delete</tt>
+all messages from one to <tt>Count</tt>, the mailbox
+should be empty.  The second half of this case group tests this
+behavior.
+</p>
+
+<p>
+The empty mailbox case is important to test, too.  By deleting all
+messages and trying to login, we&#39;ll see how
+<tt>Mail::POP3Client</tt> behaves in the this case.
+</p>
+
+<p>
+Yet another reason to delete all messages is to reset the mailbox to a
+known state, so the next test run starts with a clean slate.  This
+self-maintaining property is important for tests that access
+persistent data.  Rerun the entire test twice in a row, and the second run
+should always be correct.
+</p>
+
+<p>
+The POP3 protocol doesn&#39;t remove messages when
+<tt>Delete</tt> is called.  The messages are marked for
+deletion, and the server deletes them on successful
+<tt>Close</tt>.  <tt>Reset</tt> clears
+any deletion marks.  We cross-validate the first
+<tt>Count</tt> result with the second to verify
+<tt>Reset</tt> does what it is supposed to do.
+</p>
+
+
+
+<a name="unit-testing-consistent-apis"></a>
+<h3>Consistent APIs Ease Testing</h3>
+
+<blockquote><pre>
+$pop3 = Mail::POP3Client-&gt;new;
+is($pop3-&gt;State, &#39;DEAD&#39;);
+is($pop3-&gt;Alive, &#39;&#39;);
+is($pop3-&gt;Host($cfg-&gt;{HOST}), $cfg-&gt;{HOST});
+is($pop3-&gt;Host, $cfg-&gt;{HOST});
+$pop3-&gt;Connect;
+is($pop3-&gt;Alive, 1);
+is($pop3-&gt;State, &#39;AUTHORIZATION&#39;);
+is($pop3-&gt;User($cfg-&gt;{USER}), $cfg-&gt;{USER});
+is($pop3-&gt;User, $cfg-&gt;{USER});
+is($pop3-&gt;Pass($cfg-&gt;{PASSWORD}), $cfg-&gt;{PASSWORD});
+is($pop3-&gt;Pass, $cfg-&gt;{PASSWORD});
+is($pop3-&gt;Login, 0);
+is($pop3-&gt;State, &#39;TRANSACTION&#39;);
+is($pop3-&gt;Alive, 1);
+is($pop3-&gt;Close, 1);
+is($pop3-&gt;Alive, &#39;&#39;);
+is($pop3-&gt;Close, 0);
+
+$pop3 = Mail::POP3Client-&gt;new;
+$pop3-&gt;Connect;
+is($pop3-&gt;Alive, &#39;&#39;);
+is($pop3-&gt;Login, 0);
+is($pop3-&gt;State, &#39;DEAD&#39;);
+
+
+</pre></blockquote>
+
+<p>
+This section not only tests the accessors, but also documents the
+<tt>State</tt> and <tt>Alive</tt> transitions
+after calls to <tt>Connect</tt> and
+<tt>Login</tt>.
+</p>
+
+<p>
+There&#39;s a minor design issue to discuss.  The accessor
+<tt>Pass</tt> does not match its corresponding named parameter,
+<tt>PASSWORD</tt>, like the <tt>Host</tt> and
+<tt>User</tt> do.  The lack
+of uniformity makes using a <tt>map</tt> function for the
+accessor tests cumbersome, so we didn&#39;t bother.
+</p>
+
+<p>
+Also the non-uniform return values between
+<tt>Alive</tt> and <tt>Close</tt> is clear.
+While the empty list and zero (0) are both false in Perl, it makes
+testing for exact results more difficult than it needs to be.
+</p>
+
+
+
+<h3>Inject Failures</h3>
+
+<blockquote><pre>
+$pop3 = Mail::POP3Client-&gt;new(%$cfg);
+is($pop3-&gt;POPStat, 0);
+$pop3-&gt;Socket-&gt;close;
+is($pop3-&gt;POPStat, -1);
+is($pop3-&gt;Close, 0);
+
+
+</pre></blockquote>
+
+<p>
+The final (tada!) case group injects a failure before a normal
+operation.  <tt>Mail::POP3Client</tt> exports the socket
+that it uses.  This makes failure injection easy, because we simply
+close the socket before the next call to <tt>POPStat</tt>.
+Subsequent calls should fail.
+</p>
+
+<p>
+We assume error handling is centralized in the implementation, so we
+don&#39;t repeat all the previous tests with injected failures.  That&#39;s a
+big assumption, and for
+<tt>Mail::POP3Client</tt> it isn&#39;t true.  Rather than
+adding more cases to this test, we&#39;ll revisit the issue of shared
+error handling in <a href="refactoring.html">Refactoring</a>.
+</p>
+
+<p>
+Failure injection is an important technique to test error handling.
+It is in a different class from deviance testing, which tests the API.
+Instead, we use extra-API entry points.  It&#39;s like coming in through
+the back door without knockin&#39;.  It ain&#39;t so polite but it&#39;s sometimes
+necessary.  It&#39;s also hard to do if there ain&#39;t no backdoor as there
+is in <tt>Mail::POP3Client</tt>.
+</p>
+
+
+
+<a name="unit-testing.mock-objects"></a>
+<h3>Mock Objects</h3>
+
+<p>
+<i>Mock objects</i> allow you to inject failures and
+to test alternative execution paths by
+creating doors where they don&#39;t normally exist.
+<tt>Test::MockObject</tt><a href="unit-testing.html#6">[6]</a>
+allows you to replace subroutines and methods on the fly
+for any class or package.  You can manipulate calls to and return
+values from these faked entry points.
+</p>
+
+<p>
+Here&#39;s a simple test that forces CRAM-MD5 authentication:
+</p>
+
+<blockquote><pre>
+use strict;
+use Test::More;
+use Test::MockObject;
+BEGIN {
+    plan(tests =&gt; 3);
+}
+my($socket) = Test::MockObject-&gt;new;
+$socket-&gt;fake_module(&#39;IO::Socket::INET&#39;);
+$socket-&gt;fake_new(&#39;IO::Socket::INET&#39;);
+$socket-&gt;set_true(&#39;autoflush&#39;)
+    -&gt;set_false(&#39;connected&#39;)
+    -&gt;set_series(getline =&gt; map({&quot;$_\r\n&quot;}
+        # Replace this line with &#39;+OK POP3 &lt;my-apop@secret-key&gt;&#39; for APOP
+        &#39;+OK POP3&#39;,
+        &#39;+OK Capability list follows:&#39;,
+        # Remove this line to disable CRAM-MD5
+        &#39;SASL CRAM-MD5 LOGIN&#39;,
+        &#39;.&#39;,
+        &#39;+ abcd&#39;,
+        &#39;+OK Mailbox open&#39;,
+        &#39;+OK 33 419&#39;,
+    ))-&gt;mock(print =&gt; sub {
+        my(undef, @args) = @_;
+        die(&#39;invalid operation: &#39;, @args)
+            if grep(/(PASS|APOP)/i, join(&#39;&#39;, @args));
+        return 1;
+    });
+use_ok(&#39;Mail::POP3Client&#39;);
+my($pop3) = Mail::POP3Client-&gt;new(
+    HOST =&gt; &#39;x&#39;, USER =&gt; &#39;x&#39;, PASSWORD =&gt; &#39;keep-secret&#39;
+);
+is($pop3-&gt;State, &#39;TRANSACTION&#39;);
+is($pop3-&gt;Count, 33);
+
+
+</pre></blockquote>
+
+<p>
+In <tt>BEST</tt> authentication mode,
+<tt>Mail::POP3Client</tt> tries
+<tt>APOP</tt>, <tt>CRAM-MD5</tt>, and
+<tt>PASS</tt>.  This test makes sure that if the server
+doesn&#39;t support <tt>APOP</tt> that
+<tt>CRAM-MD5</tt> is used and <tt>PASS</tt> is
+not used.  Most POP3 servers always support
+<tt>APOP</tt> and <tt>CRAM-MD5</tt> and you
+usually can&#39;t enable one without the other.  Since
+<tt>Mail::POP3Client</tt> always tries
+<tt>APOP</tt> first, this test allows us to test
+the <tt>CRAM-MD5</tt> fallback logic without finding a
+server that conforms to this unique case.
+</p>
+
+<p>
+We use the <tt>Test::MockObject</tt> instance to
+fake the <tt>IO::Socket::INET</tt> class, which
+<tt>Mail::POP3Client</tt> uses to talk to the server.
+The faking happens before <tt>Mail::POP3Client</tt>
+imports the faked module so that the real
+<tt>IO::Socket::INET</tt> doesn&#39;t load.
+</p>
+
+<p>
+The first three methods mocked are: <tt>new</tt>,
+<tt>autoflush</tt>, and <tt>connected</tt>.
+The mock <tt>new</tt> returns <tt>$socket</tt>,
+the mock object.  We set <tt>autoflush</tt> to always returns true.
+<tt>connected</tt> is set to return false, so
+<tt>Mail::POP3Client</tt> doesn&#39;t try to close the
+socket when its <tt>DESTROY</tt> is called.
+</p>
+
+<p>
+We fake the return results of <tt>getline</tt> with
+the server responses <tt>Mail::POP3Client</tt> expects
+to see when it tries to connect and login.  To reduce coupling between
+the test and implementation, keep the list of mock routines short.
+You can do this by trial and error, because
+<tt>Test::MockObject</tt> lets you know when a routine
+that isn&#39;t mocked has been called.
+</p>
+
+<p>
+The mock <tt>print</tt> asserts that neither
+<tt>APOP</tt> nor <tt>PASS</tt> is attempted
+by <tt>Connect</tt>.  By editing the lines as recommend by
+the comments, you can inject failures to see that the test and
+<tt>Mail::POP3Client</tt> works.
+</p>
+
+<p>
+There&#39;s a lot more to <tt>Test::MockObject</tt> than I
+can present here.  It can make a seemingly impossible testing job
+almost trivial.
+</p>
+
+
+
+
+<h3>Does It Work?</h3>
+
+<p>
+As noted, several of the <tt>Mail::POP3Client</tt> test
+cases were successful, that is, they found defects in the
+implementation.  In <a href="refactoring.html">Refactoring</a>,
+you&#39;ll see the fruits of this chapter&#39;s labor.  We&#39;ll refactor the
+implementation to make it easier to fix the defects the test
+uncovered.  We&#39;ll run the unit test after each refactoring to be sure
+we didn&#39;t break anything.
+</p>
+
+
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+<i>Art of Software Testing</i>, Glenford Myers,
+John Wiley &amp; Sons, 1979, p. 16.
+</p></li>
+<li><a name="2"></a><p>
+The Post Office Protocol - Version 3 RFC can be found at
+<a href="http://www.ietf.org/rfc/rfc1939.txt">http://www.ietf.org/rfc/rfc1939.txt</a>.
+The <tt>Mail::POP3Client</tt> also implements
+the POP3 Extension Mechanism RFC,
+<a href="http://www.ietf.org/rfc/rfc2449.txt">http://www.ietf.org/rfc/rfc2449.txt</a>,
+and IMAP/POP AUTHorize Extension for Simple Challenge/Response RFC
+<a href="http://www.ietf.org/rfc/rfc2195.txt">http://www.ietf.org/rfc/rfc2195.txt</a>.
+</p></li>
+<li><a name="3"></a><p>
+The version being tested here is 2.12, which can be found at
+<a href="http://search.cpan.org/author/SDOWD/POP3Client-2.12">http://search.cpan.org/author/SDOWD/POP3Client-2.12</a>.
+</p></li>
+<li><a name="4"></a><p> The book <i>Effective Perl
+Programming</i> by Joseph Hall discusses the issues with
+<tt>wantarray</tt> and list contexts in detail.
+</p></li>
+<li><a name="5"></a><p>
+We use <tt>IO::File</tt> instead of
+<tt>IO::Scalar</tt>, because
+<tt>IO::Scalar</tt>
+does not check if the instance is closed when
+<tt>Mail::POP3Client</tt> calls print.
+</p></li>
+<li><a name="6"></a><p>
+Version 0.9 used here is available at:
+<a href="http://search.cpan.org/author/CHROMATIC/Test-MockObject-0.09/">http://search.cpan.org/author/CHROMATIC/Test-MockObject-0.09/</a>
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="continuous-design.html"><small>Previous: Chapter 12: Continuous Design</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="refactoring.html"><small>Next: Chapter 14: Refactoring</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="unit-testing.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

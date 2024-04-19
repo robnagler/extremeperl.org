@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 4: Release Planning</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 4: Release Planning</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="perl.html"><small>Previous: Chapter 3: Perl</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="iteration-planning.html"><small>Next: Chapter 5: Iteration Planning</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="release-planning"></a>
+
+
+
+
+<blockquote>
+
+<p>
+Man has an intense desire for assured knowledge.
+</p>
+<div align="right">-- Albert Einstein<a href="release-planning.html#1">[1]</a></div></blockquote>
+
+<p>
+We plan to communicate our intentions and to prepare for the
+unplanned.  In XP, the plan evolves with feedback from building and
+using the system.  We adjust our intentions as we see our ideas being
+realized.  Sometimes reality matches what we want.  Other times we
+gain new insight and change our plans accordingly.  XP ensures we get
+our recommended daily allowance of reality checks.
+</p>
+
+<p>
+Planning is a three part process in XP:
+</p>
+
+<dl>
+
+
+<dt>Release Planning</dt>
+<dd><p>
+We decide on the course of action based on customer desires and team
+capacity in the planning game.  The result is the release plan: a list
+of stories (requirements) prioritized by business value.  A release
+encompasses the next one to two months of work.
+</p></dd>
+
+
+
+<dt>Iteration Planning</dt>
+<dd><p>
+We divvy up the stories based on individual programmer desires and
+capacity in an iteration planning meeting.   An iteration plan is a
+prioritized list of development tasks estimated by the people who will
+be implementing them.  Iterations are delivered every one to three weeks.
+</p></dd>
+
+
+
+<dt>Pair Programming</dt>
+<dd><p>
+We continuously balance between improving internal quality and adding
+business function based on peer-to-peer discussions and individual
+task commitments.  A pair programming session lasts a few hours.  The
+output is one or more unit tests and the software that passes those
+tests.
+</p></dd>
+
+
+</dl>
+
+<p>
+This chapter covers release planning.  The subsequent chapters discuss
+the other two activities.
+</p>
+
+
+
+<h3>Planning Game</h3>
+
+<p>
+To start the ball rolling, the customer and programmers sit in a room
+together to define the requirements, priorities, and deadlines for the
+release.  We call this the <i>planning game</i>.
+</p>
+
+<p>
+Planning is an interpersonal process, a game, if you will.  The
+customer wants a long list of features, and the team wants to implement
+them all.  Unfortunately, the team is limited in what it can
+accomplish in one release.  In XP, the planning game defines the
+rules, pieces, and roles.  The objective is clear communication of
+business objectives and technical constraints.
+</p>
+
+
+
+<h3>Roles</h3>
+
+<p>
+In XP, we speak about <i>the customer</i> as a single
+person, although several people may fill this role simultaneously.
+It&#39;s important that the people acting as the customer speak in one
+voice.  This ensures that the project adds business value
+optimally--to the the best of the customer&#39;s knowledge.  Obviously, no
+one knows the optimal path, that&#39;s why XP encourages tight feedback
+loops. However, the team cannot be divided in its goals, or the
+project will fail.  XP has no mechanisms to resolve disputes between
+the people acting as the customer.
+</p>
+
+<p>
+The role of the customer is played by people who represent the
+collective business interests of the project.  For example, product
+managers, users, and clients act as the customer.  The business
+requirements, priorities, and deadlines are defined by the
+customer.
+</p>
+
+<p>
+XP defines the roles of customer and programmer unambiguously.  The
+customer&#39;s job is to identify <i>what</i> needs to get
+done, and the programmers&#39; job is to explain <i>how</i>
+it will get done.  The customer is not allowed to say an estimate is
+wrong or to contradict a technical statement made by the programmers.
+And, conversely, programmers cannot say a feature is unnecessary or
+the customer has her priorities wrong.  The planning game is based on
+mutual respect for these equal and distinct responsibilities.
+</p>
+
+<p>
+If you are new to XP, you may want to have an impartial coach
+participate in your first few planning games.  The planning game is
+non-adversarial, and a coach may help to remind people that planning
+is about getting as accurate a picture as possible given limited data.
+</p>
+
+
+
+<a name="release-planning-stories"></a>
+<h3>Stories</h3>
+
+<p>
+A <i>story</i> is how the customer communicates a
+requirement in XP.  The content of a story is simple, usually one or
+two sentences.  Here are some actual stories:
+</p>
+
+<dl>
+
+
+<dt>GenderTags</dt>
+<dd><p>
+The questions and answers will be customized with the name of the
+bride and groom where applicable.
+</p></dd>
+
+
+
+<dt>InstallDisks</dt>
+<dd><p>
+Figure out which computer to use, and install disks.  Make available
+via Samba and NFS.
+</p></dd>
+
+
+
+<dt>SubscriptionStartEnd</dt>
+<dd><p>
+Subscription start/end dates should not overlap.
+</p></dd>
+
+
+
+<dt>DemoClubUpdate</dt>
+<dd><p>
+Update data in demo club.
+Include AccountSync entries.
+</p></dd>
+
+
+
+<dt>DBExportSplit</dt>
+<dd><p>
+file_t is too large for a single export file.
+Need to figure out how to split.
+</p></dd>
+
+
+
+<dt>ECtoQB</dt>
+<dd><p>
+Convert EC payments to QuickBooks IIF format.
+Group checks into deposits.
+</p></dd>
+
+
+
+<dt>CloseChase</dt>
+<dd><p>
+Move account to Wells Fargo.
+</p></dd>
+
+
+</dl>
+
+<p>
+For the most part, the customer writes the stories.
+Note the incompleteness of the
+stories in some cases.  For example, DemoClubUpdate doesn&#39;t specify
+what data is required.  If the programmer needs more info, he will ask
+the customer when he starts implementing the story.
+</p>
+
+<p>
+Some of these example stories were not written by the customer, for
+example, DBExportSplit and InstallDisks.  Technical stories come up
+during implementation, but it is the customer who decides how
+important they are.  The programmers&#39; job is to note the technical
+need on a story card, and to present the business case to the customer
+during the planning game.
+</p>
+
+
+
+
+<h3>On-site Customer</h3>
+
+<p>
+The customer does not write the stories and say, "get to
+it!"
+There is an explicit trade-off with simple requirements; the customer
+must stick around for the implementation.  She must be available to
+the programmers to fill in the details during execution of the plan.
+</p>
+
+<p>
+A story is not sufficient criteria for acceptance.  Part of the
+customer&#39;s job is to write the acceptance tests with the help of the
+programmers.  Perl makes
+this easy.  <a href="acceptance-testing.html">Acceptance Testing</a> explains how
+in detail.
+</p>
+
+
+
+<h3>Story Cards</h3>
+
+<p>
+The stories are written on story cards.  Here&#39;s the CloseChase story
+card:
+</p>
+
+
+<center><b>Close Chase Story Card</b></center>
+<div align="center"><img border="0" src="../i/closechase-planning-game.jpg"></div>
+
+
+<p>
+I use story cards for almost everything.  In this case, it&#39;s an
+administration problem.  The
+mechanism is always the same: when there is a problem to solve, write
+it on a story card.  It represents a work item, and all work items
+need to be put in the queue.
+</p>
+
+<p>
+It often is a good idea to prepare story cards before the planning
+game.  Everybody should keep a stack on their desks.  The customer may
+think of new stories while using the system.  The programmers may
+encounter internal quality problems while coding.
+</p>
+
+<p>
+There is no officially-sanctioned XP story card.  Each project may
+need special customizations.  This story card is one we have developed
+for our company&#39;s needs.<a href="release-planning.html#2">[2]</a>
+Here&#39;s the way we interpret the fields:
+</p>
+
+<dl>
+
+
+<dt>StoryTag</dt>
+<dd><p>
+This is a mixed-case identifier for the story.  Giving a handle to the
+story simplifies communication about it.  In my experience, customers
+tend to have trouble filling in this field in the beginning.
+Programmers are used to naming things (subroutines, modules, etc.),
+and they may be able to help the customer choose appropriate story
+tags.
+</p></dd>
+
+
+
+<dt>Release</dt>
+<dd><p>
+The date or name of the release.  We use this field loosely to
+categorize stories by release or project.  We couldn&#39;t predict when
+CloseChase would be done, so we just put it in the Misc category.
+Some teams work on several projects simultaneously, and this field
+helps keep the story cards organized.
+</p></dd>
+
+
+
+<dt>Priority</dt>
+<dd><p>
+After the customer physically orders the story cards, she writes their
+numeric priority in this field.  The numbering scheme is arbitrary.
+Sometimes you need to insert a story card in the middle of a
+sequence.  We add a letter, for example, 5a, or use a dotted
+decimal notation, 5.1.  If you drop the story cards, it&#39;s important to
+be able to get them back in priority order.
+</p></dd>
+
+
+
+<dt>Author</dt>
+<dd><p>
+The person who wrote the story.
+You then know whom to ask for the details.
+</p></dd>
+
+
+
+<dt>on</dt>
+<dd><p>
+The date the story was written.
+</p></dd>
+
+
+
+<dt>Accepted</dt>
+<dd><p>
+The date the story&#39;s implementation is accepted by the customer.  We
+do this at the start of every planning game before we get into the new
+stories.  This helps remind the customer what has just been
+accomplished, and, sometimes, lets the customer catch incomplete
+stories.
+</p></dd>
+
+
+
+<dt>Description</dt>
+<dd><p>
+A few sentences and/or pictures explaining the requirement.  Be
+brief.  If the description isn&#39;t clear, rip up the card and
+start over.  This is the most important field, so you may want to fill
+it in first.
+See examples in <a href="release-planning.html#release-planning-stories">Stories</a>.
+</p></dd>
+
+
+
+<dt>Estimate</dt>
+<dd><p>
+The programmers write their best guess for the implementation time.
+See discussion about the time scale in
+<a href="release-planning.html#release-planning-estimation">Estimation</a>.
+</p></dd>
+
+
+
+<dt>Considerations</dt>
+<dd><p>
+The programmers list the implementation risks and prerequisites in
+this section.  This gives the customer more information about the
+confidence of the estimate and helps her order dependent stories.
+Don&#39;t implement the story here.  It&#39;s tempting to write pseudocode or
+to outline the design.  Save the design for when you are in front of a
+computer with your programming partner.
+</p></dd>
+
+
+
+<dt>Task</dt>
+<dd><p>
+The list of activities required to implement the story.  If the list
+of tasks grows to more than fits in a few lines, you probably need to
+split the story.  The original story estimate is probably wrong, too.
+We try to avoid large, complex stories to ensure the software pipeline
+stays full, and XP&#39;s many feedback loops remain active.
+This field is filled in during iteration planning, which
+is covered in <a href="iteration-planning.html">Iteration Planning</a>.
+</p></dd>
+
+
+
+<dt>Who</dt>
+<dd><p>
+The person who is responsible for this task.  Sometimes we add the
+partner who helped implement the task.  It can be useful when trying
+to remember why the code was written in a particular way.
+</p></dd>
+
+
+
+<dt>Est.</dt>
+<dd><p>
+The estimate for this task.
+</p></dd>
+
+
+
+<dt>Done</dt>
+<dd><p>
+The date the task is finished.  This field can also be used to record the
+actual time to implement the task.  We use it to help audit our
+billable hours.
+</p></dd>
+
+
+
+<dt>Acceptance Test</dt>
+<dd><p>
+This field reminds everybody that stories should have acceptance
+tests.  Ideally, the customer should be responsible for this task, but
+a programmer probably ends up doing most of the work.
+See <a href="acceptance-testing.html">Acceptance Testing</a> for more detail.
+</p></dd>
+
+
+</dl>
+
+
+
+
+<h3>Dead Wood</h3>
+
+<p>
+One important characteristic of story cards is their physical
+implementation.  They are real dead plant matter.  You write on them
+with ink, not electrons.  PDAs and laptops are not recommended for
+planning meetings.<a href="release-planning.html#3">[3]</a>
+</p>
+
+<p>
+The planning game is an interpersonal communication process.  Story
+cards are a simple communication medium, which enables people to have
+as much face time as possible.  You can read the cards from any angle, in
+almost any lighting condition.
+</p>
+
+<p>
+The stories listed so far have been text.  Sometimes text won&#39;t
+do.  Paper is also an excellent medium for creating pictures
+on-the-fly.  Here&#39;s another example that demonstrates the
+versatility of story cards to capture the story:
+</p>
+
+
+<center><b>PaymentsInFiscalYear Story Card</b></center>
+<div align="center"><img border="0" src="../i/payments-planning-game.jpg"></div>
+
+
+<p>
+And, here&#39;s the final user interface:
+</p>
+
+
+<center><b>PaymentsInFiscalYear User Interface</b></center>
+<div align="center"><img border="0" src="../i/member-contributions.jpg"></div>
+
+
+<p>
+The simple picture was enough to get the point across.<a href="release-planning.html#4">[4]</a>
+</p>
+
+
+
+<a name="release-planning-estimation"></a>
+<h3>Estimation</h3>
+
+<p>
+After a customer completes her portion of the story card, the
+programmers can estimate its implementation, and note any special
+considerations, such as, new hardware requirements or prerequisite
+stories.  Estimation is an art, where consistency is much more
+important than precision or accuracy.    The customer uses
+them to assess the relative cost of stories to aid prioritization.
+Programmers use estimates to compute and compare velocities (velocity
+is the sum of estimates for an iteration--see
+<a href="iteration-planning.html#iteration-planning-velocity">Velocity</a> for details).
+</p>
+
+<p>
+Stories are estimated in ideal programming days, not real-time.
+It&#39;s hard enough to forecast a story&#39;s implementation
+without considering other factors such as, hardware failures, sick
+time, or activation of military reservists.  Not to mention
+unforeseeable refactorings required to accommodate the implementation
+or changes requested by the customer as the implementation evolves.
+Ideal day are the way we avoid thinking about such factors that
+we can neither influence nor estimate.
+</p>
+
+<p>
+Don&#39;t be afraid of making incorrect estimates.  By definition,
+estimates are forecasts made with incomplete information.  You should
+be concerned when estimates end up matching reality exactly, because
+it&#39;s likely due to the effects of Parkinson&#39;s Law: work expands so as
+to fill the time available for its completion.
+</p>
+
+<p>
+Plan-driven methodologies often succumb to Parkinson&#39;s Law.
+Programmers are rewarded for making or beating their estimates.
+Over-estimation is a great way to make sure this happens.  In XP, if
+you over-esimate, you simply get more work to do.  You don&#39;t get to go
+home early, because the length of an iteration is measured in
+real-time, not ideal time.  There is always more business value to
+add, and the code can always be improved through refactoring.  Other
+XP feedback mechanisms, such as, small releases, pair programming, and
+continuous integration, also help to combat Parkinson&#39;s Law.
+</p>
+
+<p>
+So don&#39;t worry about Parkinson, the weather, or politics.  Just write
+your best guess as to how many ideal days the story will take to
+implement, and move on to the next card.
+</p>
+
+
+
+
+<h3>Easing Estimation</h3>
+
+<p>
+Sometimes you can&#39;t come up with a number that you have any confidence
+in.  The typical problem is that the story is too large, and it needs
+to be split up.  As a rule of thumb if the story comprises more than
+one week&#39;s worth of work, decompose it into smaller stories.
+</p>
+
+<p>
+For example, this is a story that was too large for me to estimate:
+</p>
+
+<blockquote><p>
+Create a web site with the ability to upload Microsoft Word documents
+by me and viewed by anybody.   The documents are categorized by visitor
+(consumer, broker, etc.).
+</p></blockquote>
+
+<p>
+With the help of a customer, we split the story into four smaller,
+more easily estimable stories:
+</p>
+
+<ul>
+
+<li><p>
+Create the web site home page and navigation scheme.
+</p></li>
+
+<li><p>
+Implement pages with Word document links and hand-installed documents.
+</p></li>
+
+<li><p>
+Allow site administrators to login.
+</p></li>
+
+<li><p>
+Implement upload page for Word documents accessible only by administrators.
+</p></li>
+
+</ul>
+
+<p>
+We were able to deliver business value on the first story.  After the
+second story, the customer had a functional site from the end-user
+perspective.  We were able to populate the site using non-web-based
+file transfer tools.
+The last two stories gave the customer full administrative control of
+the site, which is business value, but not as important
+as having a site at all.
+Most stories can be broken down this way.  It&#39;s
+quite similar to decomposing a story into tasks (see <a href="iteration-planning.html">Iteration Planning</a>).
+</p>
+
+
+
+<h3>Spike Solutions</h3>
+
+<p>
+Some stories defy estimation or decomposition.  The programmers knows
+so little about the problem domain that they may not even know if it is
+feasible to implement the story.   Some fundamental research is
+required.  In XP, we call this a <i>spike solution</i>.  Two
+programmers prototype, mockup, or just explore the problem space in
+detail for a short time.
+<p>
+
+<p>
+System integration is often important to spike.  There are usually so
+many variables that are out of the programmers&#39; control.  For example,
+one project we were involved in required us to download transactions from
+financial websites.  Our first attempt was to use the Open Financial
+Exchange (OFX) protocol.  It turned out that OFX is not very open, and
+we hit a non-technical roadblock.  In parallel with talking to the OFX
+consortium, we also spiked a web crawling solution for downloading
+transactions from financial websites.  We quickly learned that the
+algorithmic complexity was not in the transaction download component
+but in the backend--integrating the transactions into an existing
+accounting database.  This was an unexpected and important discovery.
+The spike solution gave us the information we needed to estimate our
+stories.
+</p>
+
+</p>
+The spike solution should be estimated, too.  This caps the time the
+customer must pay for experimentation.  The goal is to determine
+feasibility and cost, not to implement a fully working solution.
+Spike solutions are thrown away.  The result of a spike solution is a
+new story or stories, which can be estimated with confidence.
+</p>
+
+
+
+
+<h3>Prioritization</h3>
+
+<p>
+Once the stories that can be estimated have been estimated, the
+customer groups and prioritizes them.  The physical ordering process
+requires a large table so the customer can see as many of the cards as
+possible.  The customer groups the stories in two piles: this release and
+subsequent releases.
+</p>
+
+<p>
+The size of the release depends on the customer, although you should
+avoid releases exceeding a few months.
+The team will divide this release into iterations that last a few
+weeks at most (see <a href="iteration-planning.html">Iteration Planning</a>).
+From the customer&#39;s perspective each iteration is a partial but
+usable software distribution.
+The size of a release is therefore a bit of a fuzzy concept.  The
+customer may choose to stop work on a release before all the stories
+are implemented, and shall still have a working system albeit with
+fewer features than planned.
+</p>
+
+<p>
+This is why prioritization is so important and can&#39;t be left to the
+programmers.  The customer should see a continuous flow of software
+distributions in order of decreasing business value.  XP eschews big
+bang releases.   A working end-to-end system is available very early
+on in the implementation of a release plan.
+</p>
+
+<p>
+For this reason, programmers should avoid creating too many
+dependencies between stories.  It&#39;s all too easy to control the
+prioritization through unnecessary linking.  If you find yourself
+saying, "We need to build the infrastructure for this
+story." Remember XP&#39;s guideline: you aren&#39;t going to need it
+(YAGNI).   Infrastructure evolves from refactoring as you discover what
+parts of the system need it.
+</p>
+
+<p>
+When the planning game is over put the subsequent releases pile into
+storage until the next planning game.  The team may get done early in
+which case pull them out mid-release and add enough stories to meet
+the deadline for the current release.  The nice thing with XP is that
+you can add or rearrange stories at any time.  The stories that are
+already implemented have already been tested within the context of a
+working system.  There&#39;s no end-of-release panic to integrate the
+parts into the whole.  Indeed, the system probably is already in use
+well before the end of the release.
+</p>
+
+
+
+
+<h3>All the Facts</h3>
+
+<p>
+The customer&#39;s job is hard.  She is managing other factors besides
+implemention complexity, such as, time to market and resource
+acquisition.  To simplify the planning process, she has to have all
+the data from the programmers.  Any work which consumes time and
+resources needs to be on the planning game table.
+</p>
+
+<p>
+The considerations of stories may be significant.  If the story
+requires a relational database to be implemented, you need to make
+this clear.  Or, it may be obvious that a story requires major code
+restructuring.  If so, get it on a card.
+</p>
+
+<p>
+While you&#39;re coding, you&#39;ll notice problems.  You may have to
+copy-and-paste, because the refactoring required to make the pasted
+code reusable may be lengthy.<a href="release-planning.html#5">[5]</a>
+Write down the problem on a story card and
+bring it to the next planning game or iteration planning meeting.
+The customer and management are made aware of internal quality
+issues before they get out of control.
+</p>
+
+
+
+
+<h3>Small Releases</h3>
+
+<p>
+Release planning is the way we communicate business objectives to the
+programmers and enable programmers to communicate technical
+constraints.  The planning game is a simple forum for effective
+communication that relies on interactive feedback.
+</p>
+
+<p>
+By limiting the length of releases to one or two months, we limit the
+length of planning meetings.  This means we have fewer objectives to
+discuss.  It is easy to maintain the cohesion of small releases and to
+identify dependencies and other potential problems.  XP simplifies
+plan digestion by encouraging us to take a small bite and chew it
+thoroughly before taking the next bite.
+</p>
+
+
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+<i>Ideas and Opinions</i>, Albert Einstein,
+Crown Publishers Inc., 1985, p. 22.
+</p></li>
+<li><a name="2"></a><p>
+The source can be found at
+<a href="../index.html">http://www.extremeperl.org</a>.
+</p></li>
+<li><a name="3"></a><p>
+XP assumes the entire team,
+including the customer, share the same office.  If the customer or
+part of the team are not colocated, you may want to scan your story
+cards after the planning game and store them in the collective
+repository.  I&#39;m not a fan of purely electronic story cards, but some
+people like them.  As with all things XP, try it by the book and then
+season to your taste.
+</p></li>
+<li><a name="4"></a><p>
+Cards are context sensitive, so you may not understand the details of
+the PaymentsInFiscalYear story or implementation.  The point is to
+demonstrate how little information you need on a story card, and how
+closely a quick sketch matches the final implementation.
+</p></li>
+<li><a name="5"></a>
+<p>
+Lengthy to me means anything that takes an hour or more.  You may have
+completed several refactorings already, and any more will blow your
+budget.
+For a complete discussion on refactoring, see
+<a href="refactoring.html">Refactoring</a>.
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="perl.html"><small>Previous: Chapter 3: Perl</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="iteration-planning.html"><small>Next: Chapter 5: Iteration Planning</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="release-planning.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

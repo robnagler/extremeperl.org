@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 8: Pair Programming</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 8: Pair Programming</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="tracking.html"><small>Previous: Chapter 7: Tracking</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="logistics.html"><small>Next: Chapter 9: Logistics</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="pair-programming"></a>
+
+
+
+
+<blockquote>
+
+<p>
+When you&#39;re stuck together like this, I figure small differences in
+temperament are bound to show up.
+</p>
+<div align="right">-- Robert Pirsig<a href="pair-programming.html#1">[1]</a></div></blockquote>
+
+<p>
+The last planning activity in XP is pair programming.  Two programmers
+discuss what they are about to program.  They write a unit test which
+is a formal specification.  Only after their intention has been
+communicated to each other, do they begin the implementation.
+</p>
+
+
+<p>
+Pair programming is probably the most distinctive practice in XP.  It
+qualitatively differentiates XP from other software methodologies.
+Pair programming is also the hardest practice to integrate.  The
+payoff is that pair programming will elevate your system&#39;s quality to
+a new level.  And, surprisingly, your team&#39;s overall efficiency will
+improve, too.
+</p>
+
+<p>
+This chapter explains value of pair programming, how it works,
+and ways to adopt the practice.  A number of the human factors
+surrounding solitary and pair programming are also covered.
+</p>
+
+
+
+
+<h3>Quality</h3>
+
+<p>
+We want to write quality software.  Yet there are no rules that
+guarantee quality.  For example, some people think applying the once
+and only once (OAOO) principle everywhere is a way to quality.  Others
+think OAOO is not always applicable.
+</p>
+
+<p>
+Yet we know quality when we see it.  Two programmers often agree about the
+quality of a solution, but they probably won&#39;t agree on all the
+characteristics that contribute to or detract from its quality.  It&#39;s
+particularly hard to assess the quality of the code as you are writing
+it.  We can recognize quality, but it is not feasible to
+encode how to achieve it in all circumstances.
+</p>
+
+<p>
+Your programming partner can tell you about the quality of what you
+are writing.  He acts as an alter ego.  With gentle reminders about
+the team&#39;s coding standards or even fuzzy statements like
+"this doesn&#39;t feel right", your partner improves the code
+before you invest too much energy into it.  When there is a
+disagreement about quality, you discuss it.  There are no rules.  Your
+different experiences guide you.
+</p>
+
+<p>
+Simply put, pair programming yields better software than solitary
+programming.  Or, as Eric Raymond says, "Given enough eyeballs,
+all bugs are shallow."<a href="pair-programming.html#2">[2]</a>
+</p>
+
+
+
+
+<h3>How It Works</h3>
+
+<p>
+Pair programming is two programmers sitting at one computer working on
+the same task.  One person drives, and the other kibitzes.<a href="pair-programming.html#3">[3]</a>
+They switch roles naturally when the driver gets stuck or when the
+kibitzer wants to express his thoughts as code or just whenever it&#39;s
+time to switch.
+</p>
+
+<p>
+One programmer codes at a time.  Just as the customer is supposed to
+speak in one voice, a programming pair does the same.  XP&#39;s coding
+standard practice eliminates discussions about minor details, such as,
+how to align the statement braces.
+</p>
+
+<p>
+The observer thinks strategically about the code with respect to the
+whole.  He&#39;s likely to see more of the forest than the driver.  For
+example, the observer may be thinking of additional test cases as the
+code is being written or seeing a pattern that was used elsewhere and
+should be carved out so it can be reused.
+</p>
+
+<p>
+The communication between the driver and the onlooker is continuous.
+The feedback from the onlooker helps correct small errors in real-time
+before they become big problems.  The driver and onlooker code in
+unison with the ultimate goal of not remembering who wrote which line
+of code.  This won&#39;t happen at first, but when it does, you both know the
+code resulted from the synergy of your experiences and skills.
+</p>
+
+
+
+
+<h3>Ease on down the Road</h3>
+
+<p>
+Your initial sessions should be short (two hours or less) with
+frequent breaks.  Adopt pairing gradually until all production code
+is written in pairs.  In some teams this is impossible, and that&#39;s
+OK.  XP values people over process.  Some people can&#39;t pair program
+full-time (see sidebar).
+</p>
+
+<p>
+Unlike marriage, you don&#39;t try to pair with someone until death do you
+part.  And, even in marriage, it&#39;s a rare couple that can sustain
+eight hours working closely together, day in and day out.
+In XP, you switch partners
+once or twice a day.  It&#39;s not like musical chairs, where everybody
+moves to the next chair at the same time.  You might seek out specific
+partner, because he is knowledgeable about a particular problem or
+technique.  Or, somebody might ask you or your partner for help.
+</p>
+
+<p>
+Don&#39;t change partners too often, however.  It takes time for a new
+partner to develop the context necessary to be productive.  As with
+all the XP practices, you&#39;ll find what works well for your team
+through trial and error.
+</p>
+
+
+
+<h3>Rest &amp; Relaxation</h3>
+
+<p>
+Pair programming is a lot of work.  Sharing is hard, as anybody who
+has observed a preschool classroom will note.  Working side by side
+taxes even the most peaceful programmers.  You will need to remember
+to take breaks before tempers flare.
+</p>
+
+<p>
+Pair programming is more intense than solitary programming, because
+somebody is always driving.  It&#39;s like running in a relay race where
+you hand off the baton and then hop on a bike to keep up with your
+partner.  One reason XP recommends you work only 40 hours a week is
+that pair programming is hard.  To be an effective partner, you need
+to be fresh and rested.  The 40 hour work week reminds us that most of
+XP&#39;s practices were devised to address the human side of software
+development.
+</p>
+
+
+
+<h3>People Problems</h3>
+
+<p>
+Software is written by people.  We&#39;re the source of all
+the ideas and errors that go into the code and that makes us an
+important, if not the most important, implementation risk factor of
+software projects.  XP doesn&#39;t try to hide the people issues behind a
+veneer of methodology and technology to protect us from each other.
+We don&#39;t ignore risk factors; we face them with courage.
+</p>
+
+<p>
+Most of the XP
+practices are designed to force interpersonal issues to the surface so the
+team can address them.  Software methodologists have long known that
+human factors are the weakest links along the chain from project
+conception to deployment.
+Gerry Weinberg sums this up in his
+second law consulting: "No matter how it looks at first, it&#39;s
+always a people problem."<a href="pair-programming.html#4">[4]</a>
+One of the goals of XP is to help teams deal with interpersonal issues
+by themselves before management hires a consultant to
+figure out it for them.
+</p>
+
+<p>
+I&#39;m not trying to paint a picture that programming is a constant
+struggle with interpersonal issues, rather the complexity of our everyday
+lives and past experiences necessarily affects how we work.  For
+example, have you ever had a bad hair day?  Your hair, your breakfast,
+and the code comes out all wrong, and you just want to go home.  Or,
+have you ever had a fight (excuse me, technical debate) with a
+co-worker that couldn&#39;t be resolved?  You then each go off to solve it
+your own way.  Instead of burying the hatchet, you end up burying the
+interpersonal conflict in the project&#39;s codebase.
+</p>
+
+<p>
+XP&#39;s safeguards help resolve interpersonal issues like these.  If you
+aren&#39;t your usual self one day, your partner will notice.  He&#39;ll drive
+until you snap out of it.  Everybody needs to coast sometimes.  When
+you and your partner have a conflict, you have to work it out.  If you
+don&#39;t, someone else on your team will notice you wrestling the
+keyboard from each other.  They&#39;ll help you resolve the conflict,
+because they don&#39;t want to deal with battles embedded in the
+code.<a href="pair-programming.html#5">[5]</a>
+</p>
+
+<p>
+Pair programming teaches us about sharing, good manners, and
+acknowledging others&#39; feelings and opinions.  It&#39;s your average
+preschool curriculum.<a href="pair-programming.html#6">[6]</a>
+And, by the way, pair programming can be as much fun as preschool,
+too.  I find myself laughing and celebrating successes much more often
+than when I&#39;m programming by myself.  Sharing is about getting more
+out of who we are as individuals.
+</p>
+
+
+
+<h3>Different Strokes</h3>
+
+<p>
+The first step to acknowledging emotions is accepting that people are
+different.  It&#39;s not as easy as it sounds.
+Over the years, we have developed bad habits in response to emotional
+situations.  Some people withdraw in conflict situations.  Others
+become more aggressive.
+Like most people, we reuse these patterns without regard to the
+other people in the situation.
+</p>
+
+<p>
+Psychologists can help us to handle and to resolve conflict easily.
+Robert and Dorothy Bolton have developed a pragmatic approach to help
+people work with each other.  Their system, called <i>style
+flex</i>, teaches us how to treat people differently based on
+our individual characteristics:<a href="pair-programming.html#7">[7]</a>
+</p>
+
+<blockquote><p>
+Style flex involves tailoring your behavior so that your work
+fits better with the other person&#39;s style.  Flexing your behaviors is
+like a professional baseball player electing to swing differently at a
+fastball, a slider, and a curve. [...]
+Style flex is a way of
+adapting to another person&#39;s process; it is not about conforming to his
+or her point of view.  It is about relating constructively while
+appropriately disclosing your perspective on things as well as
+listening empathetically to others.  The better the interpersonal
+process, the more likely that people accurately hear each other and
+creatively resolve conflicting opinions.
+</p></blockquote>
+
+<p>
+And, one of their most important tips is:<a href="pair-programming.html#8">[8]</a>
+</p>
+
+<blockquote><p>
+When a relationship isn&#39;t going well, don&#39;t do more of the same;
+try something different.
+</p></blockquote>
+
+<p>
+If you keep this rule in mind, you will not only program with a
+partner better, you will also become more adept at dealing with your
+peers and your customers.  Pair programming is an all-around learning
+experience that helps the team get the most out of each member, and
+everybody therefore gets the most out of the project.  And, you&#39;ll
+also get help on bad hair days.
+</p>
+
+
+<table width="95%" border="1" cellpadding="5" bgcolor="#CCCCCC"><tr><td>
+<h3>Yea, Whatever</h3>
+<p>
+Not everybody in my company can sustain pair programming all the time.
+We try to flex to each other&#39;s styles when we can.  Sometimes it
+just doesn&#39;t work.
+</p>
+
+<p>
+One of my partners gets what I call the "yea whatevers"
+when he&#39;s had enough pair programming.  He ends up saying, "yea,
+whatever" whenever there&#39;s some type of disagreement.  The yea
+whatevers only happen after too many conflicts in one session.  Our
+personalities would start hindering our efforts if we continued pair
+programming so we know it&#39;s time to stop.
+</p>
+
+<p>
+XP promotes people over process first, and a set of best practices,
+second.  If the people dynamics aren&#39;t right, I don&#39;t recommend
+forcing pair programming.  It&#39;s taken this programmer and me years to figure
+out what works best for us.  We didn&#39;t start out pair programming when
+we first started working together, and we don&#39;t pair continuously all
+the time now.  Most of the time, we pair when we run into a roadblock,
+and we know we need help.
+</p>
+
+<p>
+This also turns out to be a good way to introduce pairing, that is,
+waiting until you get a hard problem before you bring in a partner.
+It may be something you do already, possibly at a whiteboard.  Next
+time, try sharing a keyboard instead.
+You will be surprised how much more effective it is to communicate
+through the code than in a conference room.
+</p>
+
+<p>
+A whiteboard solution is theoretical, and code is being there.  It&#39;s
+like the difference between planning to climb a mountain and hooting
+in unison when you both reach the top.  Coding together means helping
+each other with the inevitable wrong turns and near falls.  You gain mutual
+respect and learn to trust each other.  You can&#39;t pair program
+effectively without these qualities, and the best way to get there is
+by working side by side on a hard problem.
+</p>
+</td></tr></table>
+
+
+<h3>Gumption Traps</h3>
+
+<p>
+Bad hair days are when nothing seems to go right.  Robert Pirsig says
+this happens when you run into a <i>gumption trap</i>,
+something that saps your energy, discourages you, and causes you to
+make mistakes.  Some examples of gumption traps are:<a href="pair-programming.html#9">[9]</a>
+</p>
+
+<dl>
+
+
+<dt>Intermittent Failure</dt>
+<dd><p>
+In this the thing that is wrong becomes right all of a sudden just as
+you start to fix it.
+</p></dd>
+
+
+
+<dt>Parts Setback</dt>
+<dd><p>
+It&#39;s always a major gumption trap to get all the way home and
+discover that a new part won&#39;t work.
+</p></dd>
+
+
+
+<dt>Value Rigidity</dt>
+<dd><p>
+The facts are there but you don&#39;t see them.
+</p></dd>
+
+
+
+<dt>Ego Traps</dt>
+<dd><p>
+When the facts show that you&#39;ve just goofed, you&#39;re not as likely to
+admit it.  When false information makes you look good, you&#39;re likely
+to believe it.
+</p></dd>
+
+
+</dl>
+
+<p>
+Pirsig defines these gumption traps in terms of motorcycle maintenance,
+but they apply equally well to software development.  Whether you are
+a mechanic or programmer, gumption traps keep you from getting your
+job done.
+</p>
+
+<p>
+You can get out of gumption traps by yourself.  Pirsig gives solutions
+for each of these traps.  The biggest problem is recognizing that you
+have fallen into one.  Even when you recognize you are in a trap, it
+can take you days to get out of one, if you are working alone.  With a
+partner you&#39;ll probably be out in a few hours or possibly even minutes.
+</p>
+
+<p>
+You and your partner think differently.  You have different
+backgrounds and skills.  When you are pair programming together, these
+differences balance each other out to help both of you avoid and
+recover from gumption traps.
+</p>
+
+<p>
+Each of you probably won&#39;t fall into the same gumption traps.  If you
+both fall into the same trap, one of you will come out first and help
+the other out.  I&#39;m sure you have had the experience of searching for
+a code defect with another person.  It would be a rare event for both
+of you to find it at the exact same moment.  It doesn&#39;t matter who
+finds it first, because both of you can continue coding once it is
+found.
+</p>
+
+
+
+
+<h3>Reducing Risk Through Knowledge Transfer</h3>
+
+<p>
+Programming pairs are not only better at finding defects, they
+produce better code and learn more than solitary programmers.
+Programming partners often come up with two different implementations
+for the same task.  One or both of the implementations might contain ideas new to the other
+person.  You&#39;ll discuss the differences, and possibly merge the
+solutions.  In any event, one or both of you have learned something.
+</p>
+
+<p>
+One partner is likely to know more about the code or problem you both
+are working on than the other.  While you add business value to the
+project, the more experienced partner transfers knowledge to the less
+experienced partner.  When all production code is written in pairs, no
+one person has unique knowledge of the codebase.  This reduces risk,
+and spreads experience.  Everybody benefits from the continous
+learning that goes on in an XP project.  In addition, the customer
+benefits from the reduced risk and from the increased quality that
+pair programming delivers.
+</p>
+
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+<i>Zen and The Art of Motorcycle Maintenance</i>,
+Robert M. Pirsig, Bantam Books, 1989, p. 40.
+</p></li>
+<li><a name="2"></a><p>
+The Cathedral &amp; the Bazaar, Eric. S. Raymond, O&#39;Reilly and
+Associates, 2001, p. 30. Available online at
+<a href="http://www.catb.org/~esr/writings/cathedral-bazaar/">http://www.catb.org/~esr/writings/cathedral-bazaar/</a>.  
+Thanks to Joe Johnston for adding another connection between open
+source development and XP.  For others, see
+<a href="its-a-smop.html#its-a-smop-open-source">Open Source Development with XP</a>
+</p></li>
+<li><a name="3"></a>
+<p>
+According to Webster&#39;s New World Dictionary:
+"An onlooker at a card game, etc., esp. one who volunteers
+advice."
+</p></li>
+<li><a name="4"></a><p>
+<i>The
+Secrets of Consulting</i>, Gerald Weinberg, Dorset House,
+1985, p. 5.
+</p></li>
+<li><a name="5"></a><p>
+Or, to have to dislodge the keyboard embedded
+from your partner&#39;s skull.  It&#39;s bad for your partner and the
+keyboard.
+</p></li>
+<li><a name="6"></a>
+<p>
+My son&#39;s preschool teacher was a corporate trainer.  She said
+both jobs require the same skill set.
+</p></li>
+<li><a name="7"></a><p>
+<i>People
+Styles at Work</i>, Robert and Dorothy Bolton, American
+Management Association, 1996, p. 68.
+</p></li>
+<li><a name="8"></a><p>
+Ibid, p. 72.
+</p></li>
+<li><a name="9"></a><p>
+<i>Zen and the Art of Motorcycle Maintenance</i>,
+Robert M. Pirsig, Bantam Books, 1989, p. 277-283.
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="tracking.html"><small>Previous: Chapter 7: Tracking</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="logistics.html"><small>Next: Chapter 9: Logistics</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="pair-programming.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 5: Iteration Planning</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 5: Iteration Planning</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="release-planning.html"><small>Previous: Chapter 4: Release Planning</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="acceptance-testing.html"><small>Next: Chapter 6: Acceptance Testing</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="iteration-planning"></a>
+
+
+
+
+<blockquote>
+
+<p>
+Plans are useless, but planning is indispensable.
+</p>
+<div align="right">-- Dwight D. Eisenhower</div></blockquote>
+
+<p>
+An iteration adds function to a system without breaking it.  The new
+features are delivered to the customer in a complete software
+distribution.  This way the customer can try out the story
+implementations, and the programmers can get feedback on the
+system every few weeks, before the entire release is implemented.
+</p>
+
+<p>
+While release planning sets the pace for the customer, iterations are
+the heartbeat of the system&#39;s implementation.
+By distributing the software on a fixed schedule, typically from one
+to three weeks, the programmers stay focused on delivering complete
+stories.  This avoids the situation where the system remains
+"95% done" until the entire release has been
+implemented.  XP programmers complete the most important story first
+before moving on to the next one.
+</p>
+
+<p>
+This chapter covers dividing stories into tasks during the iteration
+planning meeting, estimating tasks, grouping tasks into iterations,
+and tracking team and individual velocity to schedule the next
+iteration&#39;s work.
+</p>
+
+
+
+<h3>Tasks</h3>
+
+<p>
+A <i>task</i> is the basic unit of work of an
+iteration.
+The stories are broken down into a list of tasks during the iteration
+planning meeting.  For example, here are the tasks for two of the
+stories from <a href="release-planning.html">Release Planning</a>:
+</p>
+
+
+<dl>
+
+
+<dt>PaymentsInFiscalYear</dt>
+<dd>
+<ul>
+
+<li><p>
+Mockup report.
+</p></li>
+
+<li><p>
+Implement year at a glance widget.
+</p></li>
+
+<li><p>
+Implement data model and report.
+</p></li>
+
+<li><p>
+Acceptance test: validate payments in months for members.
+</p></li>
+
+</ul>
+
+</dd>
+
+
+
+<dt>CloseChase</dt>
+<dd>
+<ul>
+
+<li><p>
+Compare rates and services at local banks.
+</p></li>
+
+<li><p>
+Open new account.
+</p></li>
+
+<li><p>
+Move automatic payments (FedEx, EarthLink)
+</p></li>
+
+<li><p>
+After last check clears, transfer remaining funds.
+</p></li>
+
+<li><p>
+Acceptance test: verify account is closed and automatic payments working.
+</p></li>
+
+</ul>
+
+</dd>
+
+
+</dl>
+
+<p>
+For reasons of simplicity, I write the tasks directly on the bottom of
+the story cards.  This keeps the motivation for the work (the
+story) and the list of work items on one piece of paper.  This helps
+me stay focused on the trees without getting lost in the forest.
+</p>
+
+<p>
+Alternatively, you might create separate task cards, one for each work
+item.  This allows you to divide up the work for an individual story
+among several programmers.  If you tend towards larger, multi-week
+stories, task cards are probably the way to go.
+</p>
+
+
+
+
+<h3>The Meeting</h3>
+
+<p>
+Iteration planning involves the entire team.  Somebody reads the
+stories aloud, and everybody contributes to identifying the tasks,
+which are written on whiteboards or flip charts for all to see.
+Another person writes the tasks down on the cards once everyone agrees
+they are correct.
+</p>
+
+<p>
+The meeting is a time for group design discussions.  It isn&#39;t always
+obvious what tasks are required to implement a story.  While ad hoc
+design discussions pop up during programming, iteration planning is a
+time for the whole team to discuss the system&#39;s implementation.  You
+might realize that a global refactorings need scheduling.  This may
+add dependencies and possibly a new story for the customer to prioritize.
+</p>
+
+<p>
+After all the tasks are listed on the board, people commit to
+implementing them.  Individuals take the cards and estimate the tasks
+they are planning to implement.  As with stories, estimate in
+ideal programming days.  Everybody&#39;s ideal timescale is different,
+don&#39;t expect the task and story estimates to add up.
+</p>
+
+<p>
+If a task is difficult to estimate, ask for help.  Others may have a
+better feeling for the problem and/or implementation.  Sometimes a
+task is too complex, and you&#39;ll realize as a group that the risk
+factors were underestimated.  Restructure the task list for this
+story.  If you think this story&#39;s estimate is way off, discuss it with
+the person responsible for the story estimate.  It may need to be
+changed, and the customer should be informed of the unforeseen
+considerations and the new estimate.
+</p>
+
+
+
+
+<h3>Get Me a Bucket</h3>
+
+<p>
+In plan-driven methodologies, the amount of work that goes into
+software distribution is dictated by the plan.  The schedule is
+extended as you experience the actual implementation time for the work
+items.  A software distribution only comes out when the entire release
+is complete.  XP takes another view.  Software distributions flow out
+from the team in fixed time iterations, much like water flowing
+through a water wheel.
+</p>
+
+<p>
+The buckets on a water wheel<a href="iteration-planning.html#1">[1]</a>
+are a fixed size, too, and only one bucket is necessary to get the
+water wheel turning.  If the bucket is too large, the wheel won&#39;t turn
+for awhile, and the water will flow in fits and starts. Tiny
+buckets don&#39;t supply enough energy to move the wheel at all.  There&#39;s a
+reasonable range of sizes for efficient transfer of potential to
+kinetic energy.  Experience suggests that the most efficient range for
+XP iterations is one to three weeks.  Each team must decide, however,
+what works best.
+</p>
+
+
+<a name="iteration-planning-velocity"></a>
+<h3>Velocity</h3>
+
+<p>
+The rate at which the water flows through a water wheel is measured in
+cubic feet or meters per second.  The implementation flow rate
+in XP is called velocity, and is the ratio of estimated ideal days to
+real implementation days.  Since the number of real days is fixed per
+iteration, we simply keep track of the sum of the estimated ideal days
+for each iteration.  The ideal time budget for the next iteration is
+the velocity of the iteration just completed.
+</p>
+
+<p>
+Our goal in XP iteration planning is to predictably fill an iteration
+with exactly the right number of stories.  This reduces planning time
+to a minimum, and keeps the software process flowing smoothly and
+reliably, just like an efficiently designed water wheel.
+</p>
+
+<p>
+Velocity is a relative measure, however.  You can only compare like
+estimates.  The team&#39;s velocity is the sum of estimates for completed
+stories per iteration.  Likewise, your individual velocity is measured
+in your own estimation timescale, the sum of your task estimates
+completed per iteration.  You can&#39;t compare the velocities of
+different individuals, and it doesn&#39;t matter if the sum of task
+estimates doesn&#39;t add up to their story estimate.
+It&#39;s like comparing water wheel flow rates with the rate at which
+people flow on an escalator.  The denominators are the same, but the
+numerators are different.
+</p>
+
+<p>
+Your velocity should converge after the first few iterations.  If it
+doesn&#39;t, something&#39;s wrong, and in <a href="tracking.html">Tracking</a>, I
+discuss what to do about it.  The starting budget for the first
+iteration is a guess.  It&#39;s likely to be way off.  At first, it&#39;s
+reasonable to assume the ratio of ideal days to real days is 1:1.
+Scheduling the first iteration is just the beginning.  You&#39;ll find
+you and your team&#39;s natural velocity converges rapidly no matter what
+the starting point is.
+</p>
+
+
+
+<h3>Watch Your Speed</h3>
+
+<p>
+Velocity is a self-governing speed limit.  The team limits the sum of
+its story estimates to the velocity of the prior iteration.  The sum
+of your task estimates should not exceed your individual velocity.
+That is, you should sign up for the same amount of estimated work that
+you completed last iteration.
+</p>
+
+<p>
+If you signed up for too many tasks, look for somebody with excess
+capacity.  Pick a simpler story if no one volunteers.  We avoid
+splitting stories across iterations, because it complicates tracking.
+All stories will be implemented
+by release end, so you&#39;ll be able to pick the story you dropped next
+iteration, if it still interests you.
+</p>
+
+
+
+
+<h3>Customer Priorities</h3>
+
+<p>
+The priority on the story card expresses the customer&#39;s expectation
+of business value.   Programmers work on the highest priority
+stories in each iteration.  In XP, we deliver as much business value
+as early as possible in the release.
+</p>
+
+<p>
+There&#39;s no guarantee all stories can be implemented.  The best way for
+the customer to ensure a particular feature is added is to limit the
+scope of the release.  If the programmers get done early, you can add
+stories in a mid-release planning game followed by an iteration
+planning meeting.  And, if you run out of work before the end of the
+iteration, grab the highest priority story card, estimate the tasks,
+and implement them.  This is how you increase your individual
+velocity.
+</p>
+
+<table width="95%" border="1" cellpadding="5" bgcolor="#CCCCCC"><tr><td>
+<h3>Taking Care of Business</h3>
+
+<p>
+XP was originally invented to solve an internal software development
+problem.  The idea of light requirements is more easily accepted in
+internal projects than it is for consulting projects.
+</p>
+
+<p>
+You can still use XP if your relationship with the customer is
+contractual.  My consulting company takes three approaches:
+</p>
+
+<ul>
+
+<li><p>
+We write small, fixed-price contracts after the planning game.
+We scan the story cards and include them in the contract.
+</p></li>
+
+<li><p>
+We write a general contract which promises fixed length iterations
+for a fixed price.  The planning game happens before every iteration.
+</p></li>
+
+<li><p>
+We write a time and materials contract, and the customer provides
+stories on an as needed basis.
+</p></li>
+
+</ul>
+
+<p>
+The three cases are listed in order of increasing trust.  We use the
+first option with customers who are skeptical about our development
+process.  To help with this, we absorb the risk with a fixed price
+iteration with a satisfaction guarantee.  We know that the sooner we
+get coding, the lower the risk of dissatisfaction.  And, we bypass many
+hours of unpaid work by circumventing protracted negotiations on a
+detailed, legalistic specification.
+</p>
+
+<p>
+After the first iteration, we usually slip into the second option.  The
+customer has seen a working end-to-end system, and she has experienced
+our process.  Functioning software has a way of convincing even the
+most skeptical customers about XP.
+</p>
+
+<p>
+Finally, we move into time and materials mode.  By the second or third
+iteration, XP has established a strong trust relationship due to its
+intense focus on the customer and her priorities.
+</p>
+
+</td></tr></table>
+
+
+
+
+<h3>The Beat Goes on</h3>
+
+<p>
+From the first iteration to the
+last, an XP team cranks out a steady stream of software
+distributions.  Programming, like many other creative professions,
+needs a regular beat.<a href="iteration-planning.html#2">[2]</a>
+It&#39;s all too easy to get distracted by an interesting problem.
+Regular, high frequency deadlines help people to stay on track.
+</p>
+
+<p>
+Every team has to find its own rhythm.
+Weekly iterations work well in my experience, and they dovetail nicely with
+the 40-hour week practice of XP.  At the end of the week, we go home
+with a clean plate, and come back with a fresh mind for the next
+iteration.
+</p>
+
+<p>
+Whether you deliver every week or every few weeks, the goal is to keep
+the software water wheel flowing to the customer.  She sees steady
+progress, and programmers get high frequency feedback about the
+quality of the system.
+</p>
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+Overshot water wheels with horizontal axles are the subject of this
+analogy.
+</p></li>
+<li><a name="2"></a><p>
+I had a music teacher who
+believed this, too.  He used to thwack my leg with his baton to make
+sure I didn&#39;t forget the beat.  I recommend a kinder, gentler approach
+for your team.  Although some in XP advocate a RolledUpNewspaper,
+visit the XP Wiki at
+<a href="http://c2.com/cgi/wiki?RolledUpNewspaper">http://c2.com/cgi/wiki?RolledUpNewspaper</a>
+to learn more.
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="release-planning.html"><small>Previous: Chapter 4: Release Planning</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="acceptance-testing.html"><small>Next: Chapter 6: Acceptance Testing</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="iteration-planning.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

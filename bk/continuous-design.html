@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 12: Continuous Design</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 12: Continuous Design</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="test-driven-design.html"><small>Previous: Chapter 11: Test-Driven Design</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="unit-testing.html"><small>Next: Chapter 13: Unit Testing</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="continuous-design"></a>
+
+
+
+<blockquote>
+
+<p>
+In the beginning was simplicity.
+</p>
+<div align="right">-- Richard Dawkins<a href="continuous-design.html#1">[1]</a></div></blockquote>
+
+<p>
+Software evolves. All systems are adapted to the needs of their users
+and the circumstances in which they operate, even after years of
+planning.<a href="continuous-design.html#2">[2]</a> 
+Some people call this maintenance programming, implementing change
+requests, or, simply, firefighting.  In XP, it&#39;s called <i>continuous
+design</i>, and it&#39;s the only way we design and build systems.
+Whatever you call it, change happens, and it involves two activities:
+changing what the code does and improving its internal structure.
+</p>
+
+<p>
+In XP, these two activities have names: implementing stories and
+refactoring.  <i>Refactoring</i> is the process of
+making code better without changing its external behavior. The art of
+refactoring is a fundamental skill in programming.  It&#39;s an important
+part of the programmer&#39;s craft to initiate refactorings to accommodate
+changes requested by the customer. In XP, we use
+tests to be sure the behavior hasn&#39;t changed.  
+</p>
+
+<p>
+As any implementation grows, it needs to be refactored as changes (new
+features or defect fixes) are introduced. Sometimes we refactor before
+implementing a story, for example, to expose an existing algorithm as
+its own API.  Other times, we refactor after adding a new feature,
+because we only see how to eliminate unnecessary duplication, after
+the feature is implemented.  This to and fro of code expansion
+(implementing stories) and contraction (refactoring) is how the design
+evolves continuously.  And, by the way, this is how Perl was designed:
+on demand and continuously.  It&#39;s one of the reasons Perl continues to
+grow and thrive while other languages whither and die.
+</p>
+
+<p>
+This chapter evolves the design we started in
+<a href="test-driven-design.html">Test-Driven Design</a>.  We introduce refactoring
+by simplifying the EMA equation.  We add a new class (simple moving
+average) to satisfy a new story, and then we refactor the two classes
+to share a common base class.  Finally, we fix a defect by exposing an
+API in both classes, and then we refactor the APIs into a single API
+in the base class.
+</p>
+
+
+
+
+<h3>Refactoring</h3>
+
+<p>
+The first step in continous design is to be sure you have a test.  You
+need a test to add a story, and you use existing tests to be sure you
+don&#39;t break anything with a refactoring.  This chapter picks up where
+<a href="test-driven-design.html">Test-Driven Design</a> left off.  We have a working
+exponentional moving average (EMA) module with a working unit test.
+</p>
+
+<p>
+The first improvement is a simple refactoring.  The equation in
+<tt>compute</tt> is more complex than it needs to be:
+</p>
+
+<blockquote><pre>
+sub compute {
+    my($self, $value) = @_;
+    return $self-&gt;{avg} = defined($self-&gt;{avg})
+        ? $value * $self-&gt;{alpha} + $self-&gt;{avg} * (1 - $self-&gt;{alpha})
+        : $value;
+}
+
+</pre></blockquote>
+
+<p>
+The refactored equation yields the same results and is simpler:
+</p>
+
+<blockquote><pre>
+sub compute {
+    my($self, $value) = @_;
+    return $self-&gt;{avg} <b>+=</b> defined($self-&gt;{avg})
+        ? <b>$self-&gt;{alpha} * ($value - $self-&gt;{avg})</b>
+        : $value;
+}
+
+</pre></blockquote>
+
+<p>
+After the refactoring, we run our test, and it passes.  That&#39;s all
+there is to refactoring.  Change the code, run the test for the
+module(s) we are modifying, run the entire unit test suite, and then
+check in once all tests pass.  Well, it&#39;s not always that easy,
+sometimes we make mistakes.  That&#39;s what the tests are for, and tests
+are what simplifies refactoring.
+</p>
+
+
+
+
+<h3>Simple Moving Average</h3>
+
+<p>
+Our hypothetical customer would like to expand her website to compete
+with Yahoo! Finance.  The following graph shows that Yahoo! offers two
+moving averages:
+</p>
+
+<a name="yahoo-rhat"></a>
+<center><b>Yahoo! 20 day moving averages on 3 month graph from May 18, 2004<a href="continuous-design.html#3">[3]</a></b></center>
+<div align="center"><img border="0" src="../i/yahoo-rhat-ma20.png"></div>
+
+
+<p>
+In order to provide the equivalent functionality, we need to implement
+a simple moving average (SMA or MA in Yahoo!&#39;s graph).  An SMA is the
+arithmetic mean of the last N periods of the price series.  For a
+daily graph, we add in the new day&#39;s price and we remove the oldest
+price from the sum before we take the average.
+</p>
+
+
+
+
+<h3>SMA Unit Test</h3>
+
+<p>
+The following test demonstrates the algorithm.  The test was created
+by starting with a copy of the EMA test from the
+<a href="test-driven-design.html">Test-Driven Design</a> chapter.  We replaced EMA with
+SMA, and changed the values to match the SMA algorithm:
+</p>
+
+<blockquote><pre>
+use strict;
+use Test::More tests =&gt; 11;
+use Test::Exception;
+BEGIN {
+    use_ok(&#39;SMA&#39;);
+}
+ok(my $sma = SMA-&gt;new(4));
+is($sma-&gt;compute(5), 5);
+is($sma-&gt;compute(5), 5);
+is($sma-&gt;compute(11), 7);
+is($sma-&gt;compute(11), 8);
+is($sma-&gt;compute(13), 10);
+dies_ok {SMA-&gt;new(-2)};
+dies_ok {SMA-&gt;new(0)};
+lives_ok {SMA-&gt;new(1)};
+dies_ok {SMA-&gt;new(2.5)};
+
+</pre></blockquote>
+
+<p>
+Like the EMA, the SMA stays constant (5) when the input values remain
+constant (5).  The deviance cases are identical, which gives us
+another clue that the two algorithms have a lot in common.  The
+difference is that average value changes differently, and we need to
+test the boundary condition when values "fall off the
+end" of the average.
+</p>
+
+
+
+
+<h3>SMA Implementation</h3>
+
+<p>
+The EMA and the SMA unit test are almost identical.  It follows that
+the implementations should be nearly identical.  Some people might
+want to create a base class so that <i>SMA</i> and
+<tt>EMA</tt> could share the common code.  However, at
+this stage, we don&#39;t know what that code might be.  That&#39;s why we do
+the simplest thing that could possibly work, and copy the
+<tt>EMA</tt> class to the <tt>SMA</tt>
+class.  And, let&#39;s run the test to see what happens after we change
+the package name from <tt>EMA</tt> to
+<tt>SMA</tt>:
+</p>
+
+<blockquote><pre>
+1..11
+ok 1 - use SMA;
+ok 2
+ok 3
+ok 4
+not ok 5
+#     Failed test (SMA.t at line 10)
+#          got: &#39;7.4&#39;
+#     expected: &#39;7&#39;
+not ok 6
+#     Failed test (SMA.t at line 11)
+#          got: &#39;8.84&#39;
+#     expected: &#39;8&#39;
+not ok 7
+#     Failed test (SMA.t at line 12)
+#          got: &#39;10.504&#39;
+#     expected: &#39;10&#39;
+ok 8
+ok 9
+ok 10
+ok 11
+# Looks like you failed 3 tests of 11.
+
+</pre></blockquote>
+
+<p>
+The test fails, because an EMA algorithm in an SMA&#39;s clothing is still
+an EMA.  That&#39;s good.  Otherwise, this section would be way too
+short.  Without further ado, here&#39;s the correct algorithm:
+</p>
+
+<blockquote><pre>
+package SMA;
+use strict;
+
+sub new {
+    my($proto, $length) = @_;
+    die(&quot;$length: length must be a positive 32-bit integer&quot;)
+        unless $length =~ /^\d+$/ &amp;&amp; $length &gt;= 1 &amp;&amp; $length &lt;= 0x7fff_ffff;
+    return bless({
+        length =&gt; $length,
+        values =&gt; [],
+    }, ref($proto) || $proto);
+}
+
+sub compute {
+    my($self, $value) = @_;
+    $self-&gt;{sum} -= shift(@{$self-&gt;{values}})
+        if $self-&gt;{length} eq @{$self-&gt;{values}};
+    return ($self-&gt;{sum} += $value) / push(@{$self-&gt;{values}}, $value);
+}
+
+1;
+
+</pre></blockquote>
+
+<p>
+The <tt>sum</tt> calculation is different, but the basic
+structure is the same.  The <tt>new</tt> method checks to
+makes sure that <tt>length</tt> is reasonable.  We need to
+maintain a queue of all values in the sum, because an SMA is a FIFO
+algorithm.  When a value is more than <tt>length</tt>
+periods old, it has absolutely no affect on the average. As an aside,
+the SMA algorithm pays a price for that exactness, because it must
+retain <tt>length</tt> values where EMA requires only
+one. That&#39;s the main reason why EMAs are more popular than SMAs in
+financial engineering applications.
+</p>
+
+<p>
+For our application, what we care about is that this implementation of
+SMA satisfies the unit test.  We also note that EMA and SMA have a lot
+in common.  However, after satisfying the SMA test, we run all
+the unit tests to be sure we didn&#39;t inadvertently modify another file,
+and then we checkin to be sure we have a working baseline.  Frequent
+checkins is important when designing continuously.  Programmers have
+to be free to make changes knowing that the source repository always
+holds a recent, correct implementation.
+</p>
+
+
+
+
+<h3>Move Common Features to a Base Class</h3>
+
+<p>
+The SMA implementation is functionally correct, but it isn&#39;t a good
+design.  The quick copy-and-paste job was necessary to start the
+implementation, and now we need to go back and improve the design
+through a little refactoring.  The classes <tt>SMA</tt>
+and <tt>EMA</tt> can and should share code.
+We want to represent each concept once and only once so we only have
+to fix defects in the implementation of the concepts once and only once.
+</p>
+
+<p>
+The repetitive code is contained almost entirely in
+the <tt>new</tt> methods of <tt>SMA</tt> and
+<tt>EMA</tt>.  The obvious solution is to create a base
+class from which <tt>SMA</tt> and <tt>EMA</tt>
+are derived.  This is a very common refactoring, and it&#39;s one you&#39;ll
+use over and over again.
+</p>
+
+<p>
+Since this is a refactoring, we don&#39;t write a new test.  The
+refactoring must not change the observable behavior.  The existing
+unit tests validate that the behavior hasn&#39;t changed.  That&#39;s
+what differentiates a refactoring from simply changing the
+code.  Refactoring is the discipline of making changes to improve the
+design of existing code without changing the external behavior of that
+code.
+</p>
+
+<p>
+The simple change we are making now is moving the common parts of
+<tt>new</tt> into a base class called
+<tt>MABase</tt>:
+</p>
+
+<blockquote><pre>
+package MABase;
+use strict;
+
+sub new {
+    my($proto, $length, $fields) = @_;
+    die(&quot;$length: length must be a positive 32-bit integer&quot;)
+        unless $length =~ /^\d+$/ &amp;&amp; $length &gt;= 1 &amp;&amp; $length &lt;= 0x7fff_ffff;
+    return bless($fields, ref($proto) || $proto);
+}
+
+1;
+
+</pre></blockquote>
+
+<p>
+The corresponding change to <tt>SMA</tt> is:
+</p>
+
+<blockquote><pre>
+use base &#39;MABase&#39;;
+sub new {
+    my($proto, $length) = @_;
+    return $proto-&gt;SUPER::new($length, {
+        length =&gt; $length,
+        values =&gt; [],
+    });
+}
+
+</pre></blockquote>
+
+<p>
+For brevity, I left out the the <tt>EMA</tt> changes,
+which are similar to these.  Note that <tt>MABase</tt>
+doesn&#39;t share fields between its two subclasses.  The only common code
+is checking the length and blessing the instance is shared.
+</p>
+
+
+
+
+
+<h3>Refactor the Unit Tests</h3>
+
+<p>
+After we move the common code into the base clase, we run all the
+existing tests to be sure we didn&#39;t break anything.  However, we
+aren&#39;t done.  We have a new class, which deserves its own unit test.
+<tt>EMA.t</tt> and <tt>SMA.t</tt> have four
+cases in common.  That&#39;s unnecessary duplication, and here&#39;s
+<tt>MABase.t</tt> with the cases factored out:
+</p>
+
+<blockquote><pre>
+use strict;
+use Test::More tests =&gt; 5;
+use Test::Exception;
+BEGIN {
+    use_ok(&#39;MABase&#39;);
+}
+dies_ok {MABase-&gt;new(-2, {})};
+dies_ok {MABase-&gt;new(0, {})};
+lives_ok {MABase-&gt;new(1, {})};
+dies_ok {MABase-&gt;new(2.5, {})};
+
+</pre></blockquote>
+
+<p>
+After running the new test, we refactor <tt>EMA.t</tt>
+(and similarly <tt>SMA.t</tt>) as follows:
+</p>
+
+<blockquote><pre>
+use strict;
+use Test::More tests =&gt; 5;
+BEGIN {
+    use_ok(&#39;EMA&#39;);
+}
+ok(my $ema = EMA-&gt;new(4));
+is($ema-&gt;compute(5), 5);
+is($ema-&gt;compute(5), 5);
+is($ema-&gt;compute(10), 7);
+
+</pre></blockquote>
+
+<p>
+By removing the redundancy, we make the classes and their tests
+cohesive.  <tt>MABase</tt> and its test is concerned
+with validating <tt>$length</tt>.
+<tt>EMA</tt> and <tt>SMA</tt> are
+responsible for computing moving averages.  This conceptual clarity,
+also known as <i>cohesion</i>, is
+what we strive for.
+</p>
+
+
+
+
+<h3>Fixing a Defect</h3>
+
+<p>
+The design is better, but it&#39;s wrong.  The customer noticed the
+difference between the Yahoo! graph and the one produced by the
+algorithms above:
+</p>
+
+
+<center><b>Incorrect moving average graph</b></center>
+<div align="center"><img border="0" src="../i/rhat-without-build-up.png"></div>
+
+
+<p>
+The lines on this graph start from the same point.  On the Yahoo!
+graph in the <a href="continuous-design.html#yahoo-rhat">Yahoo! 20 day moving averages on 3 month graph from May 18, 2004<footnote><para>
+<systemitem role="url">http://finance.yahoo.com/q/ta?s=RHAT&amp;t=3m&amp;p=e20,m20</systemitem>
+</para></footnote></a>, you see that the moving
+averages don&#39;t start at the same value as the price.  The problem is
+that a 20 day moving average with one data point is not valid, because
+the single data point is weighted incorrectly.  The results are skewed
+towards the initial prices.
+</p>
+
+<p>
+The solution to the problem is to "build up" the moving
+average data before the initial display point.  The build up period
+varies with the type of moving average.  For an SMA, the build up
+length is the same as the length of the average minus one, that is,
+the average is correctly weighted on the "length" price.
+For an EMA, the build up length is usually twice the length, because
+the influence of a price doesn&#39;t simply disappear from the average
+after length days.  Rather the price&#39;s influence decays over time.
+</p>
+
+<p>
+The general concept is essentially the same for both averages.  The
+algorithms themselves aren&#39;t different.  The build up period simply
+means that we don&#39;t want to display the prices.
+</p>
+
+separate out compute and value.  Compute returns undef.  value blows
+up.  is_ok or will_compute_ok?  The two calls are inefficent, but the
+design is simpler.  Show the gnuplot code to generate the graph.
+gnuplot reads from stdin?
+
+<p>
+The only difference
+is that the two algorithms have different build up lengths.  The
+easiest solution is therefore to add a field in the sub-classes which
+the base classes exposes via a method called
+<tt>build_up_length</tt>.   We need to expand our tests
+first:
+</p>
+
+<blockquote><pre>
+use strict;
+use Test::More tests =&gt; 6;
+BEGIN {
+    use_ok(&#39;EMA&#39;);
+}
+ok(my $ema = EMA-&gt;new(4));<b>
+is($ema-&gt;build_up_length, 8);</b>
+is($ema-&gt;compute(5), 5);
+is($ema-&gt;compute(5), 5);
+is($ema-&gt;compute(10), 7);
+
+</pre></blockquote>
+
+<p>
+The correct answer for <tt>EMA</tt> is always two times
+<tt>length</tt>.  It&#39;s simple enough that we only need one
+case to test it.   The change to <tt>SMA.t</tt> is
+similar.
+</p>
+
+<p>
+To satisfy these tests, we add <tt>build_up_length</tt> to
+<tt>MABase</tt>:
+</p>
+
+<blockquote><pre>
+sub build_up_length {
+    return shift-&gt;{build_up_length};
+}
+
+</pre></blockquote>
+
+<p>
+The computation of the value of <tt>build_up_length</tt>
+requires a change to <tt>new</tt> in EMA:
+</p>
+
+<blockquote><pre>
+sub new {
+    my($proto, $length) = @_;
+    return $proto-&gt;SUPER::new($length, {
+        alpha =&gt; 2 / ($length + 1),<b>
+        build_up_length =&gt; $length * 2,</b>
+    });
+}
+
+</pre></blockquote>
+
+<p>
+The change to SMA is similar, and left out for brevity.  After we fix
+the plotting code to reference <tt>build_up_length</tt>,
+we end up with the following graph:
+</p>
+
+
+<center><b>Moving average graph with correction for build up period</b></center>
+<div align="center"><img border="0" src="../i/rhat-with-build-up.png"></div>
+
+
+
+
+
+<h3>Global Refactoring</h3>
+
+<p>
+After releasing the build up fix, our customer is happy again.  We
+also have some breathing room to fix up the design again.  When we
+added <tt>build_up_length</tt>, we exposed a configuration
+value via the moving average object.  The plotting module also needs
+the value of <tt>length</tt> to print the labels
+("20-day EMA" and "20-day SMA") on the
+graph.  This configuration value is passed to the moving average
+object, but isn&#39;t exposed via the <tt>MABase</tt> API.
+That&#39;s bad, because <tt>length</tt> and
+<tt>build_up_length</tt> are related configuration
+values.  The plotting module needs both values.
+</p>
+
+<p>
+To test this feature, we add a test to <tt>SMA.t</tt>
+(and similarly, to <tt>EMA.t</tt>):
+</p>
+
+<blockquote><pre>
+use strict;
+use Test::More tests =&gt; 8;
+BEGIN {
+    use_ok(&#39;SMA&#39;);
+}
+ok(my $sma = SMA-&gt;new(4));
+is($sma-&gt;build_up_length, 3);<b>
+is($sma-&gt;length, 4);</b>
+is($sma-&gt;compute(5), 5);
+is($sma-&gt;compute(5), 5);
+is($sma-&gt;compute(11), 7);
+is($sma-&gt;compute(11), 8);
+
+</pre></blockquote>
+
+<p>
+We run the test to see that indeed <tt>length</tt>
+does not exist in <tt>MABase</tt> or its subclasses.  
+Then we add <tt>length</tt> to
+<tt>MABase</tt>:
+</p>
+
+<blockquote><pre>
+sub length {
+    return shift-&gt;{length};
+}
+
+</pre></blockquote>
+
+<p>
+<tt>SMA</tt> already has a field called
+<tt>length</tt> so we only need to change
+<tt>EMA</tt> to store the <tt>length</tt>:
+</p>
+
+<blockquote><pre>
+sub new {
+    my($proto, $length) = @_;
+    return $proto-&gt;SUPER::new($length, {
+        alpha =&gt; 2 / ($length + 1),
+        build_up_length =&gt; $length * 2,<b>
+        length =&gt; $length,</b>
+    });
+}
+
+</pre></blockquote>
+
+<p>
+This modification is a refactoring even though external behavior (the
+API) is different.  When an API and all its clients (importers)
+change, it&#39;s called a <i>global refactoring</i>.  In
+this case, the global refactoring is backwards compatible, because we
+are adding new behavior.  The clients were using a copy of
+<tt>length</tt> implicitly.
+Adding an explicit <tt>length</tt> method
+to the API change won&#39;t break that behavior. However, this type of
+global refactoring can cause problems down the road, because
+old implicit uses of <tt>length</tt> still will work until
+the behavior of the <tt>length</tt> method changes.  At
+which point, we&#39;ve got to know that the implicit coupling is no longer
+valid.
+</p>
+
+<p>
+That&#39;s why tests are so important with continuous design.   Global
+refactorings are easy when each module has its own unit test and the
+application has an acceptance test suite.  The tests will more than
+likely catch the case where implicit couplings go wrong either at the
+time of the refactoring or some time later.  Without
+tests, global refactorings are scary, and most programmers don&#39;t
+attempt them.  When an implicit coupling like this becomes cast in
+stone, the code base is a bit more fragile, and continous design is a
+bit harder.  Without some type of remediation, the policy is
+"don&#39;t change anything", and we head down the slippery
+slope that some people call <i>Software
+Entropy</i>.<a href="continuous-design.html#4">[4]</a>
+</p>
+
+
+<table width="95%" border="1" cellpadding="5" bgcolor="#CCCCCC"><tr><td>
+<h3>Continuous Rennovation in the Real World</h3>
+
+<p>
+Programmers often use building buildings as a metaphor for creating
+software.  It&#39;s often the wrong model, because it&#39;s not easy to
+copy-and-paste.  The physical world doesn&#39;t allow easy replication
+beyond the gene level.  However, continuous design is more commonplace
+than many people might think.  My company had our office rennovated
+before we moved in.  Here is a view of the kitchen (and David Farber)
+before the upgrade:
+</p>
+
+
+<center><b>Before rennovation</b></center>
+<div align="center"><img border="0" src="../i/before-rennovation.png"></div>
+
+
+<p>
+After the rennovation, the kitchen looked like this:
+</p>
+
+
+<center><b>After rennovation</b></center>
+<div align="center"><img border="0" src="../i/after-rennovation.png"></div>
+
+
+<p>
+If a couple of general contractors can restructure an office in a few
+weeks, imagine what you can do with your software in
+the same time.  The architectural plans did change continuously during
+the implementation.  The general contractors considered this
+completely normal.  After all, it&#39;s impossible for the customer to get
+a good idea what the office will look like until the walls start going
+up.
+</p>
+
+</td></tr></table>
+
+
+
+<h3>Simplify Accessors</h3>
+
+<p>
+Software entropy creeps in when the software fails to adapt to
+a change.  For example, we now have two accessors that are almost
+identical:
+</p>
+
+<blockquote><pre>
+sub length {
+    return shift-&gt;{length};
+}
+
+sub build_up_length {
+    return shift-&gt;{build_up_length};
+}
+
+</pre></blockquote>
+
+<p>
+The code is repeated.  That&#39;s not a big problem in the specific, because
+we&#39;ve only done it twice.  This subtle creep gets to be a bigger
+problem when someone else copies what we&#39;ve done here.  Simple
+copy-and-paste is probably the single biggest cause of software rot in
+any system.  New programmers on the project think that&#39;s how "we
+do things here", and we&#39;ve got a standard practice for
+copying a single error all over the code.  It&#39;s not that this
+particular code is wrong; it&#39;s that the practice is wrong.  This is
+why it&#39;s important to stamp out the practice when you can, and in this
+case it&#39;s very easy to do.
+</p>
+
+<p>
+We can replace both accessors with a single new API called
+<tt>get</tt>.  This global refactoring is very easy,
+because we are removing an existing API.  That&#39;s another reason to
+make couplings explicit: when the API changes, all uses fail with
+method not found.  The two unit test cases for EMA now become:</p>
+
+<blockquote><pre>
+is($ema-&gt;get(&#39;build_up_length&#39;), 8);
+is($ema-&gt;get(&#39;length&#39;), 4);
+
+</pre></blockquote>
+
+<p>
+And, we replace <tt>length</tt> and
+<tt>build_up_length</tt> with a single method:
+</p>
+
+<blockquote><pre>
+sub get {
+    return shift-&gt;{shift(@_)};
+}
+
+</pre></blockquote>
+
+<p>
+We also refactor uses of <tt>build_up_length</tt> and
+<tt>length</tt> in the plotting module.  This is the
+nature of continuous rennovation: constant change everywhere.  And,
+that&#39;s the part that puts people off.  They might ask why the last two
+changes (adding <tt>length</tt> and refactoring
+<tt>get</tt>) were necessary.
+</p>
+
+
+
+<h3>Change Happens</h3>
+
+<p>
+Whether you like it or not, change happens.  You can&#39;t stop it.  If
+you ignore it, your software becomes brittle, and you have more
+(boring and high stress) work to do playing catch up with the change.
+The proactive practices of testing and refactoring seem unnecessary
+until you do hit that defect that&#39;s been copied all over the code, and
+you are forced to fix it.  Not only is it difficult to find all copies
+of an error, but you also have to find all places in the
+code which unexpectedly depended on the behavior caused by the
+defect.  Errors multiply so that&#39;s changing a single error
+into N-squared errors   It gets even worse when the practice of
+copy-and-pasting is copied.  That&#39;s N-cubed, and that will make a mess
+of even the best starting code base.  Refactoring when you see
+replication is the only way to eliminate this geometric effect.
+</p>
+
+<p>
+Without tests, refactoring is no longer engineering, it&#39;s hacking.
+Even the best hackers hit a wall if they can&#39;t validate a change
+hasn&#39;t broken something.  They&#39;ll create ad hoc tests if necessary.
+XP formalizes this process.  However, unit testing is still an art.
+The only way to get good at it is by seeing more examples.
+The next chapter takes a deeper
+look at the unit testing in a more realistic environment.
+</p>
+
+
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+<i>The Selfish Gene</i>, Richard Dawkins, Oxford University Press, 1989, p. 12.
+</p></li>
+<li><a name="2"></a><p> 
+The most striking and recent example was the
+failure, debugging, and repair of the Mars Exploration Rover Spirit.
+</p></li>
+<li><a name="3"></a><p>
+<a href="http://finance.yahoo.com/q/ta?s=RHAT&amp;t=3m&amp;p=e20,m20">http://finance.yahoo.com/q/ta?s=RHAT&amp;t=3m&amp;p=e20,m20</a>
+</p></li>
+<li><a name="4"></a><p>
+Software Entropy
+is often defined as software that "loses its original design
+structure" 
+(<a href="http://www.webopedia.com/TERM/S/software_entropy.html">http://www.webopedia.com/TERM/S/software_entropy.html</a>).
+Continuous design turns the concept of software entropy right side up
+(and throws it right out the window) by changing the focus from the
+code to what the software is supposed to do. Software entropy is
+meaningless when there are tests that specify the expected behavior
+for all parts of an application.  The tests eliminate the fear of
+change inherent in non-test-driven software methodologies.
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="test-driven-design.html"><small>Previous: Chapter 11: Test-Driven Design</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="unit-testing.html"><small>Next: Chapter 13: Unit Testing</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="continuous-design.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

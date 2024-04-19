@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Preface</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Preface</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="the-problem.html"><small>Next: Chapter 1: The Problem</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="preface"></a>
+
+
+
+
+
+<blockquote>
+
+<p>
+Have fun, and build something cool.
+</p>
+<div align="right">-- Pete Bonham</div></blockquote>
+
+<p>
+This book is about a marriage of two compatible yet unlikely
+partners.  Extreme Programming (XP) is a software development
+methodology that enables users, business people, programmers, and
+computers to communicate effectively.  Perl is a dynamic programming
+language that lets an XP team embrace the inevitable change caused by
+effective communication.  Perl is the fixer and doer of the pair, and
+XP is the organizer and facilitator.  Together they help you build
+robust software applications efficiently.
+</p>
+
+<p>
+Like any good marriage, the partners of Extreme Perl support each
+other.  For example, XP asks business people to write acceptance
+tests, and Perl lets the business people use their own language and
+tools for the tests.  Much of Perl only happens when the program runs,
+and XP asks programmers to define what is supposed to happen in unit
+tests before they write the program.  In this book, you&#39;ll see other
+examples where Perl reinforces XP and vice versa.  This mutual support
+system is what makes Extreme Perl applications robust.
+</p>
+
+<p>
+This book invites Perl programmers and their customers to take a fresh
+look at software development.  Customers, and business people in
+general, will learn how XP enables customer-programmer communication
+for efficient and flexible requirements gathering.  Programmers will
+see how XP&#39;s focus on teamwork, incremental testing, and continuous
+design allows them to take pride in their craft.  The numerous
+examples demonstrate Extreme Perl in action, including the development
+of a complete, end-to-end application in the last chapter.
+</p>
+
+
+
+
+<h3>To Business People and Users</h3>
+
+<p>
+XP combines your project responsibilities into a single official role:
+<i>the customer</i>.  That&#39;s the extent of the
+formalism.  You don&#39;t need to learn use-case modeling, object
+modeling, or even fashion modeling.  You write your requirements on a
+piece of paper with pen.  You even get to draw pictures, although
+the programmers would prefer you didn&#39;t use crayon.
+</p>
+
+<p>
+As the customer, you have the responsibility to speak in one voice.
+You can discuss the requirements as much as you like, but in the end,
+you write down a simple, clear requirement in your own language,
+called a <i>story</i>.
+Any disagreements need to be settled during the
+<i>planning game</i>, where you and the programmers hash
+out what needs to get done and how long it is going to take.
+</p>
+
+<p>
+XP lets you change your mind.  That means you have to hang around the
+programmers--something that may take getting used to.  Programmers are
+terrible mind readers, and your immediate feedback is necessary when
+they get the requirements wrong or you realize a requirement isn&#39;t
+quite right.
+</p>
+
+<p>
+Best of all, you get to see progress right away.  The programmers
+<i>do the simplest thing that could possibly work</i>,
+and believe it or not, this actually produces a working program in a
+matter of weeks.  There&#39;s nothing better than seeing your requirements
+embodied in software to ensure you are getting what you want, and that
+you get what you are paying for.  Everybody is motivated by a working
+product in use.
+</p>
+
+
+
+<h3>To Programmers and Their Managers</h3>
+
+<p>
+The programming role is quite broad in XP.  Programmers are
+responsible for listening to the customer, and reacting to the dynamic
+requirements of the customer&#39;s world.
+</p>
+
+<p>
+With XP, you get to be real.  No more fudged estimates or wild
+guesses.  If the customer adds a complex requirement, like
+internationalization, right in the middle of the project, it&#39;s clearly
+not for free, and you get to say how long it will take.
+</p>
+
+<p>
+XP managers are <i>coaches</i> and
+<i>trackers</i>.  The programmers do all the work, and
+the coach gives sage advice while sipping martinis.  If all goes well,
+the tracker has a passive role, too.  XP&#39;s 12 simple practices add up
+to a lot of checks and balances.  Sometimes the coach and tracker must
+remind the programmers how to use the practices effectively, however.
+</p>
+
+<p>
+Code is the core artifact of an XP project.  You have to like to code
+to do XP.  Fortunately, Perl is fun and easy to code.  XP adds a
+modicum of discipline to Perl coding practices that enables you to
+code faster and better.
+</p>
+
+<p>
+XP is reflective.  The code gets better, because you
+<i>refactor</i> it frequently.  This means you get to
+fix the bad code in the project that usually everybody is afraid to
+touch.  With XP, you might not be so afraid.  You and your
+<i>pair programming</i> partner have lots of tests to
+ensure you don&#39;t break anything while refactoring.
+</p>
+
+<p>
+The goal of refactoring is to represent concepts <i>once and only
+once</i>.  Perl lets us do this more easily than other
+languages.  Extreme Perl code can be quite compact without
+obfuscation--rather the opposite.  The code often evolves into what I
+call a <i>subject matter oriented program</i>
+(SMOP).
+</p>
+
+<p>
+Subject matter oriented programming distills the essence of the
+problem into a little language.  The SMOPs in this book are plain old
+Perl.  There&#39;s no need to invent new syntax.  Sometimes you may need
+to think differently to understand a SMOP unless you already are
+familiar with <i>declarative programming</i>, which is
+quite different than traditional <i>imperative
+programming</i>--what most programmers learn in school.
+</p>
+
+<p>
+You need to know Perl fairly well to read many of the examples.  I
+explain the examples without going into much detail about the Perl
+syntax and semantics.  You may need to keep your favorite Perl
+reference book within reach, for example, to undertand how
+<tt>map</tt> works.
+</p>
+
+<p>
+One last thing: the some of test examples use the
+<i>bivio OLTP Platform</i> (bOP),
+an open source application framework developed by my company
+(<a href="http://www.bivio.biz">http://www.bivio.biz</a>).
+If you write a lot of tests, you need tools to help you write them
+quickly and clearly.  bOP employs SMOP to simplify unit and acceptance
+tests.  I&#39;m not trying to sell bOP to you--it&#39;s free anyway--but to
+demonstrate SMOP in testing.  This book explains just enough of bOP to
+read the examples.
+</p>
+
+
+
+
+<h3>How to Read This Book</h3>
+
+<p>
+This book explains Extreme Perl to both programmers and business
+people.  I also attempt to convey the Extreme Perl experience through
+examples and personal anecdotes.  The book covers Extreme Programming
+(XP) in detail, so no prior experience is necessary.
+</p>
+
+<p>
+The first part of this book is about the non-programming aspects of
+Extreme Perl: the why
+(<a href="the-problem.html">The Problem</a>),
+the what (<a href="extreme-programming.html">Extreme Programming</a>
+and <a href="perl.html">Perl</a>)
+and the how (<a href="release-planning.html">Release Planning</a>,
+<a href="iteration-planning.html">Iteration Planning</a>,
+<a href="acceptance-testing.html">Acceptance Testing</a>,
+<a href="tracking.html">Tracking</a>, and
+<a href="pair-programming.html">Pair Programming</a>).
+There is some code in
+<a href="acceptance-testing.html">Acceptance Testing</a>,
+but everybody should be able to read it.
+The last chapter (<a href="its-a-smop.html">It's a SMOP</a>) is an end-to-end Extreme
+Perl example that combines XP, Perl, and SMOP.
+Non-programmers
+may want to scan this chapter and read the conclusions at the end.
+</p>
+
+<p>
+The second part of this book contains numerous programming examples
+from the real world.  The following chapters show you what it is
+like to do Extreme Perl:
+<a href="coding-style.html">Coding Style</a>,
+<a href="logistics.html">Logistics</a>,
+<a href="test-driven-design.html">Test-Driven Design</a>,
+<a href="continuous-design.html">Continuous Design</a>,
+<a href="unit-testing.html">Unit Testing</a>,
+<a href="refactoring.html">Refactoring</a>, and
+<a href="its-a-smop.html">It's a SMOP</a>.
+</p>
+
+<p>
+If you are a top-down thinker, I recommend you read this book front to
+back.  Bottom-up thinkers may want to start at the last chapter and
+work backwards.
+</p>
+
+<p>
+As noted in the previous section, the Perl code in this book is
+advanced.  The programming examples are not complex, that is, they are
+short and contain only a few concepts.  However, the code may appear
+complicated to some programmers.  If you are familiar with functional
+programming and object-oriented Perl, the examples should be clear.
+If not, you may want to peek at the last chapter which describes
+functional programming.  The references throughout the book may be
+helpful, too.  The object-oriented aspects are not all that important,
+so you should be able to understand the examples without
+object-oriented experience.
+</p>
+
+<p>
+Typographical notes:
+I note acronyms that are used in the XP and Perl communities
+throughout this book, but I use their expansions so you don&#39;t have to
+memorize them.
+</p>
+
+
+
+
+<h3>Acknowledgments</h3>
+
+<p>
+This book was a collaborative project.  Many people contributed to
+make this book better.  Any errors and omissions are my own
+despite the barrage of corrections from the from the following people.
+If I left out your name, please accept my apologies.
+</p>
+
+<p>
+To Joanne, thank you for your love, support, knowledge, active
+participation, and editing skills.  This book would not have happened
+without you.
+</p>
+
+<p>
+To Ben and Aidan, thanks for accepting the million just a minute&#39;s,
+for manufacturing thousands of story cards, and for teaching me about
+life and people in the process.  Living with children and practicing
+XP have much in common.
+</p>
+
+<p>
+To Paul Moeller, thank you for being a brilliant business partner,
+friend, and programmer.  Thanks for teaching me why there is no busy
+work in programming, and for saying and not saying what you thought
+about this book.
+</p>
+
+<p>
+To Ion Yadigaroglu, thank you for the thousand conversations, your
+support, and for believing in me.  And, for having the courage to
+leave the programming to the programmers.
+</p>
+
+<p>
+To Martin Lichtin, thank you for explaining that every layer of
+indirection creates a new software problem, and for helping me wade
+through myriad software problems over the years.
+</p>
+
+<p>
+Thanks to the bivions: Danny Ace, Annaliese Beery, Greg Compestine,
+Eric Dobbs, Eric Schell, David Farber, Justin Schell, and Tom Vilot.
+You took part in my crazy experiments, listened patiently to my
+lectures and diatribes, and taught me much about programming,
+teamwork, and having fun.
+</p>
+
+<p>
+Thanks to Johannes Rukkers for teaching me about applications
+programming in large organizations, and for the many enlightening
+conversations at the James Joyce and elsewhere.
+</p>
+
+<p>
+Thanks to Rob Ward for gallantly giving up your true name at O&amp;A,
+for years of patient guidance and support, and for smashing through
+the illogic and unEnglish in the many drafts of this book.
+</p>
+
+<p>
+Thanks to Stas Bekman, Justin Schell, and Alex Viggio for pair
+programming with me in the last chapter.  You kept me on task, and
+helped me avoid complexity.
+</p>
+
+<p>
+Thanks to the many other reviewers who contributed the volumes of feedback
+that made my writing and examples more readable and correct.  The
+reviewers in alphabetical order were:
+Jim Baker,
+Kent Beck,
+Tom Brown,
+David Bruhweiler,
+Sean Burke,
+chromatic,
+Phil Cooper,
+Ward Cunningham,
+Bryan Dollery,
+Jeff Haemer,
+Ged Haywood,
+Joe Johnston,
+Walter Pienciak,
+Chris Prather,
+Lewis Rowett,
+Michael Schwern,
+Jeremy Siegel,
+and
+Mike Stok.
+</p>
+
+<p>
+I&#39;d also like to thank my many mentors over the years:
+Jon Bondy,
+Pete Bonham,
+David Cheriton,
+Tom Lyon,
+Jim Madden,
+Richard Olsen,
+Andrew Schofield,
+and
+Roger Sumner.
+Bits of your wisdom are contained herein; I hope I got them right.
+</p>
+
+<p>
+Finally, thanks and my deepest sympathies to the family of Pete
+Bonham.  You allowed me to enter your lives at such a difficult time.
+Pete&#39;s death was a driving factor in this book, and his life&#39;s work
+guides me regularly.
+</p>
+
+<p>
+Life and work are a series of successes. It just so happens that XP
+makes them more visible, but you have to choose to celebrate them.
+</p>
+
+<br>
+Rob&nbsp;Nagler<br>
+Boulder,&nbsp;CO,&nbsp;US<br>
+
+
+
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="the-problem.html"><small>Next: Chapter 1: The Problem</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="preface.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>

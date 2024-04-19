@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html><head>
+<title>Extreme Perl - Chapter 2: Extreme Programming</title>
+<link href="../f/my.css" rel="stylesheet" type="text/css" />
+</head><body bgcolor="#FFFFFF" text="#000000" link="#0000CC" alink="#0000CC" vlink="#0000CC">
+<a name="top"></a>
+<table border="0" cellpadding="0" cellspacing="0" width="98%"><tr>
+<td class="b_align_w" nowrap="nowrap"><a href="../index.html"><font size="5" style="text-decoration:none;">Extreme&nbsp;Perl:</font></a>&nbsp;&nbsp;<font size="5" style="text-decoration:none;">Chapter 2: Extreme Programming</font></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap"><small>An Evolving Book<br />about Extreme Programming<br />with Perl<br /></small></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" colspan="3"><table border="0" cellpadding="0" cellspacing="0"><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="the-problem.html"><small>Previous: Chapter 1: The Problem</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="perl.html"><small>Next: Chapter 3: Perl</small></a></td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td colspan="3" width="800"><html><body><a name="extreme-programming"></a>
+
+
+
+
+<blockquote>
+
+<p>
+XP is the most important movement in our field today.
+</p>
+<div align="right">-- Tom DeMarco</div></blockquote>
+
+<p>
+Extreme Programming (XP) is an agile software-development methodology.
+XP helps you remain light on your feet by avoiding unnecessary
+baggage and by incorporating feedback continuously.  Changing
+requirements are an expected and acceptable risk, because the customer
+sees the system being developed in real-time.  Mistakes are
+immediately visible and are corrected while the feature&#39;s
+implementation is fresh and pliable, much like a potter reworks clay.
+</p>
+
+<p>
+Programmers work and rework the code in XP projects.  The customer
+sees a system grow from layer upon layer of detail.  The software is
+only as effective as the details it embodies.  A tax accounting system
+must round computations correctly, or it can&#39;t be used; it&#39;s
+insufficient to get the formula right without considering that taxes
+are collected in whole currency units.  Details matter, and XP
+programmers reflect back to the customer in the only way that
+matters: working code.
+</p>
+
+<p>
+All this working and reworking requires a stable base and good tools.
+To throw pots effectively, you need to be seated comfortably at your
+potter&#39;s wheel, and your tools need to be within easy reach.  In the
+world of idea creation, people need comfort, too.  They need to know
+what&#39;s expected of them and why.  An XP team is expected to follow 12
+simple practices.  You aren&#39;t supposed to execute the practices
+blindly, however.  XP gives us a framework of four core values that
+lets us adjust the practices to suit our particular project.  The four
+core values are like a comfortable mental chair; we work our code
+using the practices with the core values supporting our every
+movement.
+</p>
+
+<p>
+This chapter explains XP&#39;s core values: communication,
+simplicity, feedback, and courage.  We then enumerate XP&#39;s 12
+practices, and discuss how to adopt them.
+</p>
+
+
+
+
+<h3>Core Values</h3>
+
+<p>
+XP is built on four core values: communication, simplicity, feedback,
+and courage.  The values reinforce each other to form a stable
+structure as shown in the figure:
+</p>
+
+
+<center><b>Core Values</b></center>
+<div align="center"><img border="0" src="../i/values-tetrahedron.jpg"></div>
+
+
+<p>
+The four values give the people in XP projects a firm foundation to
+stand on, the why for the how.  Unlike plan-driven software
+methodologies mentioned in <a href="the-problem.html">The Problem</a>, XP is
+people-driven.  We value people over process.
+</p>
+
+<p>
+The idea of giving people reasons (core values) for what they do
+(practices) is not new.  For example, before XP was a twinkle in Kent
+Beck&#39;s eye, John Young, then CEO of Hewlett-Packard, stated,
+"We distinguish between core values and practices; the core
+values don&#39;t change, but the practices might."<a href="extreme-programming.html#1">[1]</a>
+It&#39;s important to trust people to judge the validity of a practice for
+their particular job.  They need a value system to frame their
+judgments so that a person can change a practice without undermining
+the goals of an organization.
+</p>
+
+<p>
+The values relate to each other to form a framework.  Without these
+relationships, the values would not hold together, and people would be
+less likely to accept and to work with them.  The tetrahedron
+symbolizes the importance of the bonds between the values.  As you
+read through the descriptions in the following sections, you&#39;ll see
+how the values support each other and the practices.
+</p>
+
+
+<h4>Communication</h4>
+
+<blockquote>
+
+<p>
+A little Consideration, a little Thought for Others, makes all the difference.
+</p>
+<div align="right">-- Eeyore (A. A. Milne)</div></blockquote>
+
+<p>
+Software is developed as quickly as the communication links in the
+project allow.
+The customer communicates her requirements to programmers.  The
+programmers communicate their interpretation of the requirements to
+the computer.  The computer communicates with its users.  The users
+communicate their satisfaction with the software to the customer.
+</p>
+
+<p>
+Communication in XP is bidirectional and is based on a system of small feedback
+loops.  The customer asks the users what they want.  The programmers
+explain technical difficulties and ask questions about the
+requirements.  The computer notifies the programmers of program errors
+and test results.
+</p>
+
+<p>
+In an XP project, the communication rules are simple: all channels
+are open at all times.  The customer is free to talk to the
+programmers.  Programmers talk to the customer and users.  Unfettered
+communication mitigates project risk by reducing
+false expectations.
+All stakeholders know what they can expect from the rest of the team.
+</p>
+
+
+
+<h4>Simplicity</h4>
+
+<blockquote>
+
+<p>
+Pooh hasn&#39;t much Brain, but he never comes to any harm.  He does silly
+things and they turn out right.
+</p>
+<div align="right">-- Piglet (A. A. Milne)</div></blockquote>
+
+<p>
+We all want simple designs and simple implementations, but simple is
+an abstract concept, difficult to attain in the face of complexities.
+XP takes simplicity to the extreme with practical
+guidelines:
+</p>
+<ul>
+
+<li><p>
+Do the simplest thing that could possibly work (DTSTTCPW),
+</p></li>
+
+<li><p>
+Represent concepts once and only once (OAOO),
+</p></li>
+
+<li><p>
+You aren&#39;t going to need it (YAGNI), and
+</p></li>
+
+<li><p>
+Remove unused function.
+</p></li>
+
+</ul>
+
+<p>
+Do the simplest thing that could possibly work (DTSTTCPW) means you
+implement the first idea that comes to mind.  This can be scary.  Rely
+on your courage to try out the idea.  Remember that failure is
+an important part of creation.  It is unlikely the simplest idea is what you
+will end up with.  However, it&#39;s also unlikely you can anticipate
+what&#39;s wrong with your simple solution until you try it out.  Let the feedback system guide
+your implementation.
+DTSTTCPW is simplicity as in fast and easy.
+</p>
+
+<p>
+Once and only once (OAOO) helps you maintain your agility by reducing
+the size of your code base.  If you let
+conceptual redundancy permeate your system, you have to spend more and
+more time rooting out faults.  Every time you copy-and-paste, you
+take one more step closer to bloatware.  Each copy creates an
+implicit coupling, which must be communicated to the rest of the team.
+Be courageous, just say no to your mouse.  Say yes to refactoring the
+code for re-use.   OAOO is simplicity as in few interchangeable parts.
+</p>
+
+<p>
+You aren&#39;t going to need it (YAGNI) is a popular and fun expletive.
+If you can solve the
+immediate problem without introducing some feature, that&#39;s YAGNI!  And,
+you simplified your problem by omission.  YAGNI is a corollary of
+OAOO.  If you don&#39;t have to implement the feature in the first place,
+your system just took a step away from bloatware.
+YAGNI is simplicity as in basic.
+</p>
+
+<p>
+Sometimes you add a function for good reason but later find out the
+reason is no longer valid.  At this point you should delete the
+function.  It is unnecessary complexity.  It shouldn&#39;t require much
+courage, because the code is still there in your source repository.
+<i>[COMMENT: link to logistics.]</i>
+You can always pull it out if you need it again.
+Removing dead code is simplicity as in pure and uncluttered.
+</p>
+
+
+
+
+
+<h4>Feedback</h4>
+
+<blockquote>
+
+<p>
+Well, either a tail <i>is</i> or isn&#39;t there.  You can&#39;t make a
+mistake about it.  And yours <i>isn&#39;t</i> there!
+</p>
+<div align="right">-- Pooh (A. A. Milne)</div></blockquote>
+
+<p>
+The more immediate feedback, the more efficiently a system functions.
+A simple example can be found in the shower.  Some showers respond
+instantly to changes in the faucet handle.  Other showers don&#39;t.  I&#39;m
+sure you&#39;ve experienced showers installed by Central Services engineers
+from the movie <i>Brazil</i>.<a href="extreme-programming.html#2">[2]</a>  You turn on the shower, adjust the temperature,
+and hop into a hailstorm or <i>The Towering
+Inferno</i>.<a href="extreme-programming.html#3">[3]</a>
+After you peel yourself off the shower wall, you adjust the temperature,
+and wait a bit longer before timidly stepping in again.
+The long delay in the system makes showering unpleasant and
+inefficient.
+</p>
+
+<p>
+For many customers, this is what software development is like.
+You request a change, and it is delivered many months later in some big
+release.  Often the change fails to meet your expectations, which
+means another change request with yet another long delay.
+</p>
+
+<p>
+XP is like a well-designed shower.  You request a change and out comes
+software.  Adjustments are visible immediately.  The customer sees her
+requirements or corrections implemented within weeks.  Programmers
+integrate their changes every few hours, and receive code reviews and
+test results every few minutes.  Users see new versions every
+month or two.<a href="extreme-programming.html#4">[4]</a>
+</p>
+
+<p>
+The value of immediate, real world feedback should not be
+underestimated.  One of the reasons for the success of the Web is the
+abundance of structured and immediate feedback from users.  Developers
+see errors in real time, and contract all input and output that causes
+Web application failures.  Users benefit from running the latest
+version of the software, and seemingly on demand fault corrections.
+When people talk about the enduring value of the Web in the distant
+future, I predict they will value the extreme acceleration of user
+feedback and software releases.  The impact of this feedback on
+quality and development efficiency is what differentiates Web
+applications.
+</p>
+
+<p>
+XP reduces project risk by taking iterative development to the
+extreme.  The customer&#39;s involvement does not end at the planning
+phase, so requirements errors are reconciled almost immediately.  The
+system&#39;s internal quality is maintained by programmers working in
+pairs who are striving for simplicity.  Automated testing gives
+everybody feedback on how well the system is meeting expectations.
+</p>
+
+<p>
+XP uses feedback to integrate
+towards a solution, rather than trying to get it through
+a discontinuity.<a href="extreme-programming.html#5">[5]</a>
+</p>
+
+
+
+<h4>Courage</h4>
+
+<blockquote>
+
+<p>
+It is hard to be brave, when you&#39;re only a Very Small Animal.
+</p>
+<div align="right">-- Piglet (A. A. Milne)</div></blockquote>
+
+<p>
+Fear is a prime motivator, or as Napoleon Bonaparte put it, "There
+are two levers for moving men: interest and fear."
+With courage, our relationships take on a new quality: trust.  XP helps
+build the bonds of trust by repeatedly exposing people to small successes.
+</p>
+
+<p>
+Courage is required at all levels.  Is this solution too simple?  Is it
+too complex?
+Does this test cover all the cases which could possibly break?
+Will the programmers understand what I mean by the story?  Will we
+make
+it to
+Comdex without a detailed schedule?
+</p>
+
+<p>
+We overcome fear, uncertainty, and doubt in XP with courage backed
+by the other three values.  A simple system is harder to break than a
+complex one.  Multilevel, rapid feedback lets us know quickly when our
+courageous changes fail.
+Open communication means we don&#39;t have to face our fears alone.  Our
+team members will support us.  All we have to do is speak of our fears
+as openly as Piglet did in the epigraph to this section.
+And, Rabbit finds the right words to support him<a href="extreme-programming.html#6">[6]</a>:
+</p>
+
+<blockquote><p>
+"It is because you are a very small animal that you will be Useful in
+the adventure before us."
+</p>
+<p>
+Piglet was so excited at the idea of being Useful that he forgot to be
+frightened any more [...] he could hardly sit still, he was so eager
+to begin being useful at once.
+</p></blockquote>
+
+<p>
+Sometimes we feel as small and ineffectual as Piglet.  During these
+downtimes, it&#39;s likely one or more of our team members feel as
+courageous as Rabbit or Pooh.
+XP accepts that people&#39;s emotions vary, so XP uses team interactions
+to keep the project stable and to provide emotional support in those
+inevitable, difficult times.
+</p>
+
+<p>
+Courage is a double-edged sword.  You needed to overcome your fears,
+but too much courage can be dangerous.  XP uses small steps to promote
+courage and keep it in check.  Team members see a continuous flow of
+failures and successes.  XP uses small, regulated doses to discourage
+excess and encourage success.
+</p>
+
+
+
+
+
+<h3>The Practices</h3>
+
+<p>
+XP&#39;s practices embody the values described in the previous sections.
+In his book <i>Extreme
+Programming Explained</i> Kent Beck defines the 12 practices
+as follows (quoted verbatim):
+</p>
+
+<dl>
+
+
+<dt>The Planning Game</dt>
+<dd><p>
+Quickly determine the scope of the next release by combining business
+priorities and technical estimates.  As reality overtakes the plan,
+update the plan.
+</p></dd>
+
+
+
+<dt>Small releases</dt>
+<dd><p>
+Put a simple system into production quickly, then release new
+versions on a very short cycle.
+</p></dd>
+
+
+
+<dt>Metaphor</dt>
+<dd><p>
+Guide all development with a simple shared story of how the whole
+system works.
+</p></dd>
+
+
+
+<dt>Simple design</dt>
+<dd><p>
+The system should be designed as simply as possible at any given
+moment.  Extra complexity is removed as soon as it is discovered.
+</p></dd>
+
+
+
+<dt>Testing</dt>
+<dd><p>
+Programmers continually write unit tests, which must run flawlessly
+for development to continue.  Customers write tests demonstrating the
+features are finished.
+</p></dd>
+
+
+
+<dt>Refactoring</dt>
+<dd><p>
+Programmers restructure the system without changing its behavior to
+remove duplication, improve communication, simplify, or add flexibility.
+</p></dd>
+
+
+
+<dt>Pair programming</dt>
+<dd><p>
+All production code is written with two programmers at one machine.
+</p></dd>
+
+
+
+<dt>Collective ownership</dt>
+<dd><p>
+Anyone can change any code anywhere in the system at any time.
+</p></dd>
+
+
+
+<dt>Continuous integration</dt>
+<dd><p>
+Integrate and build the system many times a day, every time a task is
+completed.
+</p></dd>
+
+
+
+<dt>40-hour week</dt>
+<dd><p>
+Work no more than 40 hours a week as a rule.
+Never work overtime a second week in a row.
+</p></dd>
+
+
+
+<dt>On-site customer</dt>
+<dd><p>
+Include a real, live user on the team, available full-time to answer
+questions.
+</p></dd>
+
+
+
+<dt>Coding standards</dt>
+<dd><p>
+Programmers write all code in accordance with rules emphasizing
+communication through the code.
+</p></dd>
+
+
+</dl>
+
+<p>
+These 12 simple practices realize the four core values.
+The remainder of this book explains how to implement the practices in
+detail.  Before we get into implementation, let&#39;s briefly discusses
+how you might adopt XP in your organization.
+</p>
+
+
+
+<h3>Adopting XP</h3>
+
+<p>
+Organizations have their own way of doing things.  There are
+practices, processes and probably even some core values.  In order to
+adopt XP, you&#39;ll need to work within this framework, and accept the
+status quo.  One way to start is to use XP in a project composed of
+volunteers.  The project may even be important, which is good, because
+your success with XP should be visible.  Once that project succeeds, pick
+another and let another team coalesce around it, possibly including a
+few members, but not all, from the original XP team.
+</p>
+
+<p>
+You may not be in a position to pick and choose projects, but you
+probably have some latitude in how you work on a daily basis.
+If this is the case, try selecting a few practices that align with
+your existing methodology.  For example, if your organization values
+testing, try test first programming.  Or, organize your day around
+stories.  I find this technique to be helpful for non-software
+problems, too, as you&#39;ll see in <a href="release-planning.html">Release Planning</a>.
+Keep the stories on index cards, and work through them serially.  Check off
+each card as you complete it.
+</p>
+
+<p>
+Once you see your productivity go up, discuss the practices you found
+successful with a co-worker or your manager.  Use the core values as
+your guide.  You&#39;ll need courage to start the communication.  Keep
+your explanations simple, focusing on the practice, not the whole of
+XP.  Be open to feedback, and incorporate it immediately.  And, as
+always in XP, take small steps and iterate.
+</p>
+
+<p>
+As you read through this book, look at the practices from your
+organization&#39;s perspective.  You&#39;ll see plenty of ways to integrate
+them.  XP is an evolutionary methodology that can be adopted
+incrementally and organically.  Even if you are the head honcho,
+don&#39;t install XP with a Big Bang.  Organizations and people have their own
+natural pace of change.  XP cannot accelerate this rate of change
+overnight.
+Change cannot be mandated.  Rather XP values feedback and
+communication to allow you to measure your progress and to integrate
+change continuously.
+</p>
+
+
+<h3>Footnotes</h3><ol>
+<li><a name="1"></a><p>
+As cited in
+<i>Built to Last</i>, Jim Collins and Jerry Porras,
+HarperBusiness. 1997, p. 46.
+</p></li>
+<li><a name="2"></a><p>
+<a href="http://www.filmsite.org/braz.html">http://www.filmsite.org/braz.html</a>
+</p></li>
+<li><a name="3"></a><p>
+<a href="http://www.norcalmovies.com/TheToweringInferno">http://www.norcalmovies.com/TheToweringInferno</a>
+</p></li>
+<li><a name="4"></a>
+<p>
+XP&#39;s founders recommend multi-week iterations and releases to the
+customer every three or four iterations.  My experience with Extreme
+Perl is that an iteration per week and one iteration per release works
+well, too.  See <a href="logistics.html">Logistics</a> for how to make this happen.
+</p></li>
+<li><a name="5"></a><p>
+Thanks to Johannes Rukkers for this excellent observation.
+</p></li>
+<li><a name="6"></a><p>
+All A. A. Milne quotes in this chapter are from
+<i>Winnie-the-Pooh</i>,
+A. A. Milne,
+Dutton&#39;s Childrens Books,
+1994.
+</p></li>
+</ol>
+</body></html>
+</td>
+</tr><tr>
+<td>&nbsp;</td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap" width="50%"><a href="the-problem.html"><small>Previous: Chapter 1: The Problem</small></a></td>
+<td>&nbsp;</td>
+<td class="b_align_ne" nowrap="nowrap" width="50%"><a href="perl.html"><small>Next: Chapter 3: Perl</small></a></td>
+</tr></table></td>
+</tr><tr>
+<td colspan="3" bgcolor="#551A8B"><img class="b_clear_dot" alt="dot" height="2" src="../i/dot.gif" /></td>
+</tr><tr>
+<td colspan="3"><img class="b_clear_dot" alt="dot" height="4" src="../i/dot.gif" /></td>
+</tr><tr>
+<td class="b_align_nw" nowrap="nowrap"><small>Discussion at <a href="http://groups.yahoo.com/group/extremeperl">Extreme Perl Group</a><br>
+Copyright &copy; 2004 Robert Nagler (nagler at extremeperl.org)<br>
+Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<br>
+</small></td>
+<td>&nbsp;</td>
+<td class="b_align_se"><a href="extreme-programming.html#top"><small>back to top</small></a><small><br />&nbsp;<br /></small><a href="http://www.bivio.biz"><img alt="none" border="0" src="../i/bivio_power.gif" width="118" height="22" /></a></td>
+</tr></table>
+</body></html>
